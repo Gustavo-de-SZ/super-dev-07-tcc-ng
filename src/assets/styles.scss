@@ -1,2 +1,22 @@
-/* You can add global styles to this file, and also import other style files */
-@use './tailwind.css';
+
+:root {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --bg-app: #f1f5f9;      /* O cinza claro do fundo */
+  --text-main: #0f172a;   /* Slate 900 */
+  --text-muted: #64748b;  /* Slate 500 */
+  --white: #ffffff;
+  
+  --radius-card: 24px;
+  --radius-input: 12px;
+  --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+/* rewset */
+body {
+  margin: 0;
+  background-color: var(--bg-app);
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text-main);
+}
+
