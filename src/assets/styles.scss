@@ -1,22 +1,20 @@
 @import "primeicons/primeicons.css";
 
 :root {
-  /* Variáveis Light */
   --tcc-primary: #3b82f6;
-  --tcc-primary-hover: #2563eb; /* Nova cor de hover */
+  --tcc-primary-hover: #2563eb; 
   --tcc-bg: #f8fafc;
   --tcc-surface: #ffffff;
-  --tcc-surface-hover: #f1f5f9; /* Nova cor de hover para elementos sutis */
+  --tcc-surface-hover: #f1f5f9;
   --tcc-text-main: #0f172a;
   --tcc-text-muted: #64748b;
   --tcc-border: #e2e8f0;
-  --tcc-radius: 12px; /* Reduzido levemente para bater com a imagem */
-  --tcc-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Sombra mais difusa e suave */
+  --tcc-radius: 12px; 
+  --tcc-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); 
 }
 
 body.tp-dark-theme {
-  /* Variáveis Dark */
-  --tcc-bg: #090e17; /* Um pouco mais escuro para destacar os cards */
+  --tcc-bg: #090e17; 
   --tcc-surface: #131c2c;
   --tcc-surface-hover: #1e293b;
   --tcc-text-main: #f1f5f9;
@@ -33,14 +31,13 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Estrutura Base */
+/
 .tcc-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 .tcc-flex-split { display: flex; align-items: center; justify-content: space-between; }
 
-/* Navegação Principal */
 .tcc-header { 
   padding: 1rem 0; 
-  background: transparent; /* Nas imagens alvo, a navbar parece não ter fundo branco fixo ou borda pesada */
+  background: transparent;
   position: relative;
   z-index: 10;
 }
@@ -53,9 +50,9 @@ body {
   font-size: 0.95rem;
   transition: color 0.2s ease; 
 }
-.tcc-menu a:hover { color: var(--tcc-text-main); } /* Hover do menu */
+.tcc-menu a:hover { color: var(--tcc-text-main); } 
 
-/* Botão Tema (Lua/Sol) */
+// toggle dark light
 .tcc-toggle-mode { 
   background: transparent; 
   border: 1px solid var(--tcc-border); 
@@ -71,7 +68,7 @@ body {
   border-color: var(--tcc-text-muted);
 }
 
-/* Seção de Apresentação (Landing) */
+// apresentação landing
 .tcc-intro-section { padding: 4rem 0 6rem; text-align: center; position: relative; z-index: 1; }
 .tcc-highlight-tag { 
   display: inline-block; 
@@ -82,13 +79,13 @@ body {
   font-size: 0.85rem; 
   font-weight: 600; 
   margin-bottom: 2rem; 
-  border: 1px solid rgba(59, 130, 246, 0.3); /* Borda ao invés de fundo preenchido como na imagem alvo */
+  border: 1px solid rgba(59, 130, 246, 0.3); 
 }
 .tcc-main-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem; letter-spacing: -1px; }
 .tcc-main-subtitle { color: var(--tcc-text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto 3rem; line-height: 1.6; }
 .tcc-action-group { display: flex; justify-content: center; gap: 1rem; margin-bottom: 5rem;}
 
-/* Grid de Diferenciais */
+// grids
 .tcc-features-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
 .tcc-info-card { 
   background: var(--tcc-surface); 
@@ -112,11 +109,9 @@ body {
   font-size: 1.5rem; 
 }
 
-/* ========================================= */
-/* Customização de Botões PrimeNG (HOVERS)   */
-/* ========================================= */
+// btns
 
-/* Botão Primário (Azul) */
+// btn azul primario
 .tcc-btn-main { 
   background: var(--tcc-primary) !important; 
   color: #ffffff !important;
@@ -131,7 +126,7 @@ body {
   background: var(--tcc-primary-hover) !important; 
 }
 
-/* Botão Outline (Sou Profissional) */
+//profissa btn
 .tcc-btn-outline {
   background: var(--tcc-surface) !important;
   color: var(--tcc-text-main) !important;
@@ -144,8 +139,7 @@ body {
   background: var(--tcc-surface-hover) !important;
   border-color: var(--tcc-text-muted) !important;
 }
-
-/* Botão Texto (Entrar) */
+//  btn entrar
 .tcc-btn-text {
   background: transparent !important;
   color: var(--tcc-text-main) !important;
