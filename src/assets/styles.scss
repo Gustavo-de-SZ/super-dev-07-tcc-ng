@@ -1,121 +1,158 @@
+@import "primeicons/primeicons.css";
 
 :root {
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --bg-app: #f1f5f9;      /* O cinza claro do fundo */
-  --text-main: #0f172a;   /* Slate 900 */
-  --text-muted: #64748b;  /* Slate 500 */
-  --white: #ffffff;
-  
-  --radius-card: 24px;
-  --radius-input: 12px;
-  --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.05);
+  /* Variáveis Light */
+  --tcc-primary: #3b82f6;
+  --tcc-primary-hover: #2563eb; /* Nova cor de hover */
+  --tcc-bg: #f8fafc;
+  --tcc-surface: #ffffff;
+  --tcc-surface-hover: #f1f5f9; /* Nova cor de hover para elementos sutis */
+  --tcc-text-main: #0f172a;
+  --tcc-text-muted: #64748b;
+  --tcc-border: #e2e8f0;
+  --tcc-radius: 12px; /* Reduzido levemente para bater com a imagem */
+  --tcc-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); /* Sombra mais difusa e suave */
 }
 
-/* rewset */
+body.tp-dark-theme {
+  /* Variáveis Dark */
+  --tcc-bg: #090e17; /* Um pouco mais escuro para destacar os cards */
+  --tcc-surface: #131c2c;
+  --tcc-surface-hover: #1e293b;
+  --tcc-text-main: #f1f5f9;
+  --tcc-text-muted: #94a3b8;
+  --tcc-border: #223047;
+  --tcc-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
 body {
   margin: 0;
-  background-color: var(--bg-app);
-  font-family: 'Inter', -apple-system, sans-serif;
-  color: var(--text-main);
+  background-color: var(--tcc-bg);
+  color: var(--tcc-text-main);
+  font-family: 'Inter', sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* global */
+/* Estrutura Base */
+.tcc-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+.tcc-flex-split { display: flex; align-items: center; justify-content: space-between; }
 
-/* centralizar card*/
-.auth-wrapper {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+/* Navegação Principal */
+.tcc-header { 
+  padding: 1rem 0; 
+  background: transparent; /* Nas imagens alvo, a navbar parece não ter fundo branco fixo ou borda pesada */
+  position: relative;
+  z-index: 10;
+}
+.tcc-menu { display: none; gap: 2.5rem; }
+@media (min-width: 768px) { .tcc-menu { display: flex; } }
+.tcc-menu a { 
+  text-decoration: none; 
+  color: var(--tcc-text-muted); 
+  font-weight: 500; 
+  font-size: 0.95rem;
+  transition: color 0.2s ease; 
+}
+.tcc-menu a:hover { color: var(--tcc-text-main); } /* Hover do menu */
+
+/* Botão Tema (Lua/Sol) */
+.tcc-toggle-mode { 
+  background: transparent; 
+  border: 1px solid var(--tcc-border); 
+  width: 40px; height: 40px; 
+  border-radius: 50%; 
+  color: var(--tcc-text-main); 
+  cursor: pointer; 
+  display: flex; align-items: center; justify-content: center; /* Centraliza o ícone perfeitamente */
+  transition: all 0.2s ease;
+}
+.tcc-toggle-mode:hover {
+  background: var(--tcc-surface-hover);
+  border-color: var(--tcc-text-muted);
 }
 
-/* card branco core*/
-.auth-card {
-  background: var(--white);
-  width: 100%;
-  max-width: 600px;
-  padding: 3rem;
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+/* Seção de Apresentação (Landing) */
+.tcc-intro-section { padding: 4rem 0 6rem; text-align: center; position: relative; z-index: 1; }
+.tcc-highlight-tag { 
+  display: inline-block; 
+  background: transparent; 
+  color: var(--tcc-primary); 
+  padding: 6px 20px; 
+  border-radius: 20px; 
+  font-size: 0.85rem; 
+  font-weight: 600; 
+  margin-bottom: 2rem; 
+  border: 1px solid rgba(59, 130, 246, 0.3); /* Borda ao invés de fundo preenchido como na imagem alvo */
+}
+.tcc-main-title { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem; letter-spacing: -1px; }
+.tcc-main-subtitle { color: var(--tcc-text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto 3rem; line-height: 1.6; }
+.tcc-action-group { display: flex; justify-content: center; gap: 1rem; margin-bottom: 5rem;}
+
+/* Grid de Diferenciais */
+.tcc-features-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+.tcc-info-card { 
+  background: var(--tcc-surface); 
+  padding: 2.5rem 2rem; 
+  border-radius: var(--tcc-radius); 
+  border: 1px solid var(--tcc-border); 
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  text-align: center; 
+}
+.tcc-info-card:hover { 
+  transform: translateY(-4px); 
+  box-shadow: var(--tcc-shadow); 
+}
+.tcc-icon-container { 
+  background: rgba(59, 130, 246, 0.08); 
+  width: 56px; height: 56px; 
+  border-radius: 14px; 
+  display: flex; align-items: center; justify-content: center; 
+  margin: 0 auto 1.5rem; 
+  color: var(--tcc-primary); 
+  font-size: 1.5rem; 
 }
 
-/* espcaoco eentree campos */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+/* ========================================= */
+/* Customização de Botões PrimeNG (HOVERS)   */
+/* ========================================= */
+
+/* Botão Primário (Azul) */
+.tcc-btn-main { 
+  background: var(--tcc-primary) !important; 
+  color: #ffffff !important;
+  border: none !important; 
+  border-radius: 8px !important; 
+  font-weight: 600 !important;
+  transition: background 0.2s ease, transform 0.1s ease !important;
+  
+
+}
+.tcc-btn-main:hover { 
+  background: var(--tcc-primary-hover) !important; 
 }
 
-/* lavbel e cmapo */
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+/* Botão Outline (Sou Profissional) */
+.tcc-btn-outline {
+  background: var(--tcc-surface) !important;
+  color: var(--tcc-text-main) !important;
+  border: 1px solid var(--tcc-border) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+.tcc-btn-outline:hover {
+  background: var(--tcc-surface-hover) !important;
+  border-color: var(--tcc-text-muted) !important;
 }
 
-.field-group label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #475569;
+/* Botão Texto (Entrar) */
+.tcc-btn-text {
+  background: transparent !important;
+  color: var(--tcc-text-main) !important;
+  border: none !important;
+  font-weight: 600 !important;
+  transition: color 0.2s ease !important;
 }
-
-
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* landing */
-.section-hero {
-  padding: 80px 0;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 900;
-  line-height: 1.1;
-  color: var(--text-main);
-  margin-bottom: 1.5rem;
-}
-
-.hero-subtitle {
-  font-size: 1.2rem;
-  color: var(--text-muted);
-  max-width: 700px;
-  margin: 0 auto 2.5rem;
-}
-
-/* cards */
-.grid-features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin-top: 3rem;
-}
-
-.feature-card {
-  background: var(--white);
-  padding: 2.5rem;
-  border-radius: var(--radius-md);
-  border: 1px solid #f1f5f9;
-  transition: transform 0.3s ease;
-  text-align: center;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-card);
+.tcc-btn-text:hover {
+  color: var(--tcc-primary) !important;
 }
