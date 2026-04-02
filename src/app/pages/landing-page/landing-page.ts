@@ -29,14 +29,18 @@ import { NavbarComponent } from '../../shared/components/navbar.components';
         <p-button label="Sou Profissional" icon="pi pi-briefcase" styleClass="tcc-btn-outline px-4 py-3" [style]="{ padding: '12px 20px', gap: '10px' }"></p-button>
       </div>
 
-      <div class="tcc-features-layout">
-        <div *ngFor="let f of infoItems" class="tcc-info-card">
-          <div class="tcc-icon-container">
-            <i class="pi" [ngClass]="f.icon"></i>
+    <div class="tcc-features-layout">
+        
+        @for (f of infoItems; track f.title) {
+          <div class="tcc-info-card">
+            <div class="tcc-icon-container">
+              <i class="pi" [ngClass]="f.icon"></i>
+            </div>
+            <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: var(--tcc-text-main);">{{ f.title }}</h3>
+            <p style="font-size: 0.95rem; margin: 0; color: var(--tcc-text-muted)">{{ f.description }}</p>
           </div>
-          <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: var(--tcc-text-main);">{{ f.title }}</h3>
-          <p style="font-size: 0.95rem; margin: 0; color: var(--tcc-text-muted)">{{ f.description }}</p>
-        </div>
+        }
+
       </div>
     </main>
   `
