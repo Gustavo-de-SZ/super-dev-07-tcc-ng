@@ -60,7 +60,7 @@ body {
   border-radius: 50%; 
   color: var(--tcc-text-main); 
   cursor: pointer; 
-  display: flex; align-items: center; justify-content: center; /* Centraliza o ícone perfeitamente */
+  display: flex; align-items: center; justify-content: center; 
   transition: all 0.2s ease;
 }
 .tcc-toggle-mode:hover {
