@@ -42,6 +42,7 @@ import { NavbarComponent } from '../../shared/components/navbar.components';
         }
 
       </div>
+      
     </main>
   `
 })
