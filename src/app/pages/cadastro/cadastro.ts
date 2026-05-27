@@ -4,6 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-cadastro',
   imports: [],
   template: ` <p>cadastro works!</p> `,
-  styles: ``,
+  styles: ``,     
 })
 export class Cadastro {}
