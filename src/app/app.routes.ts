@@ -1,8 +1,12 @@
 import { Routes } from '@angular/router';
-import { LandingPage } from './pages/landing-page/landing-page';
 
 export const routes: Routes = [
-    {path: '', loadComponent: () => import('./pages/landing-page/landing-page').then(m => m.LandingPage)},
-    {path: 'dashboard-tecnico', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)},
-    
+{path: '', loadComponent: () => import('./pages/landing-page/landing-page').then(m => m.LandingPage)},
+{path: 'painel',loadComponent: () => import('./core/painel-layout/painel-layout').then(m => m.PainelLayout),
+    children: [
+      {path: 'dashboard', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)}
+     
+    ]},
+
+  { path: '**', redirectTo: '' }
 ];

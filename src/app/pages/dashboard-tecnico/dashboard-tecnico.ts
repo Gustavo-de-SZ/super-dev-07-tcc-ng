@@ -237,6 +237,7 @@ interface Agendamento {
     @media (max-width: 1024px) {
       .tcc-details-grid {
         grid-template-columns: 1fr; 
+      }
     }
 
    
