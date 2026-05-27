@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-
+import { ThemeService } from '../../../core/services/theme.service.ts';
+import { inject } from '@angular/core';
 @Component({
   selector: 'app-sidebar-cliente',
   standalone: true,
@@ -64,4 +65,6 @@ import { Component } from '@angular/core';
   `,
   styles: [],
 })
-export class SidebarClienteComponent {}
+export class SidebarClienteComponent {
+  theme = inject(ThemeService);
+}
