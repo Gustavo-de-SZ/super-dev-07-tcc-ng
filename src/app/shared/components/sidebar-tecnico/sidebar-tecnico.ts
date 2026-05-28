@@ -65,10 +65,10 @@ import { CommonModule } from '@angular/common';
       height: 80px;
       display: flex;
       align-items: center;
-      padding: 0 2rem;
+      padding: 0 32px;
       
       h2 {
-        font-size: 1.1rem;
+        font-size: 18px;
         font-weight: 700;
         color: var(--tcc-text-main);
         margin: 0;
@@ -79,24 +79,24 @@ import { CommonModule } from '@angular/common';
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      padding: 1rem;
+      gap: 8px;
+      padding: 16px;
       overflow-y: auto;
     }
 
     .tcc-nav-item {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.85rem 1.25rem;
+      gap: 16px;
+      padding: 14px 20px;
       border-radius: 12px;
       color: var(--tcc-text-muted);
       text-decoration: none;
       font-weight: 500;
-      font-size: 0.95rem;
+      font-size: 15px;
       transition: all 0.2s ease;
 
-      i { font-size: 1.2rem; }
+      i { font-size: 19px; }
 
       &:hover:not(.active) {
         background-color: var(--tcc-surface-hover);
@@ -106,18 +106,18 @@ import { CommonModule } from '@angular/common';
       &.active {
         background-color: var(--tcc-primary);
         color: #ffffff;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 12px #3b82f64d;
       }
     }
 
     .tcc-sidebar-footer {
-      padding: 1rem;
+      padding: 16px;
       border-top: 1px solid var(--tcc-border);
     }
 
     .tcc-logout:hover {
       color: #ef4444 !important;
-      background-color: rgba(239, 68, 68, 0.1) !important;
+      background-color: #ef44441a !important;
     }
   `]
 })
