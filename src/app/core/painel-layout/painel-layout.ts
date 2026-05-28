@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router'; 
 import { SidebarTecnico } from '../../shared/components/sidebar-tecnico/sidebar-tecnico';
 import { TopbarTecnico } from '../../shared/components/topbar/topbar';
-import { DashboardTecnico } from '../../pages/dashboard-tecnico/dashboard-tecnico';
 
 @Component({
   selector: 'app-painel-layout',
   standalone: true,
   imports: [
     CommonModule, 
+    RouterModule, 
     SidebarTecnico, 
-    TopbarTecnico, 
-    DashboardTecnico
+    TopbarTecnico
   ],
   template: `
     <div class="tcc-layout-container">
@@ -25,7 +25,7 @@ import { DashboardTecnico } from '../../pages/dashboard-tecnico/dashboard-tecnic
         </div>
 
         <main class="tcc-content-area">
-          <app-dashboard-tecnico></app-dashboard-tecnico>
+          <router-outlet></router-outlet>
         </main>
 
       </div>
@@ -33,6 +33,7 @@ import { DashboardTecnico } from '../../pages/dashboard-tecnico/dashboard-tecnic
     </div>
   `,
   styles: [`
+    
     .tcc-layout-container {
       display: flex;
       width: 100vw;
@@ -60,7 +61,6 @@ import { DashboardTecnico } from '../../pages/dashboard-tecnico/dashboard-tecnic
       flex: 1;
       padding: 32px;
       overflow-y: auto; 
-      
       
       &::-webkit-scrollbar {
         width: 8px;
