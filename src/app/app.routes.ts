@@ -4,8 +4,8 @@ export const routes: Routes = [
 {path: '', loadComponent: () => import('./pages/landing-page/landing-page').then(m => m.LandingPage)},
 {path: 'painel',loadComponent: () => import('./core/painel-layout/painel-layout').then(m => m.PainelLayout),
     children: [
-      {path: 'dashboard', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)}
-     
+      {path: 'dashboard', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)},
+      {path: 'agenda', loadComponent: () => import('./pages/agenda-tecnico/agenda-tecnico').then(m => m.AgendaTecnico)}
     ]},
 
   { path: '**', redirectTo: '' }
