@@ -38,11 +38,11 @@ import { DashboardTecnico } from '../../pages/dashboard-tecnico/dashboard-tecnic
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background-color: var(--tcc-bg); // Puxa o fundo global (claro ou escuro)
+      background-color: var(--tcc-bg); 
     }
 
     .tcc-main-wrapper {
-      flex: 1; /* Ocupa todo o espaço restante ao lado da sidebar */
+      flex: 1; 
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -50,18 +50,18 @@ import { DashboardTecnico } from '../../pages/dashboard-tecnico/dashboard-tecnic
     }
 
     .tcc-topbar-container {
-      padding: 0 2rem;
-      background-color: var(--tcc-surface); // Fundo da topbar
+      padding: 0 32px;
+      background-color: var(--tcc-surface); 
       border-bottom: 1px solid var(--tcc-border);
       z-index: 10;
     }
 
     .tcc-content-area {
       flex: 1;
-      padding: 2rem;
-      overflow-y: auto; /* Permite rolar apenas o conteúdo, mantendo topbar e sidebar fixas */
+      padding: 32px;
+      overflow-y: auto; 
       
-      /* Estilização suave da barra de rolagem */
+      
       &::-webkit-scrollbar {
         width: 8px;
       }
