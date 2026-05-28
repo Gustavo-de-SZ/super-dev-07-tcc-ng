@@ -57,7 +57,7 @@ interface InfoUsuario {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 0;
+      padding: 16px 0;
       background-color: transparent;
       width: 100%;
     }
@@ -70,21 +70,21 @@ interface InfoUsuario {
 
       i {
         position: absolute;
-        left: 1rem;
+        left: 16px;
         top: 50%;
         transform: translateY(-50%);
         color: var(--tcc-text-muted);
-        font-size: 1.1rem;
+        font-size: 18px;
       }
 
       input {
         width: 100%;
-        padding: 0.85rem 1rem 0.85rem 2.75rem;
+        padding: 14px 16px 14px 44px;
         background-color: var(--tcc-bg);
         border: 1px solid var(--tcc-border);
         border-radius: var(--tcc-radius);
         color: var(--tcc-text-main);
-        font-size: 0.95rem;
+        font-size: 15px;
         transition: all 0.2s ease;
 
         &::placeholder {
@@ -94,7 +94,7 @@ interface InfoUsuario {
         &:focus {
           outline: none;
           border-color: var(--tcc-primary);
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          box-shadow: 0 0 0 3px #3b82f61a;
           background-color: var(--tcc-surface);
         }
       }
@@ -104,7 +104,7 @@ interface InfoUsuario {
     .tcc-topbar-actions {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
+      gap: 24px;
     }
 
    
@@ -112,7 +112,7 @@ interface InfoUsuario {
       background: transparent;
       border: none;
       color: var(--tcc-text-main);
-      font-size: 1.25rem;
+      font-size: 20px;
       cursor: pointer;
       position: relative;
       display: flex;
@@ -149,7 +149,7 @@ interface InfoUsuario {
       align-items: center;
       gap: 12px;
       cursor: pointer;
-      padding: 0.25rem;
+      padding: 4px;
       border-radius: var(--tcc-radius);
       transition: background-color 0.2s ease;
 
@@ -165,13 +165,13 @@ interface InfoUsuario {
     }
 
     .tcc-profile-name {
-      font-size: 0.95rem;
+      font-size: 15px;
       font-weight: 600;
       color: var(--tcc-text-main);
     }
 
     .tcc-profile-role {
-      font-size: 0.8rem;
+      font-size: 13px;
       color: var(--tcc-text-muted);
       margin-top: 2px;
     }
@@ -180,12 +180,12 @@ interface InfoUsuario {
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background-color: rgba(59, 130, 246, 0.1);
+      background-color: #3b82f61a;
       color: var(--tcc-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 20px;
     }
   `]
 })
