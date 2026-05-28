@@ -36,8 +36,8 @@ import { NavbarComponent } from '../../shared/components/navbar.components';
             <div class="tcc-icon-container">
               <i class="pi" [ngClass]="f.icon"></i>
             </div>
-            <h3 style="font-weight: 700; margin-bottom: 0.5rem; color: var(--tcc-text-main);">{{ f.title }}</h3>
-            <p style="font-size: 0.95rem; margin: 0; color: var(--tcc-text-muted)">{{ f.description }}</p>
+            <h3 style="font-weight: 700; margin-bottom: 8px; color: var(--tcc-text-main);">{{ f.title }}</h3>
+            <p style="font-size: 15px; margin: 0; color: var(--tcc-text-muted)">{{ f.description }}</p>
           </div>
         }
 
