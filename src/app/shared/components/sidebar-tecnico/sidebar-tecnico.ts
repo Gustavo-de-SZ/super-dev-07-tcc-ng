@@ -1,55 +1,27 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar-tecnico',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
-    <aside class="tcc-sidebar">
-      <div class="tcc-sidebar-brand">
-        <h2>Painel do Técnico</h2>
-      </div>
-
-      <nav class="tcc-sidebar-nav">
-        <a href="#" class="tcc-nav-item active">
+   <nav class="tcc-sidebar-nav">
+        <a onclick() routerLink="/painel/dashboard" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-th-large"></i>
           <span>Visão Geral</span>
         </a>
-        <a href="#" class="tcc-nav-item">
+        <a onclick() routerLink="/painel/clientes" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-users"></i>
           <span>Clientes</span>
         </a>
-        <a href="#" class="tcc-nav-item">
+        <a onclick() routerLink="/painel/agenda" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-calendar"></i>
           <span>Agenda</span>
         </a>
-        <a href="#" class="tcc-nav-item">
-          <i class="pi pi-ticket"></i>
-          <span>Chamados</span>
-        </a>
-        <a href="#" class="tcc-nav-item">
-          <i class="pi pi-dollar"></i>
-          <span>Financeiro</span>
-        </a>
-        <a href="#" class="tcc-nav-item">
-          <i class="pi pi-chart-bar"></i>
-          <span>Relatórios</span>
-        </a>
-        <a href="#" class="tcc-nav-item">
-          <i class="pi pi-cog"></i>
-          <span>Configurações</span>
-        </a>
-      </nav>
-
-      <div class="tcc-sidebar-footer">
-        <a href="#" class="tcc-nav-item tcc-logout">
-          <i class="pi pi-sign-out"></i>
-          <span>Sair</span>
-        </a>
-      </div>
-    </aside>
-  `,
+        </nav>
+    `,
   styles: [`
     .tcc-sidebar {
       width: 260px;
