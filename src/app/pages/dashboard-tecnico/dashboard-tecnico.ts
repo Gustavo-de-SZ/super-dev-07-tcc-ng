@@ -132,8 +132,8 @@ interface Agendamento {
     .tcc-dashboard-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 2rem;
-      padding-bottom: 2rem;
+      gap: 32px;
+      padding-bottom: 32px;
       animation: fadeIn 0.4s ease-out;
     }
 
@@ -146,17 +146,17 @@ interface Agendamento {
     .tcc-welcome-section {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 4px;
     }
     .tcc-welcome-title {
-      font-size: 1.8rem;
+      font-size: 28px;
       font-weight: 700;
       color: var(--tcc-text-main);
       margin: 0;
     }
     .tcc-welcome-subtitle {
       color: var(--tcc-text-muted);
-      font-size: 1rem;
+      font-size: 16px;
       margin: 0;
     }
 
@@ -164,16 +164,16 @@ interface Agendamento {
     .tcc-stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.5rem;
+      gap: 24px;
     }
     .tcc-stat-card {
       background-color: var(--tcc-surface);
       border: 1px solid var(--tcc-border);
       border-radius: var(--tcc-radius);
-      padding: 1.5rem;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 16px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
 
       &:hover {
@@ -193,46 +193,46 @@ interface Agendamento {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 24px;
     }
     .tcc-stat-trend {
       color: #10b981; 
-      font-size: 0.9rem;
+      font-size: 14px;
     }
     .tcc-stat-content {
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
+      gap: 4px;
       
       h2 {
-        font-size: 1.8rem;
+        font-size: 28px;
         font-weight: 700;
         color: var(--tcc-text-main);
         margin: 0;
       }
     }
     .tcc-stat-title {
-      font-size: 0.9rem;
+      font-size: 14px;
       color: var(--tcc-text-muted);
     }
     .tcc-stat-desc {
-      font-size: 0.8rem;
+      font-size: 13px;
       color: var(--tcc-text-muted);
       opacity: 0.8;
-      margin-top: 0.5rem;
+      margin-top: 8px;
     }
 
     
-    .tcc-icon-blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-    .tcc-icon-orange { background: rgba(249, 115, 22, 0.1); color: #f97316; }
-    .tcc-icon-yellow { background: rgba(234, 179, 8, 0.1); color: #eab308; }
-    .tcc-icon-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .tcc-icon-blue { background: #3b82f61a; color: #3b82f6; }
+    .tcc-icon-orange { background: #f973161a; color: #f97316; }
+    .tcc-icon-yellow { background: #eab3081a; color: #eab308; }
+    .tcc-icon-green { background: #10b9811a; color: #10b981; }
 
     
     .tcc-details-grid {
       display: grid;
       grid-template-columns: 2fr 1fr; 
-      gap: 1.5rem;
+      gap: 24px;
     }
     @media (max-width: 1024px) {
       .tcc-details-grid {
@@ -245,10 +245,10 @@ interface Agendamento {
       background-color: var(--tcc-surface);
       border: 1px solid var(--tcc-border);
       border-radius: var(--tcc-radius);
-      padding: 1.5rem;
+      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 24px;
     }
     .tcc-panel-header {
       display: flex;
@@ -256,19 +256,19 @@ interface Agendamento {
       align-items: center;
 
       h3 {
-        font-size: 1.1rem;
+        font-size: 18px;
         font-weight: 600;
         color: var(--tcc-text-main);
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 8px;
 
         i { color: var(--tcc-primary); }
       }
     }
     .tcc-link-sm {
-      font-size: 0.85rem;
+      font-size: 14px;
       color: var(--tcc-primary);
       text-decoration: none;
       font-weight: 500;
@@ -280,13 +280,13 @@ interface Agendamento {
     .tcc-appointments-list {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 16px;
     }
     .tcc-appointment-item {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
-      padding: 1rem;
+      gap: 24px;
+      padding: 16px;
       border: 1px solid var(--tcc-border);
       border-radius: 8px;
       background-color: var(--tcc-bg);
@@ -299,41 +299,41 @@ interface Agendamento {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: rgba(59, 130, 246, 0.05);
-      padding: 0.5rem;
+      background-color: #3b82f60d;
+      padding: 8px;
       border-radius: 6px;
       min-width: 60px;
     }
-    .tcc-appt-day { font-size: 0.75rem; color: var(--tcc-text-muted); font-weight: 600; }
-    .tcc-appt-hour { font-size: 1rem; color: var(--tcc-primary); font-weight: 700; }
+    .tcc-appt-day { font-size: 12px; color: var(--tcc-text-muted); font-weight: 600; }
+    .tcc-appt-hour { font-size: 16px; color: var(--tcc-primary); font-weight: 700; }
     
     .tcc-appt-info {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.2rem;
+      gap: 4px;
 
-      h4 { margin: 0; font-size: 0.95rem; color: var(--tcc-text-main); font-weight: 600; }
-      p { margin: 0; font-size: 0.85rem; color: var(--tcc-text-muted); }
+      h4 { margin: 0; font-size: 15px; color: var(--tcc-text-main); font-weight: 600; }
+      p { margin: 0; font-size: 14px; color: var(--tcc-text-muted); }
     }
-    .tcc-status-success { color: #10b981; font-size: 1.2rem; }
-    .tcc-status-warning { color: #f97316; font-size: 1.2rem; }
+    .tcc-status-success { color: #10b981; font-size: 19px; }
+    .tcc-status-warning { color: #f97316; font-size: 19px; }
 
     
     .tcc-summary-list {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 24px;
     }
     .tcc-progress-item {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 8px;
     }
     .tcc-progress-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
+      font-size: 14px;
       
       span { color: var(--tcc-text-muted); }
       strong { color: var(--tcc-text-main); font-weight: 600; }
@@ -355,21 +355,21 @@ interface Agendamento {
 
   
     .tcc-summary-highlight {
-      margin-top: 1rem;
-      padding: 1.5rem;
+      margin-top: 16px;
+      padding: 24px;
       background-color: var(--tcc-bg);
       border-radius: 8px;
       text-align: center;
       border: 1px dashed var(--tcc-border);
 
       h2 {
-        font-size: 2rem;
+        font-size: 32px;
         color: var(--tcc-primary);
-        margin: 0 0 0.2rem 0;
+        margin: 0 0 4px 0;
       }
       p {
         margin: 0;
-        font-size: 0.9rem;
+        font-size: 14px;
         color: var(--tcc-text-muted);
       }
     }
