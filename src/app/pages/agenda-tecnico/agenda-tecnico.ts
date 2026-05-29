@@ -143,6 +143,103 @@ interface Compromisso {
       cursor: pointer;
     }
 
+        .tcc-filters-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tcc-filter-pill {
+      background-color: var(--tcc-surface);
+      border: 1px solid var(--tcc-border);
+      color: var(--tcc-text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        border-color: var(--tcc-primary);
+        color: var(--tcc-primary);
+      }
+
+      &.active {
+        background-color: var(--tcc-primary);
+        border-color: var(--tcc-primary);
+        color: #ffffff;
+      }
+    }
+
+    .tcc-search-toolbar {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tcc-input-group {
+      display: flex;
+      align-items: center;
+      background-color: var(--tcc-surface);
+      border: 1px solid var(--tcc-border);
+      border-radius: 8px;
+      padding: 0 16px;
+      height: 44px;
+      transition: border-color 0.2s;
+
+      &:focus-within {
+        border-color: var(--tcc-primary);
+      }
+
+      i {
+        color: var(--tcc-text-muted);
+        margin-right: 12px;
+      }
+
+      input {
+        border: none;
+        background: transparent;
+        color: var(--tcc-text-main);
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+        
+        &::placeholder {
+          color: var(--tcc-text-muted);
+          opacity: 0.7;
+        }
+      }
+    }
+
+    .tcc-search-input {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .tcc-date-input {
+      width: 180px;
+    }
+
+    .tcc-select-input {
+      background-color: var(--tcc-surface);
+      border: 1px solid var(--tcc-border);
+      color: var(--tcc-text-main);
+      border-radius: 8px;
+      padding: 0 16px;
+      height: 44px;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      width: 160px;
+    }
+
+    .tcc-results-count {
+      font-size: 13px;
+      color: var(--tcc-text-muted);
+      margin: -8px 0 0 0;
+    }
+
    
     .tcc-agenda-list {
       display: flex;
