@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-
 interface Compromisso {
-  data: string;
+  mes: string;
+  dia: string;
   hora: string;
   titulo: string;
   status: 'Confirmado' | 'Pendente' | 'Concluído' | 'Cancelado';
@@ -22,7 +22,7 @@ interface Compromisso {
       <header class="tcc-page-header">
         <div class="tcc-header-title-group">
           <h1 class="tcc-page-title">Agenda</h1>
-          <p class="tcc-page-subtitle">Gerencie seus agendamentos e compromissos</p>
+          <p class="tcc-page-subtitle">Gerencie seus agendamentos</p>
         </div>
         
         <button class="tcc-btn-main tcc-btn-with-icon">
@@ -32,11 +32,11 @@ interface Compromisso {
       </header>
 
       <div class="tcc-filters-row">
-        <button class="tcc-filter-pill active">Todos ({{ compromissos.length }})</button>
-        <button class="tcc-filter-pill">Confirmado ({{ compromissos.filter(c => c.status === 'Confirmado').length }})</button>
-        <button class="tcc-filter-pill">Pendente ({{ compromissos.filter(c => c.status === 'Pendente').length }})</button>
-        <button class="tcc-filter-pill">Concluído ({{ compromissos.filter(c => c.status === 'Concluído').length }})</button>
-        <button class="tcc-filter-pill">Cancelado ({{ compromissos.filter(c => c.status === 'Cancelado').length }})</button>
+        <button class="tcc-filter-pill active">Todos (8)</button>
+        <button class="tcc-filter-pill">Confirmado (3)</button>
+        <button class="tcc-filter-pill">Pendente (3)</button>
+        <button class="tcc-filter-pill">Concluído (1)</button>
+        <button class="tcc-filter-pill">Cancelado (1)</button>
       </div>
 
       <div class="tcc-search-toolbar">
@@ -56,34 +56,43 @@ interface Compromisso {
           <option>Remoto</option>
         </select>
       </div>
-      <p class="tcc-results-count">{{ compromissos.length }} agendamentos encontrados</p>
+
 
       <div class="tcc-agenda-list">
         @for (item of compromissos; track item.titulo) {
           <div class="tcc-agenda-card">
             
-            <div class="tcc-agenda-datetime">
-              <span class="tcc-agenda-date">{{ item.data }}</span>
-              <span class="tcc-agenda-time">{{ item.hora }}</span>
+            <div class="tcc-agenda-datetime-col">
+              <span class="tcc-date-month">{{ item.mes }}</span>
+              <span class="tcc-date-day">{{ item.dia }}</span>
+              <span class="tcc-date-time">{{ item.hora }}</span>
             </div>
 
             <div class="tcc-agenda-details">
-              <h3 class="tcc-agenda-title">{{ item.titulo }}</h3>
+              <div class="tcc-title-row">
+                <h3 class="tcc-agenda-title">{{ item.titulo }}</h3>
+                <span class="tcc-badge" [ngClass]="getBadgeClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </div>
               
               <div class="tcc-agenda-meta">
                 <span class="tcc-meta-item">
-                  <i class="pi pi-user"></i>
-                  {{ item.cliente }}
+                  <i class="pi pi-user"></i> {{ item.cliente }}
                 </span>
                 <span class="tcc-meta-item">
-                  <i class="pi pi-clock"></i>
-                  Duração: {{ item.duracao }}
+                  <i class="pi pi-clock"></i> {{ item.duracao }}
                 </span>
                 <span class="tcc-meta-item">
-                  <i class="pi pi-map-marker"></i>
-                  {{ item.tipo }}
+                  <i class="pi pi-map-marker"></i> {{ item.tipo }}
                 </span>
               </div>
+            </div>
+
+            <div class="tcc-agenda-actions">
+              <button class="tcc-btn-outline">
+                Ações <i class="pi pi-chevron-down"></i>
+              </button>
             </div>
 
           </div>
@@ -96,7 +105,7 @@ interface Compromisso {
     .tcc-page-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 24px; 
       padding-bottom: 32px;
       animation: fadeIn 0.4s ease-out;
     }
@@ -133,7 +142,6 @@ interface Compromisso {
       margin: 0;
     }
 
-    
     .tcc-btn-with-icon {
       display: flex;
       align-items: center;
@@ -143,7 +151,7 @@ interface Compromisso {
       cursor: pointer;
     }
 
-        .tcc-filters-row {
+    .tcc-filters-row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
@@ -244,14 +252,14 @@ interface Compromisso {
     .tcc-agenda-list {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px; 
     }
 
     .tcc-agenda-card {
       background-color: var(--tcc-surface);
       border: 1px solid var(--tcc-border);
       border-radius: var(--tcc-radius);
-      padding: 24px;
+      padding: 16px 24px;
       display: flex;
       align-items: center;
       gap: 24px;
@@ -263,86 +271,57 @@ interface Compromisso {
       }
     }
 
-    
-    .tcc-agenda-datetime {
+  
+    .tcc-agenda-datetime-col {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background-color: #3b82f60d; 
-      padding: 12px 16px;
-      border-radius: 8px;
-      min-width: 80px;
+      min-width: 60px;
+      border-right: 1px solid var(--tcc-border);
+      padding-right: 24px;
     }
 
-    .tcc-agenda-date {
+    .tcc-date-month {
+      font-size: 12px;
+      color: var(--tcc-text-muted);
+      text-transform: capitalize;
+    }
+
+    .tcc-date-day {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--tcc-primary);
+      line-height: 1.2;
+    }
+
+    .tcc-date-time {
       font-size: 13px;
       color: var(--tcc-text-muted);
-      font-weight: 600;
-      margin-bottom: 4px;
+      margin-top: 4px;
     }
 
-    .tcc-agenda-time {
-      font-size: 18px;
-      color: var(--tcc-primary);
-      font-weight: 700;
-    }
-
-    
+   
     .tcc-agenda-details {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
+    }
+
+    .tcc-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .tcc-agenda-title {
       margin: 0;
-      font-size: 18px;
+      font-size: 16px;
       color: var(--tcc-text-main);
       font-weight: 600;
     }
 
-    .tcc-agenda-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-    }
-
-    .tcc-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--tcc-text-muted);
-
-      i {
-        font-size: 16px;
-        color: var(--tcc-text-muted);
-        opacity: 0.8;
-      }
-    }
-
-  
-    @media (max-width: 768px) {
-      .tcc-agenda-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-      
-      .tcc-agenda-datetime {
-        width: 100%;
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 12px;
-        padding: 12px;
-      }
-      
-      .tcc-agenda-date {
-        margin-bottom: 0;
-      }
-      
+   
     .tcc-badge {
       font-size: 11px;
       font-weight: 600;
@@ -375,15 +354,71 @@ interface Compromisso {
       border: 1px solid #ef444440;
     }
 
+   
+    .tcc-agenda-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
     }
+
+    .tcc-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--tcc-text-muted);
+
+      i {
+        font-size: 14px;
+        opacity: 0.7;
+      }
+    }
+
+    /* Botão de Ações */
+    .tcc-btn-outline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: transparent;
+      border: 1px solid var(--tcc-border);
+      color: var(--tcc-text-main);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: var(--tcc-bg);
+        border-color: var(--tcc-text-muted);
+      }
+      
+      i {
+        font-size: 10px;
+      }
+    }
+
+    
   `]
 })
 export class AgendaTecnico {
 
+
+  getBadgeClass(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'Confirmado': 'badge-confirmado',
+      'Pendente': 'badge-pendente',
+      'Concluído': 'badge-concluido',
+      'Cancelado': 'badge-cancelado'
+    };
+    return statusMap[status] || 'badge-pendente';
+  }
+
+  
   compromissos: Compromisso[] = [
     {
-      data: '1 de abr.',
-      hora: '15:00',
+      mes: 'Mai', dia: '28', hora: '09:00',
       titulo: 'Manutenção Preventiva',
       status: 'Confirmado',
       cliente: 'Maria Silva',
@@ -391,8 +426,7 @@ export class AgendaTecnico {
       tipo: 'Presencial'
     },
     {
-      data: '2 de abr.',
-      hora: '10:00',
+      mes: 'Mai', dia: '28', hora: '11:30',
       titulo: 'Instalação de Software',
       status: 'Pendente',
       cliente: 'João Santos',
@@ -400,22 +434,44 @@ export class AgendaTecnico {
       tipo: 'Remoto'
     },
     {
-      data: '3 de abr.',
-      hora: '14:00',
+      mes: 'Mai', dia: '29', hora: '14:00',
       titulo: 'Configuração de Rede',
-      status: 'Concluído',
+      status: 'Confirmado',
       cliente: 'Ana Costa',
       duracao: '3h',
       tipo: 'Presencial'
     },
     {
-      data: '4 de abr.',
-      hora: '09:00',
-      titulo: 'Treinamento de Usuário',
-      status: 'Cancelado',
-      cliente: 'Carlos Oliveira',
+      mes: 'Mai', dia: '29', hora: '16:00',
+      titulo: 'Recuperação de Dados',
+      status: 'Pendente',
+      cliente: 'Carlos Souza',
       duracao: '2h',
+      tipo: 'Presencial'
+    },
+    {
+      mes: 'Mai', dia: '30', hora: '10:00',
+      titulo: 'Suporte Remoto',
+      status: 'Concluído',
+      cliente: 'Fernanda Lima',
+      duracao: '1h',
       tipo: 'Remoto'
+    },
+    {
+      mes: 'Mai', dia: '30', hora: '13:00',
+      titulo: 'Formatação e Reinstalação',
+      status: 'Cancelado',
+      cliente: 'Ricardo Alves',
+      duracao: '4h',
+      tipo: 'Presencial'
+    },
+    {
+      mes: 'Jun', dia: '2', hora: '09:30',
+      titulo: 'Instalação de Impressora',
+      status: 'Pendente',
+      cliente: 'Patrícia Rocha',
+      duracao: '1h',
+      tipo: 'Presencial'
     }
   ];
 }
