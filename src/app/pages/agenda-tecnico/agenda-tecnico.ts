@@ -6,6 +6,7 @@ interface Compromisso {
   data: string;
   hora: string;
   titulo: string;
+  status: 'Confirmado' | 'Pendente' | 'Concluído' | 'Cancelado';
   cliente: string;
   duracao: string;
   tipo: 'Presencial' | 'Remoto';
@@ -29,6 +30,33 @@ interface Compromisso {
           Novo Agendamento
         </button>
       </header>
+
+      <div class="tcc-filters-row">
+        <button class="tcc-filter-pill active">Todos ({{ compromissos.length }})</button>
+        <button class="tcc-filter-pill">Confirmado ({{ compromissos.filter(c => c.status === 'Confirmado').length }})</button>
+        <button class="tcc-filter-pill">Pendente ({{ compromissos.filter(c => c.status === 'Pendente').length }})</button>
+        <button class="tcc-filter-pill">Concluído ({{ compromissos.filter(c => c.status === 'Concluído').length }})</button>
+        <button class="tcc-filter-pill">Cancelado ({{ compromissos.filter(c => c.status === 'Cancelado').length }})</button>
+      </div>
+
+      <div class="tcc-search-toolbar">
+        <div class="tcc-input-group tcc-search-input">
+          <i class="pi pi-search"></i>
+          <input type="text" placeholder="Buscar cliente ou serviço...">
+        </div>
+        
+        <div class="tcc-input-group tcc-date-input">
+          <i class="pi pi-calendar"></i>
+          <input type="text" placeholder="mm/dd/yyyy">
+        </div>
+
+        <select class="tcc-select-input">
+          <option>Todos locais</option>
+          <option>Presencial</option>
+          <option>Remoto</option>
+        </select>
+      </div>
+      <p class="tcc-results-count">{{ compromissos.length }} agendamentos encontrados</p>
 
       <div class="tcc-agenda-list">
         @for (item of compromissos; track item.titulo) {
@@ -217,6 +245,39 @@ interface Compromisso {
       .tcc-agenda-date {
         margin-bottom: 0;
       }
+      
+    .tcc-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      text-transform: capitalize;
+    }
+
+    .badge-confirmado {
+      background-color: #10b9811a;
+      color: #10b981;
+      border: 1px solid #10b98140;
+    }
+
+    .badge-pendente {
+      background-color: #f59e0b1a;
+      color: #d97706;
+      border: 1px solid #f59e0b40;
+    }
+
+    .badge-concluido {
+      background-color: #3b82f61a;
+      color: #3b82f6;
+      border: 1px solid #3b82f640;
+    }
+
+    .badge-cancelado {
+      background-color: #ef44441a;
+      color: #ef4444;
+      border: 1px solid #ef444440;
+    }
+
     }
   `]
 })
@@ -227,6 +288,7 @@ export class AgendaTecnico {
       data: '1 de abr.',
       hora: '15:00',
       titulo: 'Manutenção Preventiva',
+      status: 'Confirmado',
       cliente: 'Maria Silva',
       duracao: '2h',
       tipo: 'Presencial'
@@ -235,6 +297,7 @@ export class AgendaTecnico {
       data: '2 de abr.',
       hora: '10:00',
       titulo: 'Instalação de Software',
+      status: 'Pendente',
       cliente: 'João Santos',
       duracao: '1.5h',
       tipo: 'Remoto'
@@ -243,9 +306,19 @@ export class AgendaTecnico {
       data: '3 de abr.',
       hora: '14:00',
       titulo: 'Configuração de Rede',
+      status: 'Concluído',
       cliente: 'Ana Costa',
       duracao: '3h',
       tipo: 'Presencial'
+    },
+    {
+      data: '4 de abr.',
+      hora: '09:00',
+      titulo: 'Treinamento de Usuário',
+      status: 'Cancelado',
+      cliente: 'Carlos Oliveira',
+      duracao: '2h',
+      tipo: 'Remoto'
     }
   ];
 }
