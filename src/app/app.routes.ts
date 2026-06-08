@@ -8,5 +8,11 @@ export const routes: Routes = [
       {path: 'agenda', loadComponent: () => import('./pages/agenda-tecnico/agenda-tecnico').then(m => m.AgendaTecnico)}
     ]},
 
+{
+    path: 'cliente',
+    loadComponent: () => import('./core/painel-layout/layout-cliente/layout-cliente').then(m => m.PainelClienteLayout),
+    children: [
+      { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) }
+    ]},
   { path: '**', redirectTo: '' }
 ];
