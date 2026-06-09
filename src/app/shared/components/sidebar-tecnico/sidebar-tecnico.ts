@@ -8,19 +8,26 @@ import { RouterModule } from '@angular/router';
   imports: [CommonModule, RouterModule],
   template: `
    <nav class="tcc-sidebar-nav">
-        <a onclick() routerLink="/painel/dashboard" routerLinkActive="active" class="tcc-nav-item">
+        <a routerLink="/painel/dashboard" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-th-large"></i>
           <span>Visão Geral</span>
         </a>
-        <a onclick() routerLink="/painel/clientes" routerLinkActive="active" class="tcc-nav-item">
+        <a routerLink="/painel/clientes" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-users"></i>
           <span>Clientes</span>
         </a>
-        <a onclick() routerLink="/painel/agenda" routerLinkActive="active" class="tcc-nav-item">
+        <a routerLink="/painel/agenda" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-calendar"></i>
           <span>Agenda</span>
         </a>
-        </nav>
+        <a routerLink="/painel/servicos" routerLinkActive="active" class="tcc-nav-item">
+          <i class="pi pi-job"></i>
+          <span>Serviços</span>
+        </a>
+        <a routerLink="/painel/financeiro" routerLinkActive="active" class="tcc-nav-item">
+          <i class="pi pi-money-bill"></i>
+          <span>Financeiro</span>
+        </a>
     `,
   styles: [`
     .tcc-sidebar {
