@@ -1,0 +1,254 @@
+// ============================================================================
+// SHARED STYLES - Classes Base Reutilizáveis
+// ============================================================================
+
+// LAYOUTS BASE
+.tcc-layout-base {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--tcc-bg);
+}
+
+.tcc-main-wrapper-base {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.tcc-topbar-base {
+  padding: 0 32px;
+  background-color: var(--tcc-surface);
+  border-bottom: 1px solid var(--tcc-border);
+  z-index: 10;
+}
+
+.tcc-content-base {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--tcc-border);
+    border-radius: 4px;
+  }
+}
+
+// CARDS
+.tcc-card-base {
+  background-color: var(--tcc-surface);
+  border: 1px solid var(--tcc-border);
+  border-radius: var(--tcc-radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--tcc-shadow);
+    border-color: var(--tcc-primary);
+  }
+}
+
+// INPUTS BASE
+.tcc-input-base {
+  display: flex;
+  align-items: center;
+  background-color: var(--tcc-surface);
+  border: 1px solid var(--tcc-border);
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 44px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: var(--tcc-primary);
+    box-shadow: 0 0 0 3px #3b82f61a;
+  }
+
+  i {
+    color: var(--tcc-text-muted);
+    margin-right: 12px;
+  }
+
+  input {
+    border: none;
+    background: transparent;
+    color: var(--tcc-text-main);
+    font-size: 14px;
+    width: 100%;
+    outline: none;
+
+    &::placeholder {
+      color: var(--tcc-text-muted);
+      opacity: 0.7;
+    }
+  }
+}
+
+// PILLS/BADGES
+.tcc-pill-base {
+  background-color: var(--tcc-surface);
+  border: 1px solid var(--tcc-border);
+  color: var(--tcc-text-muted);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--tcc-primary);
+    color: var(--tcc-primary);
+  }
+
+  &.active {
+    background-color: var(--tcc-primary);
+    border-color: var(--tcc-primary);
+    color: #ffffff;
+  }
+}
+
+// GRIDS
+.tcc-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.tcc-grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// TYPOGRAPHY
+.tcc-title-lg {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--tcc-text-main);
+  margin: 0;
+}
+
+.tcc-subtitle {
+  color: var(--tcc-text-muted);
+  font-size: 16px;
+  margin: 0;
+}
+
+.tcc-text-sm {
+  font-size: 14px;
+  color: var(--tcc-text-muted);
+}
+
+.tcc-link-sm {
+  font-size: 14px;
+  color: var(--tcc-primary);
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ANIMATIONS
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tcc-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+// SPACING UTILITIES
+.tcc-gap-sm { gap: 8px; }
+.tcc-gap { gap: 16px; }
+.tcc-gap-md { gap: 24px; }
+.tcc-gap-lg { gap: 32px; }
+
+.tcc-p-sm { padding: 8px; }
+.tcc-p { padding: 16px; }
+.tcc-p-md { padding: 24px; }
+.tcc-p-lg { padding: 32px; }
+
+// FLEX UTILITIES
+.tcc-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tcc-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tcc-flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+// COMPONENT SECTIONS
+.tcc-page-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 32px;
+}
+
+.tcc-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--tcc-text-main);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i {
+      color: var(--tcc-primary);
+    }
+  }
+}
+
+.tcc-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--tcc-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
