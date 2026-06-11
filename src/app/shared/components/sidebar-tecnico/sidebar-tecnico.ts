@@ -21,7 +21,7 @@ import { RouterModule } from '@angular/router';
           <span>Agenda</span>
         </a>
         <a routerLink="/painel/servicos" routerLinkActive="active" class="tcc-nav-item">
-          <i class="pi pi-job"></i>
+          <i class="pi pi-desktop"></i>
           <span>Serviços</span>
         </a>
         <a routerLink="/painel/financeiro" routerLinkActive="active" class="tcc-nav-item">
