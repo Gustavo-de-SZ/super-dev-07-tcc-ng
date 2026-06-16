@@ -1,13 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface Transacao {
-  titulo: string;
-  cliente: string;
-  data: string;
-  valor: number;
-  status: 'Pago' | 'Pendente';
-}
+import { Transacao } from '../../../models/transacao';
 
 @Component({
   selector: 'app-financeiro-transactions',
