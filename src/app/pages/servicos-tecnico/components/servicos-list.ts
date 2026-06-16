@@ -1,15 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface Servico {
-  icone: string;
-  titulo: string;
-  status: 'Concluído' | 'Em Andamento' | 'Pendente' | 'Cancelado';
-  cliente: string;
-  data: string;
-  duracao: string;
-  valor: number;
-}
+import { Servico } from '../../../models/servico';
 
 @Component({
   selector: 'app-servicos-list',
@@ -19,7 +10,7 @@ interface Servico {
     <div class="tcc-services-list">
       @for (servico of servicos; track servico.titulo) {
         <div class="tcc-service-card">
-          
+
           <div class="tcc-service-icon-box">
             <i class="pi" [ngClass]="servico.icone"></i>
           </div>
@@ -32,7 +23,7 @@ interface Servico {
                 {{ servico.status }}
               </span>
             </div>
-            
+
             <div class="tcc-service-details">
               <span><i class="pi pi-user"></i> {{ servico.cliente }}</span>
               <span><i class="pi pi-calendar"></i> {{ servico.data }}</span>
@@ -64,42 +55,136 @@ interface Servico {
     .tcc-service-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
 
     .tcc-service-icon-box {
-      width: 64px; height: 64px; /* IGUAL A AGENDA */
-      border-radius: 10px; background-color: #eff6ff; color: var(--tcc-primary, #3b82f6);
-      display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      background-color: #eff6ff;
+      color: var(--tcc-primary, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
     }
 
-    .tcc-service-content { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-    .tcc-service-header { display: flex; align-items: center; gap: 12px; }
-    .tcc-service-header h3 { margin: 0; font-size: 15px; font-weight: 600; color: var(--tcc-text-main, #0f172a); }
+    .tcc-service-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tcc-service-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .tcc-service-header h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--tcc-text-main, #0f172a);
+    }
 
     .tcc-status-badge {
-      display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px;
-      border-radius: 12px; font-size: 11px; font-weight: 600; border: 1px solid;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid;
     }
-    .tcc-status-badge i { font-size: 10px; }
+    .tcc-status-badge i {
+      font-size: 10px;
+    }
 
-    .status-concluido { color: #10b981; border-color: #10b981; background-color: #ecfdf5; }
-    .status-andamento { color: #3b82f6; border-color: #3b82f6; background-color: #eff6ff; }
-    .status-pendente { color: #f59e0b; border-color: #f59e0b; background-color: #fffbeb; }
-    .status-cancelado { color: #ef4444; border-color: #ef4444; background-color: #fef2f2; }
+    .status-concluido {
+      color: #10b981;
+      border-color: #10b981;
+      background-color: #ecfdf5;
+    }
+    .status-andamento {
+      color: #3b82f6;
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+    }
+    .status-pendente {
+      color: #f59e0b;
+      border-color: #f59e0b;
+      background-color: #fffbeb;
+    }
+    .status-cancelado {
+      color: #ef4444;
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
 
-    .tcc-service-details { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--tcc-text-muted, #64748b); }
-    .tcc-service-details span { display: flex; align-items: center; gap: 6px; }
-    .tcc-service-details i { font-size: 13px; opacity: 0.7; }
-    .price { color: var(--tcc-primary, #3b82f6); font-weight: 600; }
+    .tcc-service-details {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--tcc-text-muted, #64748b);
+    }
+    .tcc-service-details span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tcc-service-details i {
+      font-size: 13px;
+      opacity: 0.7;
+    }
+    .price {
+      color: var(--tcc-primary, #3b82f6);
+      font-weight: 600;
+    }
 
-    .tcc-service-actions { display: flex; align-items: center; gap: 8px; }
-    .icon-btn { background: transparent; border: none; color: var(--tcc-text-muted, #94a3b8); width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-    .icon-btn:hover { background-color: var(--tcc-bg, #f8fafc); color: var(--tcc-text-main, #475569); }
+    .tcc-service-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--tcc-text-muted, #94a3b8);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      background-color: var(--tcc-bg, #f8fafc);
+      color: var(--tcc-text-main, #475569);
+    }
 
     .tcc-btn-outline.small {
-      background-color: transparent; border: 1px solid var(--tcc-border, #e2e8f0); color: var(--tcc-text-main, #475569);
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer;
-      display: flex; align-items: center; gap: 6px; transition: background-color 0.2s;
+      background-color: transparent;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      color: var(--tcc-text-main, #475569);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
     }
-    .tcc-btn-outline.small:hover { background-color: var(--tcc-bg, #f8fafc); }
-    
+    .tcc-btn-outline.small:hover {
+      background-color: var(--tcc-bg, #f8fafc);
+    }
+
     @media (max-width: 768px) {
       .tcc-service-card { flex-direction: column; align-items: flex-start; }
       .tcc-service-actions { width: 100%; justify-content: flex-end; }
