@@ -1,16 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface Cliente {
-  nome: string;
-  empresa: string;
-  avaliacao: number;
-  email: string;
-  telefone: string;
-  local: string;
-  servicosAtivos: number;
-  servicosConcluidos: number;
-}
+import { Cliente } from '../../../models/cliente';
 
 @Component({
   selector: 'app-clientes-list',
@@ -73,44 +63,123 @@ export interface Cliente {
     .tcc-client-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
 
     .tcc-client-icon-box {
-      width: 64px; height: 64px;
-      border-radius: 10px; background-color: #eff6ff; color: var(--tcc-primary, #3b82f6);
-      display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      background-color: #eff6ff;
+      color: var(--tcc-primary, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
     }
 
-    .tcc-client-content { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-    
-    .tcc-client-header { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .tcc-client-header h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--tcc-text-main, #0f172a); }
-    
+    .tcc-client-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tcc-client-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .tcc-client-header h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--tcc-text-main, #0f172a);
+    }
+
     .tcc-company-badge {
-      background-color: var(--tcc-bg, #f8fafc); border: 1px solid var(--tcc-border, #e2e8f0);
-      padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; color: var(--tcc-text-muted, #64748b);
+      background-color: var(--tcc-bg, #f8fafc);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--tcc-text-muted, #64748b);
     }
-    
-    .tcc-rating { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; color: #eab308; }
-    .tcc-rating i { font-size: 12px; }
 
-    .tcc-client-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--tcc-text-muted, #64748b); }
-    .tcc-meta-item { display: flex; align-items: center; gap: 6px; }
-    .tcc-meta-item i { font-size: 13px; opacity: 0.7; }
+    .tcc-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #eab308;
+    }
+    .tcc-rating i {
+      font-size: 12px;
+    }
+
+    .tcc-client-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--tcc-text-muted, #64748b);
+    }
+    .tcc-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tcc-meta-item i {
+      font-size: 13px;
+      opacity: 0.7;
+    }
 
     .tcc-client-stats {
-      display: flex; gap: 24px; padding: 0 24px;
-      border-left: 1px solid var(--tcc-border, #e2e8f0); border-right: 1px solid var(--tcc-border, #e2e8f0);
+      display: flex;
+      gap: 24px;
+      padding: 0 24px;
+      border-left: 1px solid var(--tcc-border, #e2e8f0);
+      border-right: 1px solid var(--tcc-border, #e2e8f0);
     }
-    .tcc-mini-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .tcc-mini-stat span { font-size: 11px; color: var(--tcc-text-muted, #64748b); }
-    .tcc-mini-stat strong { font-size: 16px; color: var(--tcc-text-main, #0f172a); font-weight: 700; }
+    .tcc-mini-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .tcc-mini-stat span {
+      font-size: 11px;
+      color: var(--tcc-text-muted, #64748b);
+    }
+    .tcc-mini-stat strong {
+      font-size: 16px;
+      color: var(--tcc-text-main, #0f172a);
+      font-weight: 700;
+    }
 
-    .tcc-client-actions { display: flex; align-items: center; gap: 8px; }
+    .tcc-client-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
     .tcc-btn-outline.small {
-      background-color: transparent; border: 1px solid var(--tcc-border, #e2e8f0); color: var(--tcc-text-main, #475569);
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer;
-      display: flex; align-items: center; gap: 6px; transition: background-color 0.2s;
+      background-color: transparent;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      color: var(--tcc-text-main, #475569);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
     }
-    .tcc-btn-outline.small:hover { background-color: var(--tcc-bg, #f8fafc); }
+    .tcc-btn-outline.small:hover {
+      background-color: var(--tcc-bg, #f8fafc);
+    }
 
     @media (max-width: 992px) {
       .tcc-client-card { flex-wrap: wrap; }
@@ -118,7 +187,7 @@ export interface Cliente {
       .tcc-mini-stat { align-items: flex-start; }
       .tcc-client-actions { width: 100%; justify-content: flex-start; }
     }
-    
+
     @media (max-width: 768px) {
       .tcc-client-card { flex-direction: column; align-items: flex-start; gap: 16px; }
       .tcc-client-actions, .tcc-btn-outline.small { width: 100%; justify-content: center; }
