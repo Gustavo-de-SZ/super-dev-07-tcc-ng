@@ -10,9 +10,9 @@ import { CommonModule } from '@angular/common';
       
       <header class="tcc-page-header">
         <div class="tcc-header-title-group">
-          <div class="tcc-back-link">
+          <a class="tcc-back-link" routerLink="/painel/clientes">
             <i class="pi pi-arrow-left"></i> Voltar para Clientes
-          </div>
+          </a>
           <h1 class="tcc-title-lg">Novo Cliente</h1>
           <p class="tcc-subtitle">Adicione um novo cliente à sua base de dados</p>
         </div>

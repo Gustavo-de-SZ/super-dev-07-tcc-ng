@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClientesStats } from './components/cliente-tecnico-stats';
 import { ClientesSearch } from './components/cliente-tecnico-search';
-import { ClientesList, Cliente } from './components/clientes-tecnico-list';
+import { ClientesList } from './components/clientes-tecnico-list';
+import { Cliente } from '../../models/cliente';
+import { ClienteService } from '../../services/cliente.service';
 
 @Component({
   selector: 'app-clientes-tecnico',
@@ -22,7 +24,7 @@ import { ClientesList, Cliente } from './components/clientes-tecnico-list';
           <p class="tcc-subtitle">Gerencie sua base de clientes</p>
         </div>
         
-        <button class="tcc-btn-main">
+        <button class="tcc-btn-main" routerLink="/painel/clientes/novo">
           <i class="pi pi-plus"></i> Novo Cliente
         </button>
       </header>
@@ -58,36 +60,9 @@ import { ClientesList, Cliente } from './components/clientes-tecnico-list';
   `]
 })
 export class ClientesTecnico {
-  clientes: Cliente[] = [
-    {
-      nome: 'Maria Silva',
-      empresa: 'Tech Solutions LTDA',
-      avaliacao: 5.0,
-      email: 'maria@techsolutions.com',
-      telefone: '(11) 98765-4321',
-      local: 'São Paulo, SP',
-      servicosAtivos: 2,
-      servicosConcluidos: 15
-    },
-    {
-      nome: 'João Santos',
-      empresa: 'Consultoria ABC',
-      avaliacao: 4.8,
-      email: 'joao@consultoriaabc.com',
-      telefone: '(11) 91234-5678',
-      local: 'São Paulo, SP',
-      servicosAtivos: 1,
-      servicosConcluidos: 8
-    },
-    {
-      nome: 'Ana Costa',
-      empresa: 'Empresa XYZ',
-      avaliacao: 5.0,
-      email: 'ana@empresaxyz.com',
-      telefone: '(11) 99876-5432',
-      local: 'Campinas, SP',
-      servicosAtivos: 0,
-      servicosConcluidos: 12
-    }
-  ];
+  clientes: Cliente[] = [];
+
+  constructor(private clienteService: ClienteService) {
+    this.clientes = this.clienteService.getClientes();
+  }
 }
