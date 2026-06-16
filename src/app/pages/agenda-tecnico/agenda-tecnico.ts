@@ -22,7 +22,7 @@ import { Agendamento } from '../../shared/models';
           <p class="tcc-subtitle">Gerencie seus agendamentos</p>
         </div>
 
-        <button class="tcc-btn-main">
+        <button class="tcc-btn-main" routerLink="/painel/agenda/novo">
           <i class="pi pi-plus"></i> Novo Agendamento
         </button>
       </header>

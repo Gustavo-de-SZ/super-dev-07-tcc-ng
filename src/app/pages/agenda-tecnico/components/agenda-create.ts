@@ -10,9 +10,9 @@ import { CommonModule } from '@angular/common';
       
       <header class="tcc-page-header">
         <div class="tcc-header-title-group">
-          <div class="tcc-back-link">
+          <a class="tcc-back-link" routerLink="/painel/agenda">
             <i class="pi pi-arrow-left"></i> Voltar para Agenda
-          </div>
+          </a>
           <h1 class="tcc-title-lg">Novo Agendamento</h1>
           <p class="tcc-subtitle">Preencha os dados para marcar um novo compromisso</p>
         </div>
