@@ -10,9 +10,9 @@ import { CommonModule } from '@angular/common';
       
       <header class="tcc-page-header">
         <div class="tcc-header-title-group">
-          <div class="tcc-back-link">
+          <a class="tcc-back-link" routerLink="/painel/servicos">
             <i class="pi pi-arrow-left"></i> Voltar para Serviços
-          </div>
+          </a>
           <h1 class="tcc-title-lg">Novo Serviço</h1>
           <p class="tcc-subtitle">Registre os detalhes do serviço prestado</p>
         </div>
