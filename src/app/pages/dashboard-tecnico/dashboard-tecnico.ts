@@ -73,28 +73,28 @@ export class DashboardTecnico {
       hora: '14:00',
       empresa: 'Empresa ABC Ltda',
       servico: 'Manutenção de Rede',
-      status: 'concluido'
+      status: 'Concluído'
     },
     {
       dia: 'Hoje',
       hora: '16:30',
       empresa: 'Tech Solutions',
       servico: 'Instalação de Software',
-      status: 'pendente'
+      status: 'Pendente'
     },
     {
       dia: 'Amanhã',
       hora: '10:00',
       empresa: 'Digital Corp',
       servico: 'Suporte Técnico',
-      status: 'pendente'
+      status: 'Pendente'
     },
     {
       dia: '30 Mar',
       hora: '15:00',
       empresa: 'Inovação SA',
       servico: 'Configuração de Servidor',
-      status: 'pendente'
+      status: 'Pendente'
     }
   ];
 }

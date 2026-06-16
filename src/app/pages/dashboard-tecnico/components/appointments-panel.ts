@@ -25,7 +25,7 @@ import { Agendamento } from '../../../shared/models';
               <p>{{ agendamento.servico }}</p>
             </div>
             <div class="tcc-appt-status">
-              @if (agendamento.status === 'concluido') {
+              @if (agendamento.status === 'Concluído') {
                 <i class="pi pi-check-circle tcc-status-success"></i>
               } @else {
                 <i class="pi pi-clock tcc-status-warning"></i>
