@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../../core/services/theme.service';
 
 // interface back
 interface InfoUsuario {
@@ -27,7 +28,7 @@ interface InfoUsuario {
       <div class="tcc-topbar-actions">
         
         <button class="tcc-toggle-mode" (click)="toggleTheme()">
-          <i [class]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"></i>
+          <i [class]="isDark ? 'pi pi-sun' : 'pi pi-moon'"></i>
         </button>
 
         <button class="tcc-notification-btn">
@@ -190,23 +191,23 @@ interface InfoUsuario {
   `]
 })
 export class TopbarTecnico {
-  
+
   usuario: InfoUsuario = {
     nome: 'João Silva',
     cargo: 'Técnico de TI',
-    temNotificacao: true 
+    temNotificacao: true
   };
 
-  isDarkMode = false; 
+  isDark: boolean;
+
+  constructor(private themeService: ThemeService) {
+    this.isDark = this.themeService.isDark();
+  }
 
   toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    
-    if (this.isDarkMode) {
-      document.body.classList.add('tp-dark-theme');
-    } else {
-      document.body.classList.remove('tp-dark-theme');
-    }
+    this.themeService.toggle();
+    // Update the local property after toggling
+    this.isDark = this.themeService.isDark();
   }
 
   onSearch(event: Event) {

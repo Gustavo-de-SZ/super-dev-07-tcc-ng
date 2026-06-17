@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { SearchSectionComponent } from './components/search-section';
 import { ProfessionalCardComponent } from './components/professional-card';
 import { Profissional } from '../../shared/models';
@@ -9,11 +10,20 @@ import { Profissional } from '../../shared/models';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     SearchSectionComponent,
     ProfessionalCardComponent
   ],
   template: `
     <div class="tcc-fade-in tcc-p-lg">
+      <div class="tcc-form-card" style="margin-bottom: 24px;">
+        <h2 class="tcc-title-lg">Precisa de ajuda com seu equipamento?</h2>
+        <p class="tcc-subtitle">Abra um chamado e nossos técnicos irão resolver seu problema rapidamente.</p>
+        <button class="tcc-btn-main" [routerLink]="['/cliente/solicitacao']" style="margin-top:16px;">
+          <i class="pi pi-plus"></i> Abrir Novo Chamado
+        </button>
+      </div>
+
       <header class="tcc-welcome-header">
         <h1 class="tcc-title-lg">Olá, Maria!</h1>
         <p class="tcc-subtitle">Encontre o profissional certo para o seu problema.</p>
@@ -43,6 +53,19 @@ import { Profissional } from '../../shared/models';
 
     .tcc-favorites-section {
       margin-top: 48px;
+    }
+
+    .tcc-btn-main {
+      height: 44px;
+      padding: 12px 24px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .tcc-btn-cancel {
+      height: 44px;
+      padding: 12px 24px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
     .tcc-section-header {

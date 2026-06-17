@@ -19,7 +19,9 @@ export const routes: Routes = [
     path: 'cliente',
     loadComponent: () => import('./core/painel-layout/layout-cliente/layout-cliente').then(m => m.PainelClienteLayout),
     children: [
-      { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) }
+      { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) },
+      { path: 'solicitacao', loadComponent: () => import('./pages/nova-solicitacao/nova-solicitacao').then(m => m.NovaSolicitacao) },
+      { path: 'meus-chamados', loadComponent: () => import('./pages/meus-chamados/meus-chamados').then(m => m.MeusChamados) }
     ]},
   { path: '**', redirectTo: '' }
 ];

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { AgendaFilters } from './components/agenda-filters';
 import { AgendaSearch } from './components/agenda-search';
 import { AgendaList } from './components/agenda-list';
@@ -10,6 +11,7 @@ import { Agendamento } from '../../shared/models';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     AgendaFilters,
     AgendaSearch,
     AgendaList

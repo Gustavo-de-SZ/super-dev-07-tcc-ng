@@ -27,6 +27,10 @@ import { RouterModule } from '@angular/router';
           <i class="pi pi-search"></i>
           <span>Buscar Profissionais</span>
         </a>
+        <a routerLink="/cliente/meus-chamados" routerLinkActive="active" class="tcc-nav-item">
+          <i class="pi pi-list"></i>
+          <span>Meus Chamados</span>
+        </a>
         <a routerLink="/cliente/agendamentos" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-calendar"></i>
           <span>Meus Agendamentos</span>
