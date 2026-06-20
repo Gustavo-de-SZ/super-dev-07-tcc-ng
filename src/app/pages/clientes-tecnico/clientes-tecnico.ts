@@ -65,6 +65,14 @@ export class ClientesTecnico {
   clientes: Cliente[] = [];
 
   constructor(private clienteService: ClienteService) {
-    this.clientes = this.clienteService.getClientes();
+    this.clienteService.getClientes().subscribe({
+      next: (clientes) => {
+        this.clientes = clientes;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar clientes', err);
+        this.clientes = [];
+      }
+    });
   }
 }

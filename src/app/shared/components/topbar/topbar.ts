@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { inject } from '@angular/core';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../services/auth.service';
 
 // interface back
 interface InfoUsuario {
@@ -15,18 +17,18 @@ interface InfoUsuario {
   imports: [CommonModule],
   template: `
     <header class="tcc-topbar">
-      
+
       <div class="tcc-search-wrapper">
         <i class="pi pi-search"></i>
-        <input 
-          type="text" 
-          placeholder="Buscar clientes, chamados..." 
+        <input
+          type="text"
+          placeholder="Buscar clientes, chamados..."
           (input)="onSearch($event)"
         >
       </div>
 
       <div class="tcc-topbar-actions">
-        
+
         <button class="tcc-toggle-mode" (click)="toggleTheme()">
           <i [class]="isDark ? 'pi pi-sun' : 'pi pi-moon'"></i>
         </button>
@@ -63,7 +65,7 @@ interface InfoUsuario {
       width: 100%;
     }
 
-    
+
     .tcc-search-wrapper {
       position: relative;
       width: 100%;
@@ -101,14 +103,14 @@ interface InfoUsuario {
       }
     }
 
- 
+
     .tcc-topbar-actions {
       display: flex;
       align-items: center;
       gap: 24px;
     }
 
-   
+
     .tcc-notification-btn {
       background: transparent;
       border: none;
@@ -137,14 +139,14 @@ interface InfoUsuario {
       }
     }
 
-    
+
     .tcc-divider {
       width: 1px;
       height: 32px;
       background-color: var(--tcc-border);
     }
 
-   
+
     .tcc-profile-section {
       display: flex;
       align-items: center;
@@ -191,17 +193,73 @@ interface InfoUsuario {
   `]
 })
 export class TopbarTecnico {
-
   usuario: InfoUsuario = {
-    nome: 'João Silva',
-    cargo: 'Técnico de TI',
-    temNotificacao: true
+    nome: '',
+    cargo: '',
+    temNotificacao: false
   };
 
   isDark: boolean;
 
-  constructor(private themeService: ThemeService) {
+  private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
+
+  constructor() {
     this.isDark = this.themeService.isDark();
+    this.loadUserData();
+  }
+
+  private loadUserData(): void {
+    const token = this.authService.getToken();
+    if (token) {
+      // Try to get user profile from the auth service
+      this.authService.getUserProfile().subscribe({
+        next: (profile) => {
+          this.usuario.nome = profile.nome || '';
+          // For cargo, we might need to get it from the token or another endpoint
+          // For now, we'll leave it empty or try to get from token
+          this.usuario.cargo = this.extractRoleFromToken(token) || '';
+          this.usuario.temNotificacao = false; // This would come from a notification service
+        },
+        error: (err) => {
+          console.warn('Could not load user profile', err);
+          // Fallback: try to extract data from token
+          const nomeFromToken = this.extractNameFromToken(token) || '';
+          this.usuario.nome = nomeFromToken;
+          this.usuario.cargo = this.extractRoleFromToken(token) || '';
+          this.usuario.temNotificacao = false;
+        }
+      });
+    } else {
+      this.usuario.nome = '';
+      this.usuario.cargo = '';
+      this.usuario.temNotificacao = false;
+    }
+  }
+
+  private extractNameFromToken(token: string): string | null {
+    try {
+      // Split the token and decode the payload
+      const payload = token.split('.')[1];
+      const decodedPayload = atob(payload);
+      const parsed = JSON.parse(decodedPayload);
+      return parsed.nome || parsed.name || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  private extractRoleFromToken(token: string): string | null {
+    try {
+      // Split the token and decode the payload
+      const payload = token.split('.')[1];
+      const decodedPayload = atob(payload);
+      const parsed = JSON.parse(decodedPayload);
+      // Common JWT fields for role/authorities
+      return parsed.role || parsed.authorities || parsed.cargo || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   toggleTheme() {

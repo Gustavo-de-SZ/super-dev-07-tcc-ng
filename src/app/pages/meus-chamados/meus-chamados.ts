@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { MeusChamadosService } from '../../services/meus-chamados.service';
+import { OnInit } from '@angular/core';
 
 interface Chamado {
   id: number;
@@ -15,7 +17,7 @@ interface Chamado {
   imports: [CommonModule, RouterModule],
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
-      <header class="tcc-page-header">
+      <header class="tcc-page-header tcc-flex-between tcc-gap tcc-flex-wrap tcc-mb-md">
         <h1 class="tcc-title-lg">Meus Chamados</h1>
         <button class="tcc-btn-main" [routerLink]="['/cliente/solicitacao']">
           <i class="pi pi-plus"></i> Novo Chamado
@@ -43,8 +45,6 @@ interface Chamado {
   `,
   styles: [`
     .tcc-page-wrapper { display: flex; flex-direction: column; gap: 24px; padding: 0; }
-    .tcc-page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    .tcc-title-lg { font-size: 28px; font-weight: 700; color: var(--tcc-text-main, #0f172a); margin: 0 0 6px 0; }
     .tcc-fade-in { animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -64,18 +64,6 @@ interface Chamado {
     .tcc-badge-concluido { background-color: #dcfce7; color: #166534; }
     .tcc-link { color: var(--tcc-primary, #3b82f6); text-decoration: none; font-size: 14px; font-weight: 500; }
     .tcc-link:hover { text-decoration: underline; }
-    .tcc-btn-main {
-      height: 44px;
-      padding: 12px 24px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .tcc-btn-cancel {
-      height: 44px;
-      padding: 12px 24px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
     @media (max-width: 768px) {
       .tcc-chamado-item { flex-direction: column; align-items: flex-start; }
       .tcc-chamado-info { width: 100%; justify-content: space-between; }
@@ -83,13 +71,23 @@ interface Chamado {
     }
   `]
 })
-export class MeusChamados {
-  chamados: Chamado[] = [
-    { id: 1001, equipamento: 'Desktop', status: 'Pendente', dataCriacao: '10/06/2026' },
-    { id: 1002, equipamento: 'Notebook', status: 'Em Andamento', dataCriacao: '08/06/2026' },
-    { id: 1003, equipamento: 'Servidor', status: 'Concluído', dataCriacao: '05/06/2026' },
-    { id: 1004, equipamento: 'Rede', status: 'Pendente', dataCriacao: '03/06/2026' }
-  ];
+export class MeusChamados implements OnInit {
+  chamados: Chamado[] = [];
+
+  constructor(private meusChamadosService: MeusChamadosService) {}
+
+  ngOnInit(): void {
+    this.meusChamadosService.getChamados().subscribe({
+      next: (data) => {
+        this.chamados = data;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar chamados', err);
+        // Clear chamados on error - no fallback mock data
+        this.chamados = [];
+      }
+    });
+  }
 
   statusBadgeClass(status: string): string {
     switch (status.toLowerCase()) {

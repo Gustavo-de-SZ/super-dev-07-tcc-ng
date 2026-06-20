@@ -5,6 +5,7 @@ import { AgendaFilters } from './components/agenda-filters';
 import { AgendaSearch } from './components/agenda-search';
 import { AgendaList } from './components/agenda-list';
 import { Agendamento } from '../../shared/models';
+import { AgendaService } from '../../services/agenda.service';
 
 @Component({
   selector: 'app-agenda-tecnico',
@@ -59,11 +60,17 @@ import { Agendamento } from '../../shared/models';
   `]
 })
 export class AgendaTecnico {
-  compromissos: Agendamento[] = [
-    { mes: 'Jun', dia: '09', hora: '14:00', titulo: 'Manutenção de Rede', status: 'Confirmado', cliente: 'Empresa ABC Ltda', duracao: '2h', tipo: 'Presencial' },
-    { mes: 'Jun', dia: '09', hora: '16:30', titulo: 'Instalação de Software', status: 'Pendente', cliente: 'Tech Solutions', duracao: '1h 30min', tipo: 'Presencial' },
-    { mes: 'Jun', dia: '10', hora: '10:00', titulo: 'Suporte Técnico', status: 'Concluído', cliente: 'Digital Corp', duracao: '45min', tipo: 'Remoto' },
-    { mes: 'Jun', dia: '12', hora: '15:00', titulo: 'Configuração de Servidor', status: 'Pendente', cliente: 'Inovação SA', duracao: '3h', tipo: 'Presencial' },
-    { mes: 'Jun', dia: '15', hora: '09:00', titulo: 'Atualização de Sistema', status: 'Cancelado', cliente: 'Data Center Pro', duracao: '2h', tipo: 'Remoto' }
-  ];
+  compromissos: Agendamento[] = [];
+
+  constructor(private agendaService: AgendaService) {
+    this.agendaService.getAgendamentos().subscribe({
+      next: (agendamentos) => {
+        this.compromissos = agendamentos;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar agendamentos', err);
+        this.compromissos = [];
+      }
+    });
+  }
 }

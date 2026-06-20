@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FinanceiroStatsComponent } from './components/financeiro-stats';
 import { FinanceiroTransactionsComponent } from './components/financeiro-transactions';
+import { FinanceiroService } from '../../services/financeiro.service';
 
 interface Transacao {
   titulo: string;
@@ -72,10 +73,17 @@ interface Transacao {
   `]
 })
 export class FinanceiroTecnico {
-  transacoes: Transacao[] = [
-    { titulo: 'Manutenção Preventiva', cliente: 'Maria Silva', data: '02/04/2026', valor: 240, status: 'Pago' },
-    { titulo: 'Instalação Software', cliente: 'João Santos', data: '01/04/2026', valor: 180, status: 'Pendente' },
-    { titulo: 'Configuração Rede', cliente: 'Ana Costa', data: '28/03/2026', valor: 360, status: 'Pago' },
-    { titulo: 'Suporte Técnico', cliente: 'Maria Silva', data: '25/03/2026', valor: 150, status: 'Pago' }
-  ];
+  transacoes: Transacao[] = [];
+
+  constructor(private financeiroService: FinanceiroService) {
+    this.financeiroService.getTransacoes().subscribe({
+      next: (transacoes) => {
+        this.transacoes = transacoes;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar transações', err);
+        this.transacoes = [];
+      }
+    });
+  }
 }

@@ -63,6 +63,14 @@ export class ServicosTecnico {
   servicos: Servico[] = [];
 
   constructor(private servicoService: ServicoService) {
-    this.servicos = this.servicoService.getServicos();
+    this.servicoService.getServicos().subscribe({
+      next: (servicos) => {
+        this.servicos = servicos;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar serviços', err);
+        this.servicos = [];
+      }
+    });
   }
 }

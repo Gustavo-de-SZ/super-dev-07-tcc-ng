@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { SearchSectionComponent } from './components/search-section';
 import { ProfessionalCardComponent } from './components/professional-card';
 import { Profissional } from '../../shared/models';
+import { HomeClienteService } from '../../services/home-cliente.service';
+import { OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-cliente-inicio',
@@ -16,16 +18,16 @@ import { Profissional } from '../../shared/models';
   ],
   template: `
     <div class="tcc-fade-in tcc-p-lg">
-      <div class="tcc-form-card" style="margin-bottom: 24px;">
+      <div class="tcc-form-card tcc-mb-md">
         <h2 class="tcc-title-lg">Precisa de ajuda com seu equipamento?</h2>
         <p class="tcc-subtitle">Abra um chamado e nossos técnicos irão resolver seu problema rapidamente.</p>
-        <button class="tcc-btn-main" [routerLink]="['/cliente/solicitacao']" style="margin-top:16px;">
+        <button class="tcc-btn-main tcc-mt-sm" [routerLink]="['/cliente/solicitacao']">
           <i class="pi pi-plus"></i> Abrir Novo Chamado
         </button>
       </div>
 
       <header class="tcc-welcome-header">
-        <h1 class="tcc-title-lg">Olá, Maria!</h1>
+        <h1 class="tcc-title-lg">Olá!</h1>
         <p class="tcc-subtitle">Encontre o profissional certo para o seu problema.</p>
       </header>
 
@@ -53,19 +55,6 @@ import { Profissional } from '../../shared/models';
 
     .tcc-favorites-section {
       margin-top: 48px;
-    }
-
-    .tcc-btn-main {
-      height: 44px;
-      padding: 12px 24px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .tcc-btn-cancel {
-      height: 44px;
-      padding: 12px 24px;
-      font-size: 14px;
-      line-height: 1.5;
     }
 
     .tcc-section-header {
@@ -119,36 +108,33 @@ import { Profissional } from '../../shared/models';
     }
   `]
 })
-export class ClienteInicioComponent {
-  categorias = ['Redes', 'Hardware', 'Software', 'Segurança', 'Impressoras', 'Dispositivos'];
+export class ClienteInicioComponent implements OnInit {
+  categorias: string[] = [];
+  profissionaisFavoritos: Profissional[] = [];
 
-  profissionaisFavoritos: Profissional[] = [
-    {
-      nome: 'Carlos Silva',
-      especialidade: 'Redes e Infraestrutura',
-      nota: 4.9,
-      avaliacoes: 87,
-      tempoResposta: '1h',
-      local: 'São Paulo',
-      status: 'online'
-    },
-    {
-      nome: 'Ana Santos',
-      especialidade: 'Segurança da Informação',
-      nota: 5.0,
-      avaliacoes: 54,
-      tempoResposta: '45min',
-      local: 'São Paulo',
-      status: 'online'
-    },
-    {
-      nome: 'Pedro Costa',
-      especialidade: 'Hardware e Manutenção',
-      nota: 4.7,
-      avaliacoes: 42,
-      tempoResposta: '2h',
-      local: 'Guarulhos',
-      status: 'offline'
-    }
-  ];
+  constructor(private homeClienteService: HomeClienteService) {}
+
+  ngOnInit(): void {
+    this.homeClienteService.getCategorias().subscribe({
+      next: (data) => {
+        this.categorias = data;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar categorias', err);
+        // Clear categorias on error - no fallback mock data
+        this.categorias = [];
+      }
+    });
+
+    this.homeClienteService.getFavoritos().subscribe({
+      next: (data) => {
+        this.profissionaisFavoritos = data;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar favoritos', err);
+        // Clear profissionaisFavoritos on error - no fallback mock data
+        this.profissionaisFavoritos = [];
+      }
+    });
+  }
 }

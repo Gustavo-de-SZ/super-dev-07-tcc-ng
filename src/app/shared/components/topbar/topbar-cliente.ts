@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { inject } from '@angular/core';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-topbar-cliente',
@@ -23,14 +25,14 @@ import { CommonModule } from '@angular/common';
 
         <button class="tcc-icon-btn tcc-notification-btn">
           <i class="pi pi-bell"></i>
-          <span class="tcc-badge">2</span>
+          <span class="tcc-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
         </button>
 
         <div class="tcc-divider"></div>
 
         <div class="tcc-profile-section">
           <div class="tcc-profile-info">
-            <span class="tcc-profile-name">Maria Silva</span>
+            <span class="tcc-profile-name">{{ userName }}</span>
             <span class="tcc-profile-role">Cliente</span>
           </div>
           <div class="tcc-profile-avatar">
@@ -170,6 +172,46 @@ import { CommonModule } from '@angular/common';
 })
 export class TopbarCliente {
   isDarkMode = false;
+  notificationCount = 0;
+  userName = '';
+
+  private authService = inject(AuthService);
+
+  constructor() {
+    this.loadUserName();
+  }
+
+  private loadUserName(): void {
+    const token = this.authService.getToken();
+    if (token) {
+      // Try to get user profile from the auth service
+      this.authService.getUserProfile().subscribe({
+        next: (profile) => {
+          this.userName = profile.nome || '';
+        },
+        error: (err) => {
+          console.warn('Could not load user profile', err);
+          // Fallback: try to extract name from token
+          this.userName = this.extractNameFromToken(token) || '';
+        }
+      });
+    } else {
+      this.userName = '';
+    }
+  }
+
+  private extractNameFromToken(token: string): string | null {
+    try {
+      // Split the token and decode the payload
+      const payload = token.split('.')[1];
+      const decodedPayload = atob(payload);
+      const parsed = JSON.parse(decodedPayload);
+      return parsed.nome || parsed.name || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   toggleTheme() {
     this.isDarkMode = !this.isDarkMode;
     document.body.classList.toggle('tp-dark-theme', this.isDarkMode);

@@ -32,6 +32,61 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
+// Spacing utilities
+.tcc-mt-xs { margin-top: 4px !important; }
+.tcc-mt-sm { margin-top: 8px !important; }
+.tcc-mt-md { margin-top: 16px !important; }
+.tcc-mt-lg { margin-top: 24px !important; }
+.tcc-mt-xl { margin-top: 32px !important; }
+
+.tcc-mb-xs { margin-bottom: 4px !important; }
+.tcc-mb-sm { margin-bottom: 8px !important; }
+.tcc-mb-md { margin-bottom: 16px !important; }
+.tcc-mb-lg { margin-bottom: 24px !important; }
+.tcc-mb-xl { margin-bottom: 32px !important; }
+
+.tcc-mr-xs { margin-right: 4px !important; }
+.tcc-mr-sm { margin-right: 8px !important; }
+.tcc-mr-md { margin-right: 16px !important; }
+.tcc-mr-lg { margin-right: 24px !important; }
+.tcc-mr-xl { margin-right: 32px !important; }
+
+.tcc-ml-xs { margin-left: 4px !important; }
+.tcc-ml-sm { margin-left: 8px !important; }
+.tcc-ml-md { margin-left: 16px !important; }
+.tcc-ml-lg { margin-left: 24px !important; }
+.tcc-ml-xl { margin-left: 32px !important; }
+
+.tcc-p-xs { padding: 4px !important; }
+.tcc-p-sm { padding: 8px !important; }
+.tcc-p-md { padding: 16px !important; }
+.tcc-p-lg { padding: 24px !important; }
+.tcc-p-xl { padding: 32px !important; }
+
+.tcc-pt-xs { padding-top: 4px !important; }
+.tcc-pt-sm { padding-top: 8px !important; }
+.tcc-pt-md { padding-top: 16px !important; }
+.tcc-pt-lg { padding-top: 24px !important; }
+.tcc-pt-xl { padding-top: 32px !important; }
+
+.tcc-pb-xs { padding-bottom: 4px !important; }
+.tcc-pb-sm { padding-bottom: 8px !important; }
+.tcc-pb-md { padding-bottom: 16px !important; }
+.tcc-pb-lg { padding-bottom: 24px !important; }
+.tcc-pb-xl { padding-bottom: 32px !important; }
+
+.tcc-pl-xs { padding-left: 4px !important; }
+.tcc-pl-sm { padding-left: 8px !important; }
+.tcc-pl-md { padding-left: 16px !important; }
+.tcc-pl-lg { padding-left: 24px !important; }
+.tcc-pl-xl { padding-left: 32px !important; }
+
+.tcc-pr-xs { padding-right: 4px !important; }
+.tcc-pr-sm { padding-right: 8px !important; }
+.tcc-pr-md { padding-right: 16px !important; }
+.tcc-pr-lg { padding-right: 24px !important; }
+.tcc-pr-xl { padding-right: 32px !important; }
+
 
 .tcc-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .tcc-flex-split { display: flex; align-items: center; justify-content: space-between; }
@@ -150,4 +205,37 @@ body {
 }
 .tcc-btn-text:hover {
   color: var(--tcc-primary) !important;
+}
+
+.tcc-btn-cancel {
+  background: transparent !important;
+  border: 1px solid var(--tcc-border) !important;
+  color: var(--tcc-text-main) !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+.tcc-btn-cancel:hover {
+  background: var(--tcc-bg) !important;
+  border-color: #cbd5e1 !important;
+}
+
+.tcc-btn-main {
+  height: 44px;
+  padding: 12px 24px;
+  line-height: 1.5;
+}
+.tcc-btn-outline {
+  height: 44px;
+  padding: 12px 24px;
+  line-height: 1.5;
+}
+
+.tcc-btn-cancel {
+  height: 44px;
+  padding: 12px 24px;
+  line-height: 1.5;
 }
