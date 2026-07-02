@@ -9,7 +9,6 @@ export const routes: Routes = [
       {path: 'servicos', loadComponent: () => import('./pages/servicos-tecnico/servicos-tecnico').then(m => m.ServicosTecnico)},
       {path: 'financeiro', loadComponent: () => import('./pages/financeiro-tecnico/financeiro-tecnico').then(m => m.FinanceiroTecnico)},
       {path: 'clientes', loadComponent: () => import('./pages/clientes-tecnico/clientes-tecnico').then(m => m.ClientesTecnico)},
-      {path: 'pacientes', loadComponent: () => import('./pages/paciente-tecnico/paciente-tecnico').then(m => m.PacienteTecnico)},
       {path: 'agenda/novo', loadComponent: () => import('./pages/agenda-tecnico/components/agenda-create').then(m => m.NovoAgendamento)},
       {path: 'servicos/novo', loadComponent: () => import('./pages/servicos-tecnico/components/servicos-create').then(m => m.NovoServico)},
       {path: 'clientes/novo', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-tecnico-create').then(m => m.NovoCliente)}

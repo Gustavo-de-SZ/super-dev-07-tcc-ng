@@ -16,4 +16,16 @@ export class FinanceiroService {
   getTransacoes(): Observable<Transacao[]> {
     return this.http.get<Transacao[]>(`${this.configService.getApiUrl()}/transacoes`);
   }
+
+  addTransacao(transacao: Transacao): Observable<Transacao> {
+    return this.http.post<Transacao>(`${this.configService.getApiUrl()}/transacoes`, transacao);
+  }
+
+  updateTransacao(transacao: Transacao): Observable<Transacao> {
+    return this.http.put<Transacao>(`${this.configService.getApiUrl()}/transacoes/${transacao.titulo}`, transacao);
+  }
+
+  deleteTransacao(titulo: string): Observable<void> {
+    return this.http.delete<void>(`${this.configService.getApiUrl()}/transacoes/${titulo}`);
+  }
 }

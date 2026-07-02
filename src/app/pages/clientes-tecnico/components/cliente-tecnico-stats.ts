@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ClienteService, ClientesStats } from '../../../services/cliente.service';
 
 @Component({
   selector: 'app-clientes-stats',
@@ -9,15 +10,15 @@ import { CommonModule } from '@angular/common';
     <div class="tcc-stats-row">
       <div class="tcc-stat-box">
         <span class="tcc-stat-label">Total de Clientes</span>
-        <span class="tcc-stat-value text-blue">3</span>
+        <span class="tcc-stat-value text-blue">{{ stats?.total }}</span>
       </div>
       <div class="tcc-stat-box">
         <span class="tcc-stat-label">Ativos Este Mês</span>
-        <span class="tcc-stat-value text-green">2</span>
+        <span class="tcc-stat-value text-green">{{ stats?.ativosEsteMes }}</span>
       </div>
       <div class="tcc-stat-box">
         <span class="tcc-stat-label">Novos Este Mês</span>
-        <span class="tcc-stat-value text-purple">2</span>
+        <span class="tcc-stat-value text-purple">{{ stats?.novosEsteMes }}</span>
       </div>
     </div>
   `,
@@ -43,4 +44,30 @@ import { CommonModule } from '@angular/common';
     .text-purple { color: #a855f7; }
   `]
 })
-export class ClientesStats {}
+export class ClientesStatsComponent implements OnInit {
+  private readonly clienteService = inject(ClienteService);
+
+  stats: ClientesStats | null = null;
+  loading = true;
+  error: string | null = null;
+
+  ngOnInit(): void {
+    this.clienteService.getClientesStats().subscribe({
+      next: (data) => {
+        this.stats = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar estatísticas de clientes:', err);
+        this.error = 'Falha ao carregar estatísticas';
+        this.loading = false;
+        // Fallback to some default values to avoid breaking the UI
+        this.stats = {
+          total: 0,
+          ativosEsteMes: 0,
+          novosEsteMes: 0
+        };
+      }
+    });
+  }
+}

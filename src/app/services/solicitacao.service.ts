@@ -5,7 +5,8 @@ import { Solicitacao } from '../models/solicitacao';
 import { ConfigService } from './config.service';
 
 @Injectable({
-  providedIn: 'root')
+  providedIn: 'root'
+})
 export class SolicitacaoService {
   constructor(
     private http: HttpClient,
