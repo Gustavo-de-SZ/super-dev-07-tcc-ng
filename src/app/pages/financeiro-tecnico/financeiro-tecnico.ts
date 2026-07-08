@@ -29,7 +29,7 @@ interface Transacao {
         </div>
       </header>
 
-      <app-financeiro-stats></app-financeiro-stats>
+      <app-financeiro-stats [transacoes]="transacoes"></app-financeiro-stats>
       <app-financeiro-transactions [transacoes]="transacoes"></app-financeiro-transactions>
     </div>
   `,

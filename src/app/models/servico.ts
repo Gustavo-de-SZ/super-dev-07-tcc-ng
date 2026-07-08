@@ -1,9 +1,11 @@
 export interface Servico {
   icone: string;
+  categoria: 'Redes' | 'Hardware' | 'Software' | 'Segurança' | 'Impressoras' | 'Outros';
   titulo: string;
-  status: 'Concluído' | 'Em Andamento' | 'Pendente' | 'Cancelado';
+  status: 'Finalizado' | 'Pendente';
   cliente: string;
   data: string;
   duracao: string;
-  valor: number;
+  valor: string;
+  descricao: string;
 }

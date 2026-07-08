@@ -239,3 +239,44 @@ body {
   padding: 12px 24px;
   line-height: 1.5;
 }
+/* =========================================================
+   PRIMENG OVERLAYS - CUSTOMIZAÇÃO PARA O DESIGN SYSTEM (FIGMA)
+   Estas regras afetam janelas flutuantes que usam appendTo="body"
+   ========================================================= */
+
+.p-autocomplete-panel,
+.p-datepicker,
+.p-select-panel {
+  background-color: #ffffff !important;
+  border: 1px solid #94a3b8 !important; /* Cor da borda alinhada com os inputs */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  z-index: 9999 !important; /* Garante que fique acima de menus e barras laterais */
+  margin-top: 4px !important; /* Desgruda levemente do input */
+}
+
+/* Espaçamento interno do Autocomplete */
+.p-autocomplete-panel {
+  padding: 8px !important; 
+}
+
+/* Customização fina dos dias no DatePicker */
+.p-datepicker table td {
+  padding: 4px !important;
+}
+
+.p-datepicker table td > span {
+  border-radius: 6px !important;
+  transition: background-color 0.2s;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.p-datepicker table td > span:not(.p-highlight):hover {
+  background-color: #f8fafc !important; /* bg-main */
+  color: #3b82f6 !important; /* primary */
+}
+
+.p-datepicker table td > span.p-highlight {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}

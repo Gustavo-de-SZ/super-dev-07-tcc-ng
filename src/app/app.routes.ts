@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
+import { authGuardFn } from '@auth0/auth0-angular';
 
 export const routes: Routes = [
 {path: '', loadComponent: () => import('./pages/landing-page/landing-page').then(m => m.LandingPage)},
-{path: 'painel',loadComponent: () => import('./core/painel-layout/painel-layout').then(m => m.PainelLayout),
+{path: 'painel',
+canActivate: [authGuardFn],
+  loadComponent: () => import('./core/painel-layout/painel-layout').then(m => m.PainelLayout),
     children: [
       {path: 'dashboard', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)},
       {path: 'agenda', loadComponent: () => import('./pages/agenda-tecnico/agenda-tecnico').then(m => m.AgendaTecnico)},
@@ -17,6 +20,7 @@ export const routes: Routes = [
 
 {
     path: 'cliente',
+    canActivate: [authGuardFn],
     loadComponent: () => import('./core/painel-layout/layout-cliente/layout-cliente').then(m => m.PainelClienteLayout),
     children: [
       { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) },

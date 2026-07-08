@@ -1,401 +1,721 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
-// PrimeNG Modules
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { SelectModule } from 'primeng/select';
+// Imports do PrimeNG (v18+)
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { DatePickerModule } from 'primeng/datepicker';
-import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 // Models e Services
+import { Servico } from '../../../models/servico';
+import { ServicoService } from '../../../services/servico.service';
 import { Cliente } from '../../../models/cliente';
 import { ClienteService } from '../../../services/cliente.service';
-import { ServicoService } from '../../../services/servico.service';
-import { Servico } from '../../../models/servico';
 
 @Component({
   selector: 'app-novo-servico',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    InputTextModule,
-    ButtonModule,
-    SelectModule,
     AutoCompleteModule,
     DatePickerModule,
-    TextareaModule,
     ToastModule
   ],
   providers: [MessageService],
   template: `
-    <div class="tcc-page-wrapper tcc-fade-in">
-      
-      <header class="tcc-page-header">
-        <div class="tcc-header-title-group">
-          <a class="tcc-back-link" (click)="cancelar()">
-            <i class="pi pi-arrow-left"></i> Voltar para Serviços
-          </a>
-          <h1 class="tcc-title-lg">Novo Serviço</h1>
-          <p class="tcc-subtitle">Registre os detalhes do serviço prestado</p>
+    <div class="ns-page-container">
+      <header class="ns-page-header">
+        <a routerLink="/painel/servicos" class="ns-back-btn">
+          <i class="pi pi-chevron-left"></i>
+        </a>
+        <div>
+          <h1>Novo Serviço</h1>
+          <p>Registre um novo serviço para um cliente</p>
         </div>
       </header>
 
-      <div class="tcc-form-card">
-        <form [formGroup]="servicoForm" (ngSubmit)="salvar()">
-          
-          <h3 class="tcc-form-section-title">Dados Básicos</h3>
+      <div class="ns-grid-layout" [formGroup]="form">
 
-          <div class="tcc-form-row">
-            <div class="tcc-form-group flex-2">
-              <label class="tcc-form-label" for="titulo">Título do Serviço <span class="tcc-required">*</span></label>
-              <input pInputText id="titulo" autocomplete="off" formControlName="titulo" placeholder="Ex: Formatação de Computador" />
-              @if(servicoForm.get("titulo")?.touched && servicoForm.get("titulo")?.hasError("required")){
-                <small class="tcc-error-text">Título é obrigatório</small>
-              }
+        <main class="ns-form-column">
+
+          <section class="ns-card">
+            <h2 class="ns-card-title">
+              <i class="pi pi-file-edit text-primary"></i> Informações do Serviço
+            </h2>
+
+            <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('titulo')">
+              <label for="titulo">Título do serviço *</label>
+              <input
+                id="titulo"
+                type="text"
+                formControlName="titulo"
+                class="ns-input"
+                placeholder="Ex: Formatação e reinstalação do Windows"
+              />
             </div>
 
-            <div class="tcc-form-group flex-2">
-              <label class="tcc-form-label">Cliente vinculado <span class="tcc-required">*</span></label>
-              <p-autoComplete 
-                formControlName="cliente" 
-                [suggestions]="clientesFiltrados" 
-                (completeMethod)="filtrarCliente($event)"
-                field="nome_exibicao"
-                placeholder="Busque por nome ou empresa..."
-                [forceSelection]="true"
-                appendTo="body"
-                [dropdown]="true"> 
-                  <ng-template let-cliente pTemplate="item">
-                    <div class="tcc-custom-item">
-                      <span class="tcc-item-title">{{cliente.nome_completo || cliente.nome}}</span>
-                      <small class="tcc-item-subtitle">{{cliente.empresa || 'Sem empresa vinculada'}}</small>
-                    </div>
-                  </ng-template>
-              </p-autoComplete>
-              @if(servicoForm.get("cliente")?.touched && servicoForm.get("cliente")?.hasError("required")){
-                <small class="tcc-error-text">Cliente vinculado é obrigatório</small>
-              }
-            </div>
-          </div>
-
-          <div class="tcc-form-row">
-            <div class="tcc-form-group">
-              <label class="tcc-form-label" for="categoria">Categoria (Ícone) <span class="tcc-required">*</span></label>
-              <p-select 
-                id="categoria"
-                [options]="categoriaOptions"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Selecione a categoria"
-                appendTo="body"
-                formControlName="categoria">
-                  <ng-template #selectedItem let-selectedOption>
-                    <div class="tcc-custom-select-item">
-                      <i [class]="'pi ' + selectedOption.value"></i>
-                      <span>{{ selectedOption.label }}</span>
-                    </div>
-                  </ng-template>
-                  <ng-template let-categoria pTemplate="item">
-                    <div class="tcc-custom-select-item">
-                      <i [class]="'pi ' + categoria.value"></i>
-                      <span>{{ categoria.label }}</span>
-                    </div>
-                  </ng-template>
-              </p-select>
-              @if(servicoForm.get("categoria")?.touched && servicoForm.get("categoria")?.hasError("required")){
-                <small class="tcc-error-text">Categoria é obrigatória</small>
-              }
+            <div class="ns-form-group">
+              <label>Categoria *</label>
+              <div class="ns-category-grid">
+                @for (cat of categorias; track cat.id) {
+                  <button
+                    type="button"
+                    class="ns-category-card"
+                    [class.ns-active]="form.get('categoria')?.value === cat.id"
+                    (click)="selecionarCategoria(cat.id)"
+                  >
+                    <i [class]="cat.icon"></i>
+                    <span>{{ cat.label }}</span>
+                  </button>
+                }
+              </div>
             </div>
 
-            <div class="tcc-form-group">
-              <label class="tcc-form-label">Data de Execução <span class="tcc-required">*</span></label>
-              <p-datePicker 
-                formControlName="dataExecucao" 
-                dateFormat="dd/mm/yy" 
-                [showIcon]="true" 
-                appendTo="body">
-              </p-datePicker>
-              @if(servicoForm.get("dataExecucao")?.touched && servicoForm.get("dataExecucao")?.hasError("required")){
-                <small class="tcc-error-text">Data de execução é obrigatória</small>
-              }
+            <div class="ns-form-group">
+              <label for="descricao">Descrição</label>
+              <textarea
+                id="descricao"
+                formControlName="descricao"
+                class="ns-input ns-textarea"
+                rows="4"
+                placeholder="Descreva o serviço a ser realizado, problema identificado..."
+              ></textarea>
             </div>
-          </div>
+          </section>
 
-          <hr class="tcc-divider">
+          <section class="ns-card">
+            <h2 class="ns-card-title">
+              <i class="pi pi-user text-primary"></i> Cliente
+            </h2>
 
-          <h3 class="tcc-form-section-title">Valores e Status</h3>
+            <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('cliente')">
+              <div class="ns-input-icon-wrapper">
+                <i class="pi pi-search ns-icon-left"></i>
+                <p-autoComplete 
+                    formControlName="cliente" 
+                    [suggestions]="clientesFiltrados" 
+                    (completeMethod)="filtrarCliente($event)"
+                    optionLabel="nome_exibicao"
+                    placeholder="Buscar cliente por nome ou empresa..."
+                    [forceSelection]="true"
+                    appendTo="body"
+                    styleClass="ns-autocomplete"
+                    inputStyleClass="ns-has-icon-left"> 
+                      <ng-template let-cliente pTemplate="item">
+                        <div class="ns-cliente-suggestion">
+                          <div class="ns-cliente-avatar"><i class="pi pi-user"></i></div>
+                          <div class="ns-cliente-info">
+                            <span class="ns-cliente-nome">{{ cliente.nome_completo || cliente.nome || 'Sem nome' }}</span>
+                            <span class="ns-cliente-empresa">{{ cliente.empresa || 'Sem empresa' }}</span>
+                          </div>
+                        </div>
+                      </ng-template>
+                  </p-autoComplete>
+              </div>
+            </div>
+          </section>
 
-          <div class="tcc-form-row">
-            <div class="tcc-form-group">
-              <label class="tcc-form-label" for="valor">Valor (R$) <span class="tcc-required">*</span></label>
-              <input pInputText id="valor" type="number" step="0.01" autocomplete="off" formControlName="valor" placeholder="0,00" />
-              @if(servicoForm.get("valor")?.touched && servicoForm.get("valor")?.hasError("required")){
-                <small class="tcc-error-text">Valor é obrigatório</small>
-              }
+          <section class="ns-card">
+            <h2 class="ns-card-title">
+              <i class="pi pi-calendar text-primary"></i> Agendamento e Valor
+            </h2>
+
+            <div class="ns-form-row">
+              <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('data')">
+                <label>Data *</label>
+                <p-datePicker
+                  formControlName="data"
+                  dateFormat="dd/mm/yy"
+                  placeholder="mm/dd/yyyy"
+                  [showIcon]="true"
+                  iconDisplay="input"
+                  appendTo="body"
+                  styleClass="ns-datepicker"
+                ></p-datePicker>
+              </div>
+
+              <div class="ns-form-group">
+                <label for="duracao">Duração estimada</label>
+                <div class="ns-input-icon-wrapper">
+                  <i class="pi pi-clock ns-icon-left"></i>
+                  <input
+                    id="duracao"
+                    type="text"
+                    formControlName="duracao"
+                    class="ns-input ns-has-icon-left"
+                    placeholder="Ex: 2h"
+                  />
+                </div>
+              </div>
+
+              <div class="ns-form-group">
+                <label for="valor">Valor (R$)</label>
+                <div class="ns-input-icon-wrapper">
+                  <span class="ns-prefix-left">R$</span>
+                  <input
+                    id="valor"
+                    type="text"
+                    formControlName="valor"
+                    class="ns-input ns-has-prefix-left"
+                    placeholder="0,00"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <aside class="ns-summary-column">
+          <div class="ns-card ns-summary-card">
+            <h3>Resumo</h3>
+
+            <div class="ns-summary-list">
+              <div class="ns-summary-item">
+                <span class="label">Serviço</span>
+                <span class="value">{{ form.get('titulo')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Categoria</span>
+                <span class="value">{{ getCategoriaLabel() }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Cliente</span>
+                <span class="value">{{ form.get('cliente')?.value?.nome || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Data</span>
+                <span class="value">{{ form.get('data')?.value ? (form.get('data')?.value | date:'dd/MM/yyyy') : '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Duração</span>
+                <span class="value">{{ form.get('duracao')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Valor</span>
+                <span class="value">{{ form.get('valor')?.value ? 'R$ ' + form.get('valor')?.value : '—' }}</span>
+              </div>
             </div>
 
-            <div class="tcc-form-group">
-              <label class="tcc-form-label" for="status">Status do Serviço <span class="tcc-required">*</span></label>
-              <p-select 
-                id="status"
-                [options]="statusOptions"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Selecione o status"
-                appendTo="body"
-                formControlName="status">
-              </p-select>
-              @if(servicoForm.get("status")?.touched && servicoForm.get("status")?.hasError("required")){
-                <small class="tcc-error-text">Status do serviço é obrigatório</small>
-              }
+            <div class="ns-summary-status">
+              <span>Status inicial</span>
+              <span class="ns-badge-pending">Pendente</span>
             </div>
-          </div>
 
-          <hr class="tcc-divider">
-
-          <h3 class="tcc-form-section-title">Detalhes do Serviço</h3>
-
-          <div class="tcc-form-row">
-            <div class="tcc-form-group">
-              <label class="tcc-form-label" for="tempoGasto">Tempo Gasto <span class="tcc-required">*</span></label>
-              <input pInputText id="tempoGasto" autocomplete="off" formControlName="tempoGasto" placeholder="Ex: 2h 30m" />
-              @if(servicoForm.get("tempoGasto")?.touched && servicoForm.get("tempoGasto")?.hasError("required")){
-                <small class="tcc-error-text">Tempo gasto é obrigatório</small>
-              }
-            </div>
-          </div>
-
-          <div class="tcc-form-row">
-            <div class="tcc-form-group">
-              <label class="tcc-form-label" for="descricaoTecnica">Descrição Técnica do Serviço</label>
-              <textarea pTextarea formControlName="descricaoTecnica" id="descricaoTecnica" rows="4" style="resize: vertical;"></textarea>
-            </div>
-          </div>
-
-          <div class="tcc-form-actions">
-            <button type="button" class="tcc-btn-cancel" (click)="cancelar()">
-              <i class="pi pi-times tcc-mr-sm"></i> Cancelar
+            <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="salvarServico()">
+              Criar Serviço
             </button>
-
-            <button type="submit" class="tcc-btn-main" [disabled]="servicoForm.invalid"
-                    [style.opacity]="servicoForm.invalid ? '0.6' : '1'"
-                    [style.cursor]="servicoForm.invalid ? 'not-allowed' : 'pointer'">
-              <i class="pi pi-save tcc-mr-sm"></i> Cadastrar Serviço
+            <button type="button" routerLink="/painel/servicos" class="ns-btn-cancel">
+              Cancelar
             </button>
           </div>
-        </form>
+        </aside>
+
       </div>
-
     </div>
     <p-toast position="bottom-right"></p-toast>
   `,
   styles: [`
-    /* Estrutura Geral */
-    .tcc-page-wrapper { display: flex; flex-direction: column; gap: 24px; padding: 0; background-color: transparent; }
-    .tcc-page-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
     
-    .tcc-back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--tcc-text-muted, #64748b); cursor: pointer; margin-bottom: 8px; font-weight: 500; text-decoration: none; transition: color 0.2s;}
-    .tcc-back-link:hover { color: var(--tcc-primary, #3b82f6); }
-    .tcc-title-lg { font-size: 28px; font-weight: 700; color: var(--tcc-text-main, #0f172a); margin: 0 0 6px 0; }
-    .tcc-subtitle { color: var(--tcc-text-muted, #64748b); font-size: 16px; margin: 0; }
-
-    .tcc-fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .tcc-form-card { background-color: var(--tcc-surface, #ffffff); border: 1px solid var(--tcc-border, #e2e8f0); border-radius: var(--tcc-radius, 12px); padding: 32px; box-shadow: var(--tcc-shadow, 0 4px 20px #00000008); }
-    .tcc-form-section-title { font-size: 18px; font-weight: 600; color: var(--tcc-text-main, #0f172a); margin: 0 0 20px 0; }
-    .tcc-divider { border: 0; height: 1px; background-color: var(--tcc-border, #e2e8f0); margin: 32px 0; }
-
-    /* Alinhamento de Grids e Labels */
-    .tcc-form-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; width: 100%; }
-    .tcc-form-group { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 250px; width: 100%; }
-    .flex-2 { flex: 2; min-width: 350px; }
-    
-    .tcc-form-label { font-size: 14px; font-weight: 600; color: var(--tcc-text-main, #0f172a); margin: 0; display: block; }
-    .tcc-required { color: #dc2626; font-weight: bold; }
-    .tcc-error-text { color: #dc2626; font-size: 12px; margin-top: 4px; }
-
-    /* Customização interna das opções (Select e AutoComplete) */
-    .tcc-custom-item { display: flex; flex-direction: column; gap: 4px; }
-    .tcc-item-title { font-weight: 600; color: var(--tcc-text-main); }
-    .tcc-item-subtitle { color: var(--tcc-text-muted); font-size: 12px; }
-    .tcc-custom-select-item { display: flex; align-items: center; gap: 10px; }
-
-    /* BOTÕES */
-    .tcc-form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--tcc-border, #e2e8f0); }
-    .tcc-btn-cancel { background-color: transparent; border: 1px solid var(--tcc-border, #e2e8f0); color: var(--tcc-text-muted, #64748b); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .tcc-btn-cancel:hover { background-color: var(--tcc-surface-hover, #f1f5f9); border-color: var(--tcc-text-muted, #64748b); }
-    .tcc-btn-main { background-color: var(--tcc-primary, #3b82f6); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .tcc-btn-main:hover { background-color: var(--tcc-primary-hover, #2563eb); }
-    .tcc-mr-sm { margin-right: 6px; }
-
-    /* * CORREÇÃO CRÍTICA DO PRIMENG (BORDAS, PADDING E WIDTH)
-     * O ::ng-deep é obrigatório aqui para perfurar o encapsulamento e aplicar o estilo 
-     * diretamente nos elementos nativos que o PrimeNG gera internamente.
-     */
-
-    /* Garante que os containers (wrappers) ocupem 100% da flexbox */
-    :host ::ng-deep p-autocomplete,
-    :host ::ng-deep p-select,
-    :host ::ng-deep p-datepicker {
-      display: block !important;
-      width: 100% !important;
+    .ns-page-container {
+      padding: 24px;
+      max-width: 1280px;
+      margin: 0 auto;
+      font-family: system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      background-color: var(--tcc-bg, #f8fafc); /* Força o fundo da página a obedecer seu tema */
+      transition: background-color 0.2s, color 0.2s;
     }
 
-    /* Recria as bordas e paddings dos inputs que estão flutuando transparentes */
-    :host ::ng-deep input.p-inputtext,
-    :host ::ng-deep textarea.p-textarea,
-    :host ::ng-deep .p-autocomplete-input,
-    :host ::ng-deep .p-datepicker-input {
-      width: 100% !important;
-      border: 1px solid var(--tcc-border, #cbd5e1) !important;
-      border-radius: 6px !important;
-      padding: 0.75rem 1rem !important;
-      background-color: var(--tcc-surface, #ffffff) !important;
-      color: var(--tcc-text-main, #0f172a) !important;
-      font-family: inherit;
-      box-shadow: none !important;
-      box-sizing: border-box !important;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    .ns-page-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--tcc-text-main, #0f172a);
+      margin: 0 0 4px 0;
     }
 
-    /* O p-select precisa de um tratamento especial porque ele é uma div que funciona como botão */
-    :host ::ng-deep .p-select {
-      width: 100% !important;
-      border: 1px solid var(--tcc-border, #cbd5e1) !important;
-      border-radius: 6px !important;
-      background-color: var(--tcc-surface, #ffffff) !important;
-      color: var(--tcc-text-main, #0f172a) !important;
-      padding: 0 !important; /* Retira o padding de fora... */
-      display: flex !important;
+    .ns-page-header p {
+      font-size: 14px;
+      color: var(--tcc-text-muted, #64748b);
+      margin: 0;
+    }
+
+    .ns-back-btn {
+      display: flex;
       align-items: center;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: var(--tcc-text-muted, #64748b);
+      text-decoration: none;
+      transition: background 0.2s;
     }
 
-    /* ...e aplica o padding no label interno para a área clicável ficar do tamanho certo */
-    :host ::ng-deep .p-select .p-select-label {
-      padding: 0.75rem 1rem !important;
+    .ns-back-btn:hover {
+      background: var(--tcc-surface-hover, #e2e8f0);
+    }
+
+    .ns-grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .ns-form-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+
+    .ns-card {
+      background-color: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--tcc-shadow, 0 1px 3px rgba(0,0,0,0.1));
+      color: var(--tcc-text-main, #0f172a);
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .ns-card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--tcc-text-main, #0f172a);
+    }
+
+    .text-primary {
+      color: #3b82f6;
+    }
+
+    .ns-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .ns-form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--tcc-text-muted, #64748b);
+    }
+
+    .ns-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    ::ng-deep .ns-input,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input,
+    ::ng-deep .ns-datepicker .p-inputtext {
       width: 100%;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      transition: all 0.2s;
+      box-shadow: none;
+      font-family: inherit;
+      background-color: var(--tcc-surface, #ffffff) !important;
+      color: var(--tcc-text-main, #0f172a) !important;
+      border: 1px solid var(--tcc-border, #e2e8f0) !important;
     }
 
-    /* Retira qualquer borda duplicada que o p-autocomplete possa gerar internamente */
-    :host ::ng-deep .p-autocomplete .p-inputtext {
-      border: none !important; 
+    ::ng-deep .ns-input::placeholder,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input::placeholder,
+    ::ng-deep .ns-datepicker .p-inputtext::placeholder {
+      color: var(--tcc-text-muted, #94a3b8) !important;
+      opacity: 0.7;
     }
 
-    /* Efeitos visuais ao focar (clicar) nos inputs */
-    :host ::ng-deep input.p-inputtext:focus,
-    :host ::ng-deep textarea.p-textarea:focus,
-    :host ::ng-deep .p-select:focus-within,
-    :host ::ng-deep .p-autocomplete-input:focus,
-    :host ::ng-deep .p-datepicker-input:focus {
-      border-color: var(--tcc-primary, #3b82f6) !important;
-      outline: none !important;
-      box-shadow: 0 0 0 1px var(--tcc-primary, #3b82f6) !important;
+    ::ng-deep .ns-input:focus,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input:focus,
+    ::ng-deep .ns-datepicker .p-inputtext:focus {
+      border-color: #3b82f6 !important;
+      outline: none;
+      box-shadow: 0 0 0 1px #3b82f6 !important;
     }
+
+    .ns-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .ns-input-icon-wrapper {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    .ns-icon-left, .ns-prefix-left {
+      position: absolute;
+      left: 14px;
+      color: var(--tcc-text-muted, #64748b);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .ns-prefix-left {
+      font-size: 14px;
+    }
+
+    .ns-has-icon-left { padding-left: 38px !important; }
+    .ns-has-prefix-left { padding-left: 38px !important; }
+    ::ng-deep .ns-autocomplete { width: 100%; }
+    ::ng-deep .ns-datepicker { width: 100% !important; display: inline-flex !important; }
+
+    /* Força o ícone nativo do datepicker a herdar a cor correta */
+    ::ng-deep .ns-datepicker .p-datepicker-dropdown-icon,
+    ::ng-deep .ns-datepicker .p-datepicker-input-icon {
+      color: var(--tcc-text-muted) !important;
+    }
+
+    .ns-category-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .ns-category-card {
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 8px;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--tcc-text-main, #0f172a);
+      transition: all 0.2s;
+    }
+
+    .ns-category-card i {
+      font-size: 18px;
+      color: var(--tcc-text-muted, #64748b);
+    }
+
+    .ns-category-card span { font-size: 12px; font-weight: 500; }
+
+    .ns-category-card:hover {
+      background: var(--tcc-surface-hover, #f1f5f9);
+      border-color: var(--tcc-text-muted, #94a3b8);
+    }
+
+    .ns-category-card.ns-active {
+      background: rgba(59, 130, 246, 0.15) !important;
+      border-color: #3b82f6 !important;
+      color: #3b82f6 !important;
+    }
+
+    .ns-category-card.ns-active i { color: #3b82f6 !important; }
+
+
+    .ns-summary-column { position: sticky; top: 24px; }
+    .ns-summary-card h3 { font-size: 16px; font-weight: 600; margin: 0 0 20px 0; }
+
+    .ns-summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--tcc-border, #e2e8f0);
+      padding-bottom: 20px;
+    }
+
+    .ns-summary-item { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; font-size: 13px; }
+    .ns-summary-item .label { color: var(--tcc-text-muted, #64748b); }
+    .ns-summary-item .value { font-weight: 500; text-align: right; color: var(--tcc-text-main, #0f172a); }
+
+    .ns-summary-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 24px;
+      color: var(--tcc-text-muted, #64748b);
+    }
+
+    .ns-badge-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .ns-btn-submit {
+      width: 100%; background: #3b82f6; color: #ffffff; border: none; padding: 12px;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-bottom: 12px;
+    }
+    .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
+    .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ns-btn-cancel { width: 100%; background: transparent; border: none; color: var(--tcc-text-muted, #64748b); font-size: 13px; cursor: pointer; text-align: center; }
+    .ns-btn-cancel:hover { color: var(--tcc-text-main, #0f172a); }
+
+
+    .ns-is-invalid label { color: #ef4444 !important; }
+    .ns-is-invalid ::ng-deep .ns-input,
+    .ns-is-invalid ::ng-deep .p-autocomplete-input,
+    .ns-is-invalid ::ng-deep .p-inputtext {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.05) !important;
+    }
+
+
+
+    /* Fundo do painel do Datepicker e do Autocomplete */
+    ::ng-deep body.tp-dark-theme .p-datepicker-panel,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-overlay,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-panel {
+      background-color: var(--tcc-surface, #131c2c) !important;
+      border: 1px solid var(--tcc-border, #223047) !important;
+      color: var(--tcc-text-main, #f1f5f9) !important;
+      box-shadow: var(--tcc-shadow) !important;
+    }
+
+    /* Cabeçalho e calendário interno do Datepicker */
+    ::ng-deep body.tp-dark-theme .p-datepicker-header {
+      background-color: var(--tcc-surface, #131c2c) !important;
+      border-bottom: 1px solid var(--tcc-border, #223047) !important;
+      color: var(--tcc-text-main, #f1f5f9) !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-title,
+    ::ng-deep body.tp-dark-theme .p-datepicker-prev-icon,
+    ::ng-deep body.tp-dark-theme .p-datepicker-next-icon {
+      color: var(--tcc-text-main, #f1f5f9) !important;
+    }
+
+    /* Dias da semana e números do mês */
+    ::ng-deep body.tp-dark-theme .p-datepicker-weekday {
+      color: var(--tcc-text-muted, #94a3b8) !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day {
+      color: var(--tcc-text-main, #f1f5f9) !important;
+    }
+
+    /* Efeitos de Hover e Seleção nos dias do Datepicker */
+    ::ng-deep body.tp-dark-theme .p-datepicker-day:not(.p-datepicker-day-selected):hover {
+      background-color: var(--tcc-surface-hover, #1e293b) !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day-selected {
+      background-color: #3b82f6 !important;
+      color: #ffffff !important;
+    }
+
+    /* Itens de sugestão do AutoComplete no Modo Escuro */
+    ::ng-deep body.tp-dark-theme .p-autocomplete-option {
+      color: var(--tcc-text-main, #f1f5f9) !important;
+      background: transparent !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-autocomplete-option:hover,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-option.p-focus {
+      background-color: var(--tcc-surface-hover, #1e293b) !important;
+    }
+
+    .ns-cliente-suggestion { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
+    .ns-cliente-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--tcc-surface-hover, #e2e8f0);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--tcc-text-muted, #64748b);
+    }
+    .ns-cliente-info { display: flex; flex-direction: column; }
+    .ns-cliente-nome { font-size: 14px; font-weight: 500; color: var(--tcc-text-main, #0f172a); }
+    .ns-cliente-empresa { font-size: 11px; color: var(--tcc-text-muted, #64748b); }
   `]
 })
 export class NovoServico implements OnInit {
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly messageService = inject(MessageService);
-  private readonly clienteService = inject(ClienteService);
-  private readonly router = inject(Router);
-  private readonly servicoService = inject(ServicoService);
+  private fb = inject(FormBuilder);
+  private servicoService = inject(ServicoService);
+  private clienteService = inject(ClienteService);
+  private messageService = inject(MessageService);
+  private router = inject(Router);
 
+  form!: FormGroup;
   clientes: Cliente[] = [];
   clientesFiltrados: any[] = [];
 
-  categoriaOptions = [
-    { label: 'Manutenção (Desktop)', value: 'pi-desktop' },
-    { label: 'Redes (Wi-Fi)', value: 'pi-wifi' },
-    { label: 'Hardware (HD/SSD)', value: 'pi-database' },
-    { label: 'Segurança (Antivírus)', value: 'pi-shield' }
+  categorias = [
+    { id: 'redes', label: 'Redes', icon: 'pi pi-wifi' },
+    { id: 'hardware', label: 'Hardware', icon: 'pi pi-database' },
+    { id: 'software', label: 'Software', icon: 'pi pi-desktop' },
+    { id: 'seguranca', label: 'Segurança', icon: 'pi pi-shield' },
+    { id: 'impressoras', label: 'Impressoras', icon: 'pi pi-print' },
+    { id: 'outros', label: 'Outros', icon: 'pi pi-wrench' }
   ];
-
-  statusOptions = [
-    { label: 'Pendente', value: 'Pendente' },
-    { label: 'Em Andamento', value: 'Em Andamento' },
-    { label: 'Concluído', value: 'Concluído' }
-  ];
-
-  servicoForm = this.formBuilder.group({
-    titulo: ['', [Validators.required, Validators.minLength(3)]],
-    cliente: ['', Validators.required],
-    categoria: ['', Validators.required],
-    dataExecucao: ['', Validators.required],
-    valor: ['', [Validators.required, Validators.min(0.01)]],
-    status: ['', Validators.required],
-    tempoGasto: ['', Validators.required],
-    descricaoTecnica: ['']
-  });
 
   ngOnInit(): void {
+    this.form = this.fb.group({
+      titulo: ['', [Validators.required, Validators.minLength(4)]],
+      categoria: ['redes', Validators.required],
+      descricao: [''],
+      cliente: [null, Validators.required],
+      data: [new Date(), Validators.required],
+      duracao: [''],
+      valor: ['']
+    });
+
+    // Load clientes for autocomplete
     this.carregarClientes();
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.form.get(controlName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  selecionarCategoria(id: string): void {
+    this.form.get('categoria')?.setValue(id);
+  }
+
+  getCategoriaLabel(): string {
+    const currentId = this.form.get('categoria')?.value;
+    const cat = this.categorias.find(c => c.id === currentId);
+    return cat ? cat.label : '—';
   }
 
   carregarClientes(): void {
     this.clienteService.getClientes().subscribe({
       next: (clientes: Cliente[]) => {
-        this.clientes = clientes.map(cliente => ({
-          ...cliente,
-          nome_exibicao: `${(cliente as any).nome_completo || cliente.nome} ${cliente.empresa ? ' - ' + cliente.empresa : ''}`
-        }));
+        this.clientes = clientes.map(cliente => {
+          // Use nome_completo if available, otherwise fall back to nome
+          const nomeParaExibicao = (cliente as any).nome_completo
+            || cliente.nome
+            || '';
+          return {
+            ...cliente,
+            nome_exibicao: nomeParaExibicao
+          };
+        });
       },
       error: (err) => {
         console.error('Erro ao carregar clientes', err);
-        this.messageService.add({ severity: "error", summary: "Erro", detail: "Ocorreu um erro ao carregar os clientes" });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao carregar clientes para autocompletar'
+        });
       }
     });
   }
 
-  filtrarCliente(event: any) {
-    const query = event.query.toLowerCase();
-    this.clientesFiltrados = this.clientes.filter(c => 
+  filtrarCliente(event: any): void {
+    const query = event.query ? event.query.toLowerCase() : '';
+
+    // Filtra pelo nome_exibicao (mesmo campo usado para exibição)
+    this.clientesFiltrados = this.clientes.filter(c =>
       (c as any).nome_exibicao.toLowerCase().includes(query)
     );
   }
+  salvarServico(): void {
+    if (this.form.valid) {
+      // Map form values to Servico interface
+      const formValue = this.form.value;
 
-  salvar() {
-    if (this.servicoForm.valid) {
-      const formData = this.servicoForm.getRawValue();
+      // Map category ID to the exact string expected by the backend
+      const categoriaMap = {
+        redes: 'Redes',
+        hardware: 'Hardware',
+        software: 'Software',
+        seguranca: 'Segurança',
+        impressoras: 'Impressoras',
+        outros: 'Outros'
+      } as const;
 
-      const servico: any = {
-        titulo: formData.titulo,
-        cliente: formData.cliente, 
-        icone: formData.categoria, 
-        data: formData.dataExecucao,
-        valor: Number(formData.valor), 
-        status: formData.status,
-        duracao: formData.tempoGasto,
-        descricaoTecnica: formData.descricaoTecnica
+      // Map category ID to icon
+      const iconeMap = {
+        redes: 'pi pi-wifi',
+        hardware: 'pi pi-database',
+        software: 'pi pi-desktop',
+        seguranca: 'pi pi-shield',
+        impressoras: 'pi pi-print',
+        outros: 'pi pi-wrench'
+      } as const;
+
+      // Format date as YYYY-MM-DD (ISO format) for the API
+      const dataSelecionada = formValue.data;
+      const dataFormatada = dataSelecionada instanceof Date
+        ? dataSelecionada.toISOString().split('T')[0]
+        : String(dataSelecionada);
+
+      const categoriaValue = categoriaMap[formValue.categoria as keyof typeof categoriaMap];
+
+      const servico: Servico = {
+        icone: iconeMap[formValue.categoria as keyof typeof iconeMap] || 'pi pi-wrench', // Map to icon
+        categoria: categoriaValue, // Properly typed
+        titulo: formValue.titulo,
+        status: 'Pendente', // Default status for new services
+        cliente: formValue.cliente?.nome || '', // Safe access to client name
+        data: dataFormatada,
+        duracao: formValue.duracao || '',
+        valor: formValue.valor || '',
+        descricao: formValue.descricao || ''
       };
 
+      
+      // Call the service to save the service
       this.servicoService.addServico(servico).subscribe({
-        next: () => {
-          this.messageService.add({ severity: "success", summary: "Sucesso", detail: "Serviço registrado com sucesso" });
-          this.router.navigate(['/painel/servicos']);
+        next: (response) => {
+          // Show success message
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Serviço cadastrado com sucesso!'
+          });
+          // Reset form
+          this.form.reset();
+          // Set default values if needed (like category and date)
+          this.form.patchValue({
+            categoria: 'redes',
+            data: new Date()
+          });
+          // Navigate to services list page
+          setTimeout(() => this.router.navigate(['/painel/servicos']), 1000);
         },
         error: (err) => {
+          // Log error for debugging (acceptable use of console.error)
           console.error('Erro ao salvar serviço', err);
-          this.messageService.add({ severity: "error", summary: "Erro", detail: "Ocorreu um erro ao registrar o serviço" });
+          // Show error message to user
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Ocorreu um erro ao cadastrar o serviço. Por favor, tente novamente.'
+          });
         }
       });
     } else {
-      this.servicoForm.markAllAsTouched();
+      // Mark all fields as touched to show validation errors
+      this.form.markAllAsTouched();
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro de Validação',
+        detail: 'Por favor, preencha todos os campos obrigatórios corretamente'
+      });
     }
   }
 
-  cancelar() {
-    this.router.navigate(['/painel/servicos']);
+  // Helper method to get icon based on category
+  private getCategoriaIcon(): string {
+    const categoriaId = this.form.get('categoria')?.value;
+    const categoria = this.categorias.find(c => c.id === categoriaId);
+    return categoria ? categoria.icon : 'pi pi-wrench'; // Default to wrench icon
   }
 }

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Transacao } from '../../../models/transacao';
 
 @Component({
   selector: 'app-financeiro-stats',
@@ -14,7 +15,7 @@ import { CommonModule } from '@angular/common';
           </div>
           <span class="tcc-stat-title">Receita Total</span>
         </div>
-        <div class="tcc-stat-value success-text">R$ 750</div>
+        <div class="tcc-stat-value success-text">R$ {{ totalReceita | number:'1.0-0' }}</div>
         <div class="tcc-stat-desc success-text"><i class="pi pi-arrow-up-right"></i> +12% este mês</div>
       </div>
 
@@ -25,8 +26,8 @@ import { CommonModule } from '@angular/common';
           </div>
           <span class="tcc-stat-title">A Receber</span>
         </div>
-        <div class="tcc-stat-value warning-text">R$ 180</div>
-        <div class="tcc-stat-desc">1 pendente</div>
+        <div class="tcc-stat-value warning-text">R$ {{ aReceber | number:'1.0-0' }}</div>
+        <div class="tcc-stat-desc">{{ pendenteCount }} pendente{{ pendenteCount !== 1 ? 's' : '' }}</div>
       </div>
 
       <div class="tcc-stat-card">
@@ -36,7 +37,7 @@ import { CommonModule } from '@angular/common';
           </div>
           <span class="tcc-stat-title">Ticket Médio</span>
         </div>
-        <div class="tcc-stat-value info-text">R$ 250</div>
+        <div class="tcc-stat-value info-text">R$ {{ ticketMedio | number:'1.0-0' }}</div>
         <div class="tcc-stat-desc">Por serviço</div>
       </div>
     </div>
@@ -73,7 +74,7 @@ import { CommonModule } from '@angular/common';
       align-items: center;
       justify-content: center;
       font-size: 18px;
-      
+
       &.success { background-color: #dcfce7; color: #16a34a; }
       &.warning { background-color: #ffedd5; color: #ea580c; }
       &.info { background-color: #eff6ff; color: #2563eb; }
@@ -82,10 +83,33 @@ import { CommonModule } from '@angular/common';
     .tcc-stat-title { font-size: 14px; color: var(--tcc-text-muted, #64748b); font-weight: 500; }
     .tcc-stat-value { font-size: 28px; font-weight: 700; }
     .tcc-stat-desc { font-size: 13px; color: var(--tcc-text-muted, #94a3b8); display: flex; align-items: center; gap: 4px; }
-    
+
     .success-text { color: #16a34a; }
     .warning-text { color: #ea580c; }
     .info-text { color: #2563eb; }
   `]
 })
-export class FinanceiroStatsComponent {}
+export class FinanceiroStatsComponent {
+  @Input() transacoes: Transacao[] = [];
+
+  get totalReceita(): number {
+    return this.transacoes
+      .filter(t => t.status === 'Pago')
+      .reduce((sum, t) => sum + t.valor, 0);
+  }
+
+  get aReceber(): number {
+    return this.transacoes
+      .filter(t => t.status === 'Pendente')
+      .reduce((sum, t) => sum + t.valor, 0);
+  }
+
+  get ticketMedio(): number {
+    if (this.transacoes.length === 0) return 0;
+    return this.transacoes.reduce((sum, t) => sum + t.valor, 0) / this.transacoes.length;
+  }
+
+  get pendenteCount(): number {
+    return this.transacoes.filter(t => t.status === 'Pendente').length;
+  }
+}

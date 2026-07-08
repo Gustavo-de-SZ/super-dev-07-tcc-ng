@@ -202,69 +202,32 @@ export class TopbarTecnico {
   isDark: boolean;
 
   private themeService = inject(ThemeService);
+  // Injetamos o serviço Auth0
   private authService = inject(AuthService);
 
   constructor() {
     this.isDark = this.themeService.isDark();
-    this.loadUserData();
+    this.setupUserSubscription();
   }
 
-  private loadUserData(): void {
-    const token = this.authService.getToken();
-    if (token) {
-      // Try to get user profile from the auth service
-      this.authService.getUserProfile().subscribe({
-        next: (profile) => {
-          this.usuario.nome = profile.nome || '';
-          // For cargo, we might need to get it from the token or another endpoint
-          // For now, we'll leave it empty or try to get from token
-          this.usuario.cargo = this.extractRoleFromToken(token) || '';
-          this.usuario.temNotificacao = false; // This would come from a notification service
-        },
-        error: (err) => {
-          console.warn('Could not load user profile', err);
-          // Fallback: try to extract data from token
-          const nomeFromToken = this.extractNameFromToken(token) || '';
-          this.usuario.nome = nomeFromToken;
-          this.usuario.cargo = this.extractRoleFromToken(token) || '';
-          this.usuario.temNotificacao = false;
-        }
-      });
-    } else {
-      this.usuario.nome = '';
-      this.usuario.cargo = '';
-      this.usuario.temNotificacao = false;
-    }
-  }
-
-  private extractNameFromToken(token: string): string | null {
-    try {
-      // Split the token and decode the payload
-      const payload = token.split('.')[1];
-      const decodedPayload = atob(payload);
-      const parsed = JSON.parse(decodedPayload);
-      return parsed.nome || parsed.name || null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  private extractRoleFromToken(token: string): string | null {
-    try {
-      // Split the token and decode the payload
-      const payload = token.split('.')[1];
-      const decodedPayload = atob(payload);
-      const parsed = JSON.parse(decodedPayload);
-      // Common JWT fields for role/authorities
-      return parsed.role || parsed.authorities || parsed.cargo || null;
-    } catch (e) {
-      return null;
-    }
+  private setupUserSubscription(): void {
+    // O Auth0 injeta o usuário automaticamente aqui
+    this.authService.user$.subscribe((user: any) => {
+      if (user) {
+        this.usuario.nome = user.name || 'Usuário';
+        
+        // Aqui pegamos o cargo (Role) que configuramos na Action do Auth0
+        // Lembre-se de usar o namespace exato que você configurou no Auth0
+        const roles = user['https://tcc-ng.com/roles'] || [];
+        this.usuario.cargo = roles.length > 0 ? roles[0] : 'Técnico';
+        
+        this.usuario.temNotificacao = false;
+      }
+    });
   }
 
   toggleTheme() {
     this.themeService.toggle();
-    // Update the local property after toggling
     this.isDark = this.themeService.isDark();
   }
 

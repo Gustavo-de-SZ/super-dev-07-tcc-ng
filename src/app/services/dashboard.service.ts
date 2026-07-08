@@ -25,7 +25,7 @@ export class DashboardService {
 
   // Alternative: separate endpoints
   getStats(): Observable<StatCard[]> {
-    return this.http.get<StatCard[]>(`${this.configService.getApiUrl()}/stats`);
+    return this.http.get<StatCard[]>(`${this.configService.getApiUrl()}/clientes/stats`);
   }
 
   getAgendamentos(): Observable<Agendamento[]> {
