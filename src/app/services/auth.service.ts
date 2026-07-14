@@ -24,13 +24,13 @@ export class AuthService {
    * Limpa a sessão no Auth0 e redireciona de volta para a raiz do seu app
    */
   logout(): void {
-    this.auth0.logout({ 
-      logoutParams: { returnTo: window.location.origin } 
+    this.auth0.logout({
+      logoutParams: { returnTo: window.location.origin }
     });
   }
 
   /**
-   * O Auth0 já gerencia o Token. 
+   * O Auth0 já gerencia o Token.
    * Só chame isso se precisar do token bruto por algum motivo muito específico.
    */
   getToken() {

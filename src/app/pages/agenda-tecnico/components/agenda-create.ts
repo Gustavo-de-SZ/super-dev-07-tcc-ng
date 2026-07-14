@@ -79,15 +79,15 @@ interface TipoAtendimentoCard {
                 <label>Cliente vinculado *</label>
                 <div class="ns-input-icon-wrapper">
                   <i class="pi pi-search ns-icon-left"></i>
-                  <p-autoComplete 
-                    formControlName="cliente" 
-                    [suggestions]="clientesFiltrados" 
+                  <p-autoComplete
+                    formControlName="cliente"
+                    [suggestions]="clientesFiltrados"
                     (completeMethod)="filtrarCliente($event)"
                     optionLabel="nome_exibicao"
                     placeholder="Buscar cliente por nome..."
                     [forceSelection]="true"
                     appendTo="body"
-                    styleClass="ns-autocomplete"
+                    class="ns-autocomplete"
                     inputStyleClass="ns-has-icon-left"> 
                       <ng-template let-cliente pTemplate="item">
                         <div class="ns-cliente-suggestion">
@@ -179,7 +179,7 @@ interface TipoAtendimentoCard {
                     optionValue="value"
                     placeholder="Selecione..."
                     appendTo="body"
-                    styleClass="ns-select w-full"
+                    class="ns-select w-full"
                   ></p-select>
                 </div>
               </div>

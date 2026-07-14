@@ -71,12 +71,12 @@ import { Cliente } from '../../../models/cliente';
 
                 <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('telefone')">
                   <label for="telefone">Telefone / WhatsApp *</label>
-                  <p-inputmask 
-                    id="telefone" 
-                    formControlName="telefone" 
-                    mask="(99) 99999-9999" 
-                    placeholder="(99) 99999-9999" 
-                    styleClass="ns-input"
+                  <p-inputmask
+                    id="telefone"
+                    formControlName="telefone"
+                    mask="(99) 99999-9999"
+                    placeholder="(99) 99999-9999"
+                    class="ns-input"
                   ></p-inputmask>
                   @if (hasError('telefone', 'required')) {
                     <span class="ns-error-text"><i class="pi pi-info-circle"></i> Telefone é obrigatório</span>
@@ -93,12 +93,12 @@ import { Cliente } from '../../../models/cliente';
               <div class="ns-form-row-3-cep">
                 <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('cep')">
                   <label for="cep">CEP *</label>
-                  <p-inputmask 
-                    id="cep" 
-                    formControlName="cep" 
-                    mask="99999-999" 
-                    placeholder="00000-000" 
-                    styleClass="ns-input"
+                  <p-inputmask
+                    id="cep"
+                    formControlName="cep"
+                    mask="99999-999"
+                    placeholder="00000-000"
+                    class="ns-input"
                   ></p-inputmask>
                   @if (hasError('cep', 'required')) {
                     <span class="ns-error-text"><i class="pi pi-info-circle"></i> CEP obrigatório</span>
@@ -410,12 +410,14 @@ export class NovoCliente {
       const cliente: Cliente = {
         nome: formData.nome!,
         empresa: formData.empresa ?? '',
-        avaliacao: 0, 
+        avaliacao: 0,
         email: formData.email ?? '',
         telefone: formData.telefone!,
         local: enderecoCompleto,
         servicosAtivos: 0,
-        servicosConcluidos: 0
+        servicosConcluidos: 0,
+        tipoCliente: null,
+        status: null
       };
 
       this.clienteService.addClienteTecnico(cliente).subscribe({

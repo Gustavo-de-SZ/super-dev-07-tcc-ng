@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Servico } from '../../../models/servico';
 
 @Component({
   selector: 'app-servicos-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="tcc-services-list">
       @for (servico of servicos; track servico.titulo) {
@@ -26,7 +27,7 @@ import { Servico } from '../../../models/servico';
 
             <div class="tcc-service-details">
               <span><i class="pi pi-user"></i> {{ servico.cliente }}</span>
-              <span><i class="pi pi-calendar"></i> {{ servico.data }}</span>
+              <span><i class="pi pi-calendar"></i> {{ servico.data | date:'dd/MM/yyyy' }}</span>
               <span><i class="pi pi-clock"></i> {{ servico.duracao }}</span>
               <span class="price">R$ {{ servico.valor | number:'1.2-2' }}</span>
             </div>
@@ -34,7 +35,7 @@ import { Servico } from '../../../models/servico';
 
           <div class="tcc-service-actions">
             <button class="icon-btn" title="Visualizar"><i class="pi pi-eye"></i></button>
-            <button class="icon-btn" title="Editar"><i class="pi pi-pencil"></i></button>
+            <button class="icon-btn" title="Editar" [routerLink]="['/painel/servicos/', servico.titulo, 'edit']"><i class="pi pi-pencil"></i></button>
             <button class="tcc-btn-outline small">
               Status <i class="pi pi-chevron-down"></i>
             </button>

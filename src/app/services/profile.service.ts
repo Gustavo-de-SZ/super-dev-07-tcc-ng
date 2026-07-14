@@ -2,20 +2,26 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { StatCard } from '../models/stat-card';
-import { Agendamento } from '../models/agendamento';
+import { Cliente } from '../models/cliente';
 import { ConfigService } from './config.service';
-import { AuthService } from '@auth0/auth0-angular';
+import { AuthService } from './auth.service';
 
-interface DashboardData {
-  stats: StatCard[];
-  agendamentos: Agendamento[];
+interface Tecnico {
+  nome: string;
+  email: string;
+  especialidades?: string[];
+  // outros campos específicos de técnico
+}
+
+interface ProfileResponse {
+  exists: boolean;
+  type: 'cliente' | 'tecnico' | null;
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class DashboardService {
+export class ProfileService {
   constructor(
     private http: HttpClient,
     private configService: ConfigService,
@@ -30,21 +36,17 @@ export class DashboardService {
       const payloadBase64Padding = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
       const payloadJson = atob(payloadBase64Padding);
       const payload = JSON.parse(payloadJson);
-      console.log('Dashboard Token payload:', payload);
+      console.log('Profile Service Token payload:', payload);
     } catch (e) {
       console.error('Failed to decode token payload', e);
     }
   }
 
-  getDashboardData(): Observable<DashboardData> {
-    return this.auth.getAccessTokenSilently({
-      authorizationParams: {
-        audience: 'https://api.tcc-ng.com'
-      }
-    }).pipe(
+  verificarPerfilExistente(): Observable<ProfileResponse> {
+    return this.auth.getToken().pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.get<DashboardData>(`${this.configService.getApiUrl()}/dashboard`, {
+        return this.http.get<ProfileResponse>(`${this.configService.getApiUrl()}/usuarios/perfil/verificar`, {
           headers: {
             Authorization: `Bearer${token}`,
             'Content-Type': 'application/json',
@@ -55,16 +57,11 @@ export class DashboardService {
     );
   }
 
-  // Alternative: separate endpoints
-  getStats(): Observable<StatCard[]> {
-    return this.auth.getAccessTokenSilently({
-      authorizationParams: {
-        audience: 'https://api.tcc-ng.com'
-      }
-    }).pipe(
+  criarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
+    return this.auth.getToken().pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.get<StatCard[]>(`${this.configService.getApiUrl()}/clientes/stats`, {
+        return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes`, clienteData, {
           headers: {
             Authorization: `Bearer${token}`,
             'Content-Type': 'application/json',
@@ -75,15 +72,11 @@ export class DashboardService {
     );
   }
 
-  getAgendamentos(): Observable<Agendamento[]> {
-    return this.auth.getAccessTokenSilently({
-      authorizationParams: {
-        audience: 'https://api.tcc-ng.com'
-      }
-    }).pipe(
+  criarPerfilTecnico(tecnicoData: Partial<Tecnico>): Observable<Tecnico> {
+    return this.auth.getToken().pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.get<Agendamento[]>(`${this.configService.getApiUrl()}/agendamentos`, {
+        return this.http.post<Tecnico>(`${this.configService.getApiUrl()}/tecnicos`, tecnicoData, {
           headers: {
             Authorization: `Bearer${token}`,
             'Content-Type': 'application/json',

@@ -1,16 +1,17 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Cliente } from '../../../models/cliente';
 
 @Component({
   selector: 'app-clientes-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="tcc-client-list">
       @for (cliente of clientes; track cliente.email) {
         <div class="tcc-client-card">
-          
+
           <div class="tcc-client-icon-box">
             <i class="pi pi-users"></i>
           </div>
@@ -23,7 +24,7 @@ import { Cliente } from '../../../models/cliente';
                 <i class="pi pi-star-fill"></i> {{ cliente.avaliacao }}
               </span>
             </div>
-            
+
             <div class="tcc-client-meta">
               <span class="tcc-meta-item"><i class="pi pi-envelope"></i> {{ cliente.email }}</span>
               <span class="tcc-meta-item"><i class="pi pi-phone"></i> {{ cliente.telefone }}</span>
@@ -43,6 +44,7 @@ import { Cliente } from '../../../models/cliente';
           </div>
 
           <div class="tcc-client-actions">
+            <button class="icon-btn" title="Editar" [routerLink]="['/painel/clientes/', cliente.email, 'edit']"><i class="pi pi-pencil"></i></button>
             <button class="tcc-btn-outline small">
               Ações <i class="pi pi-chevron-down"></i>
             </button>
@@ -88,6 +90,7 @@ import { Cliente } from '../../../models/cliente';
       flex-wrap: wrap;
       gap: 12px;
     }
+
     .tcc-client-header h3 {
       margin: 0;
       font-size: 16px;
@@ -113,6 +116,7 @@ import { Cliente } from '../../../models/cliente';
       font-weight: 600;
       color: #eab308;
     }
+
     .tcc-rating i {
       font-size: 12px;
     }
@@ -124,11 +128,13 @@ import { Cliente } from '../../../models/cliente';
       font-size: 13px;
       color: var(--tcc-text-muted, #64748b);
     }
+
     .tcc-meta-item {
       display: flex;
       align-items: center;
       gap: 6px;
     }
+
     .tcc-meta-item i {
       font-size: 13px;
       opacity: 0.7;
@@ -141,16 +147,19 @@ import { Cliente } from '../../../models/cliente';
       border-left: 1px solid var(--tcc-border, #e2e8f0);
       border-right: 1px solid var(--tcc-border, #e2e8f0);
     }
+
     .tcc-mini-stat {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
     }
+
     .tcc-mini-stat span {
       font-size: 11px;
       color: var(--tcc-text-muted, #64748b);
     }
+
     .tcc-mini-stat strong {
       font-size: 16px;
       color: var(--tcc-text-main, #0f172a);
@@ -181,16 +190,22 @@ import { Cliente } from '../../../models/cliente';
       background-color: var(--tcc-bg, #f8fafc);
     }
 
-    @media (max-width: 992px) {
-      .tcc-client-card { flex-wrap: wrap; }
-      .tcc-client-stats { border: none; padding: 0; width: 100%; justify-content: flex-start; gap: 32px; margin-top: 8px; }
-      .tcc-mini-stat { align-items: flex-start; }
-      .tcc-client-actions { width: 100%; justify-content: flex-start; }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--tcc-text-muted, #94a3b8);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-
-    @media (max-width: 768px) {
-      .tcc-client-card { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .tcc-client-actions, .tcc-btn-outline.small { width: 100%; justify-content: center; }
+    .icon-btn:hover {
+      background-color: var(--tcc-bg, #f8fafc);
+      color: var(--tcc-text-main, #475569);
     }
   `]
 })

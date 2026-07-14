@@ -7,4 +7,6 @@ export interface Cliente {
   local: string;
   servicosAtivos: number;
   servicosConcluidos: number;
+  tipoCliente: string | null;
+  status: string | null;
 }

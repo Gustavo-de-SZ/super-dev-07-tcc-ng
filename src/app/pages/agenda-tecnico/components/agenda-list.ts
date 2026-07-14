@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Agendamento } from '../../../shared/models';
 
 @Component({
   selector: 'app-agenda-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="tcc-agenda-list">
       @for (item of compromissos; track item.titulo) {
@@ -33,6 +34,7 @@ import { Agendamento } from '../../../shared/models';
           </div>
 
           <div class="tcc-agenda-actions">
+            <button class="icon-btn" title="Editar" [routerLink]="['/painel/agenda/', item.id, 'edit']"><i class="pi pi-pencil"></i></button>
             <button class="tcc-btn-outline small">
               Ações <i class="pi pi-chevron-down"></i>
             </button>
@@ -88,6 +90,24 @@ import { Agendamento } from '../../../shared/models';
       display: flex; align-items: center; gap: 6px; transition: background-color 0.2s;
     }
     .tcc-btn-outline.small:hover { background-color: var(--tcc-bg, #f8fafc); }
+
+    .icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--tcc-text-muted, #94a3b8);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      background-color: var(--tcc-bg, #f8fafc);
+      color: var(--tcc-text-main, #475569);
+    }
 
     @media (max-width: 768px) {
       .tcc-agenda-card { flex-direction: column; align-items: flex-start; }

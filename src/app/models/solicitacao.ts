@@ -1,9 +1,8 @@
 export interface Solicitacao {
   id?: number;
-  equipamento: string;
-  urgencia: string;
-  descricao: string;
-  preferencia: string;
-  dataCriacao?: string;
-  status?: string;
+  titulo: string;
+  descricao_problema: string;
+  categoria_id: number;
+  dataCriacao: string;
+  // status is set by default in backend (ABERTO) so not needed in create payload
 }

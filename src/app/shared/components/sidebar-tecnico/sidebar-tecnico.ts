@@ -28,6 +28,22 @@ import { RouterModule } from '@angular/router';
           <i class="pi pi-money-bill"></i>
           <span>Financeiro</span>
         </a>
+       
+      <div class="tcc-sidebar-footer">
+        <a routerLink="/cliente/ajuda" class="tcc-nav-item">
+          <i class="pi pi-question-circle"></i>
+          <span>Ajuda</span>
+        </a>
+        <a routerLink="/cliente/configuracoes" class="tcc-nav-item">
+          <i class="pi pi-cog"></i>
+          <span>Configurações</span>
+        </a>
+        <div class="tcc-nav-separator"></div>
+        <a routerLink="/login" class="tcc-nav-item tcc-logout">
+          <i class="pi pi-sign-out"></i>
+          <span>Sair</span>
+        </a>
+      </div>
     `,
   styles: [`
     .tcc-sidebar {
