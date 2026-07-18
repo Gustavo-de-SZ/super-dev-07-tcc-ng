@@ -39,7 +39,7 @@ export class HomeClienteService {
         this.logTokenPayload(token);
         return this.http.get<any[]>(`${this.configService.getApiUrl()}/profissionais/favoritos`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -58,7 +58,7 @@ export class HomeClienteService {
         this.logTokenPayload(token);
         return this.http.get<string[]>(`${this.configService.getApiUrl()}/categorias`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

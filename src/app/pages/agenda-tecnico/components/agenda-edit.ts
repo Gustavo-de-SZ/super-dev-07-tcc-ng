@@ -137,12 +137,12 @@ import { ClienteService } from '../../../services/cliente.service';
 
           <aside class="ns-summary-column">
             <div class="ns-card ns-summary-card">
-              <h3>Resumo</h3>
+              <h3>Resumo do Agendamento</h3>
 
               <div class="ns-summary-list">
                 <div class="ns-summary-item">
                   <span class="label">Título</span>
-                  <span class="value">{{ form.get('titulo')?.value || '—' }}</span>
+                  <span class="value ns-truncate" [title]="form.get('titulo')?.value">{{ form.get('titulo')?.value || '—' }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Tipo</span>
@@ -150,11 +150,11 @@ import { ClienteService } from '../../../services/cliente.service';
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Cliente</span>
-                  <span class="value">{{ form.get('cliente')?.value?.nome_exibicao || '—' }}</span>
+                  <span class="value ns-truncate" [title]="form.get('cliente')?.value?.nome_exibicao">{{ form.get('cliente')?.value?.nome_exibicao || '—' }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Data</span>
-                  <span class="value">{{ form.get('data')?.value ? (form.get('data')?.value | date:'dd/MM/yyyy') : '—' }}</span>
+                  <span class="value">{{ formatarDataExibicao(form.get('data')?.value) }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Hora</span>
@@ -170,12 +170,16 @@ import { ClienteService } from '../../../services/cliente.service';
                 </div>
               </div>
 
-              <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarAgendamento()">
-                Atualizar Agendamento
-              </button>
-              <button type="button" routerLink="/painel/agenda" class="ns-btn-cancel">
-                Cancelar
-              </button>
+              <div class="ns-summary-divider"></div>
+
+              <div class="ns-summary-actions">
+                <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarAgendamento()">
+                  Atualizar Agendamento
+                </button>
+                <button type="button" routerLink="/painel/agenda" class="ns-btn-cancel">
+                  Cancelar
+                </button>
+              </div>
             </div>
           </aside>
         </div>
@@ -297,23 +301,29 @@ import { ClienteService } from '../../../services/cliente.service';
     }
 
     ::ng-deep .ns-input,
+    ::ng-deep .ns-autocomplete input,
     ::ng-deep .ns-autocomplete .p-autocomplete-input,
+    ::ng-deep .ns-datepicker input,
     ::ng-deep .ns-datepicker .p-inputtext,
     ::ng-deep .ns-select .p-inputtext {
-      width: 100%;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 14px;
-      transition: all 0.2s;
-      box-shadow: none;
-      font-family: inherit;
+      width: 100% !important;
+      height: 44px !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      transition: all 0.2s !important;
+      box-shadow: none !important;
+      font-family: inherit !important;
       background-color: var(--tcc-surface, #ffffff) !important;
       color: var(--tcc-text-main, #0f172a) !important;
       border: 1px solid var(--tcc-border, #e2e8f0) !important;
+      box-sizing: border-box !important;
     }
 
     ::ng-deep .ns-input::placeholder,
+    ::ng-deep .ns-autocomplete input::placeholder,
     ::ng-deep .ns-autocomplete .p-autocomplete-input::placeholder,
+    ::ng-deep .ns-datepicker input::placeholder,
     ::ng-deep .ns-datepicker .p-inputtext::placeholder,
     ::ng-deep .ns-select .p-inputtext::placeholder {
       color: var(--tcc-text-muted, #94a3b8) !important;
@@ -321,11 +331,13 @@ import { ClienteService } from '../../../services/cliente.service';
     }
 
     ::ng-deep .ns-input:focus,
+    ::ng-deep .ns-autocomplete input:focus,
     ::ng-deep .ns-autocomplete .p-autocomplete-input:focus,
+    ::ng-deep .ns-datepicker input:focus,
     ::ng-deep .ns-datepicker .p-inputtext:focus,
     ::ng-deep .ns-select .p-inputtext:focus {
       border-color: #3b82f6 !important;
-      outline: none;
+      outline: none !important;
       box-shadow: 0 0 0 1px #3b82f6 !important;
     }
 
@@ -353,9 +365,24 @@ import { ClienteService } from '../../../services/cliente.service';
       font-size: 14px;
     }
 
-    .ns-has-icon-left { padding-left: 38px !important; }
-    .ns-has-prefix-left { padding-left: 38px !important; }
-    ::ng-deep .ns-autocomplete { width: 100%; }
+    ::ng-deep .ns-has-icon-left,
+    ::ng-deep .ns-autocomplete input,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input {
+      padding-left: 38px !important;
+    }
+    ::ng-deep .ns-has-prefix-left { padding-left: 38px !important; }
+    ::ng-deep .ns-autocomplete,
+    ::ng-deep .ns-autocomplete .p-autocomplete {
+      width: 100% !important;
+    }
+    ::ng-deep .ns-datepicker,
+    ::ng-deep .ns-datepicker.p-datepicker {
+      width: 100% !important;
+      display: inline-flex !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
 
     /* P-dropdown styling */
     ::ng-deep .p-dropdown {
@@ -470,9 +497,19 @@ import { ClienteService } from '../../../services/cliente.service';
     .ns-cliente-nome { font-size: 14px; font-weight: 500; color: var(--text-main, #0f172a); }
     .ns-cliente-empresa { font-size: 11px; color: var(--text-muted, #64748b); }
 
+    /* Summary Card Styling */
+    .ns-summary-column { position: sticky; top: 24px; }
+    .ns-summary-card h3 { font-size: 16px; font-weight: 700; margin: 0 0 20px 0; }
+    .ns-summary-list { display: flex; flex-direction: column; gap: 14px; }
+    .ns-summary-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 16px; }
+    .ns-summary-item .label { color: var(--text-muted, #64748b); font-weight: 500; white-space: nowrap; }
+    .ns-summary-item .value { font-weight: 500; text-align: right; color: var(--text-main, #0f172a); }
+    .ns-summary-divider { height: 1px; background-color: var(--border, #e2e8f0); margin: 20px 0; }
+    .ns-summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+
     .ns-btn-submit {
       width: 100%; background: #3b82f6; color: #ffffff; border: none; padding: 12px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-bottom: 12px;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
     .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
     .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -540,6 +577,42 @@ export class EditarAgendamento implements OnInit {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
+  formatarDataExibicao(data: any): string {
+    if (!data) return '—';
+    if (data instanceof Date) {
+      if (isNaN(data.getTime())) return '—';
+      const d = data.getDate().toString().padStart(2, '0');
+      const m = (data.getMonth() + 1).toString().padStart(2, '0');
+      const y = data.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    const str = String(data);
+    if (str.toLowerCase().includes('invalid')) {
+      return '—';
+    }
+    if (str.includes('/')) {
+      return str;
+    }
+    if (str.includes('-')) {
+      const partes = str.split('T')[0].split('-');
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        } else {
+          return `${partes[0]}/${partes[1]}/${partes[2]}`;
+        }
+      }
+    }
+    const parsed = new Date(str);
+    if (!isNaN(parsed.getTime())) {
+      const d = parsed.getDate().toString().padStart(2, '0');
+      const m = (parsed.getMonth() + 1).toString().padStart(2, '0');
+      const y = parsed.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    return str;
+  }
+
   carregarClientes(): void {
     this.clienteService.getClientes().subscribe({
       next: (clientes: Cliente[]) => {
@@ -572,8 +645,27 @@ export class EditarAgendamento implements OnInit {
         if (agendamento) {
           this.originalAgendamento = agendamento;
           // Convert mes and dia to a Date object for the date field
-          const dataObj = agendamento.mes && agendamento.dia ?
-            new Date(`${agendamento.mes} ${agendamento.dia}, 2024`) : null;
+          let dataObj: Date | null = null;
+          if (agendamento.dia) {
+            if (agendamento.dia.includes('-')) {
+              dataObj = new Date(agendamento.dia + 'T12:00:00');
+            } else if (agendamento.mes) {
+              let mesStr = agendamento.mes;
+              if (mesStr.endsWith('.')) {
+                mesStr = mesStr.slice(0, -1);
+              }
+              
+              const ptToEn: Record<string, string> = {
+                'janeiro': 'January', 'fevereiro': 'February', 'março': 'March', 'abril': 'April',
+                'maio': 'May', 'junho': 'June', 'julho': 'July', 'agosto': 'August',
+                'setembro': 'September', 'outubro': 'October', 'novembro': 'November', 'dezembro': 'December',
+                'jan': 'Jan', 'fev': 'Feb', 'mar': 'Mar', 'abr': 'Apr', 'mai': 'May', 'jun': 'Jun',
+                'jul': 'Jul', 'ago': 'Aug', 'set': 'Sep', 'out': 'Oct', 'nov': 'Nov', 'dez': 'Dec'
+              };
+              const enMonth = ptToEn[mesStr.toLowerCase()] || mesStr;
+              dataObj = new Date(`${enMonth} ${agendamento.dia}, 2026`);
+            }
+          }
 
           this.form.patchValue({
             titulo: agendamento.titulo,

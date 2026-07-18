@@ -8,6 +8,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 // Models e Services
 import { Servico } from '../../../models/servico';
@@ -24,7 +25,8 @@ import { ClienteService } from '../../../services/cliente.service';
     RouterModule,
     AutoCompleteModule,
     DatePickerModule,
-    ToastModule
+    ToastModule,
+    InputNumberModule
   ],
   providers: [MessageService],
   template: `
@@ -130,18 +132,17 @@ import { ClienteService } from '../../../services/cliente.service';
                     <label>Data *</label>
                     <p-datePicker
                       formControlName="data"
-                      dateFormat="dd/mm/yyyy"
+                      dateFormat="dd/mm/yy"
                       placeholder="dd/mm/yyyy"
                       [showIcon]="true"
                       iconDisplay="input"
                       appendTo="body"
                       class="ns-datepicker"
-                      locale="pt-BR"
                     ></p-datePicker>
                   </div>
 
               <div class="ns-form-group">
-                <label for="duracao">Duração estimada</label>
+                <label for="duracao">Duração estimada (h:m)</label>
                 <div class="ns-input-icon-wrapper">
                   <i class="pi pi-clock ns-icon-left"></i>
                   <input
@@ -149,7 +150,8 @@ import { ClienteService } from '../../../services/cliente.service';
                     type="text"
                     formControlName="duracao"
                     class="ns-input ns-has-icon-left"
-                    placeholder="Ex: 2h"
+                    placeholder="Ex: 02:30"
+                    (input)="formatarDuracao($event)"
                   />
                 </div>
               </div>
@@ -157,14 +159,15 @@ import { ClienteService } from '../../../services/cliente.service';
               <div class="ns-form-group">
                 <label for="valor">Valor (R$)</label>
                 <div class="ns-input-icon-wrapper">
-                  <span class="ns-prefix-left">R$</span>
-                  <input
+                  <p-inputNumber
                     id="valor"
-                    type="text"
                     formControlName="valor"
-                    class="ns-input ns-has-prefix-left"
-                    placeholder="0,00"
-                  />
+                    mode="currency"
+                    currency="BRL"
+                    locale="pt-BR"
+                    styleClass="ns-inputnumber w-full"
+                    placeholder="R$ 0,00"
+                  ></p-inputNumber>
                 </div>
               </div>
             </div>
@@ -190,7 +193,7 @@ import { ClienteService } from '../../../services/cliente.service';
               </div>
               <div class="ns-summary-item">
                 <span class="label">Data</span>
-                <span class="value">{{ form.get('data')?.value ? (form.get('data')?.value | date:'dd/MM/yyyy') : '—' }}</span>
+                <span class="value">{{ formatarDataExibicao(form.get('data')?.value) }}</span>
               </div>
               <div class="ns-summary-item">
                 <span class="label">Duração</span>
@@ -333,32 +336,40 @@ import { ClienteService } from '../../../services/cliente.service';
     }
 
     ::ng-deep .ns-input,
+    ::ng-deep .ns-autocomplete input,
     ::ng-deep .ns-autocomplete .p-autocomplete-input,
+    ::ng-deep .ns-datepicker input,
     ::ng-deep .ns-datepicker .p-inputtext {
-      width: 100%;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 14px;
-      transition: all 0.2s;
-      box-shadow: none;
-      font-family: inherit;
+      width: 100% !important;
+      height: 44px !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      transition: all 0.2s !important;
+      box-shadow: none !important;
+      font-family: inherit !important;
       background-color: var(--tcc-surface, #ffffff) !important;
       color: var(--tcc-text-main, #0f172a) !important;
       border: 1px solid var(--tcc-border, #e2e8f0) !important;
+      box-sizing: border-box !important;
     }
 
     ::ng-deep .ns-input::placeholder,
+    ::ng-deep .ns-autocomplete input::placeholder,
     ::ng-deep .ns-autocomplete .p-autocomplete-input::placeholder,
+    ::ng-deep .ns-datepicker input::placeholder,
     ::ng-deep .ns-datepicker .p-inputtext::placeholder {
       color: var(--tcc-text-muted, #94a3b8) !important;
       opacity: 0.7;
     }
 
     ::ng-deep .ns-input:focus,
+    ::ng-deep .ns-autocomplete input:focus,
     ::ng-deep .ns-autocomplete .p-autocomplete-input:focus,
+    ::ng-deep .ns-datepicker input:focus,
     ::ng-deep .ns-datepicker .p-inputtext:focus {
       border-color: #3b82f6 !important;
-      outline: none;
+      outline: none !important;
       box-shadow: 0 0 0 1px #3b82f6 !important;
     }
 
@@ -386,9 +397,24 @@ import { ClienteService } from '../../../services/cliente.service';
       font-size: 14px;
     }
 
-    .ns-has-icon-left { padding-left: 38px !important; }
-    .ns-has-prefix-left { padding-left: 38px !important; }
-    ::ng-deep .ns-autocomplete { width: 100%; }
+    ::ng-deep .ns-has-icon-left,
+    ::ng-deep .ns-autocomplete input,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input {
+      padding-left: 38px !important;
+    }
+    ::ng-deep .ns-has-prefix-left { padding-left: 38px !important; }
+    ::ng-deep .ns-autocomplete,
+    ::ng-deep .ns-autocomplete .p-autocomplete {
+      width: 100% !important;
+    }
+    ::ng-deep .ns-datepicker,
+    ::ng-deep .ns-datepicker.p-datepicker {
+      width: 100% !important;
+      display: inline-flex !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
     
     /* Força o ícone nativo do datepicker a herdar a cor correta */
     ::ng-deep .ns-datepicker .p-datepicker-dropdown-icon,
@@ -606,6 +632,42 @@ export class NovoServico implements OnInit {
     return cat ? cat.label : '—';
   }
 
+  formatarDataExibicao(data: any): string {
+    if (!data) return '—';
+    if (data instanceof Date) {
+      if (isNaN(data.getTime())) return '—';
+      const d = data.getDate().toString().padStart(2, '0');
+      const m = (data.getMonth() + 1).toString().padStart(2, '0');
+      const y = data.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    const str = String(data);
+    if (str.toLowerCase().includes('invalid')) {
+      return '—';
+    }
+    if (str.includes('/')) {
+      return str;
+    }
+    if (str.includes('-')) {
+      const partes = str.split('T')[0].split('-');
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        } else {
+          return `${partes[0]}/${partes[1]}/${partes[2]}`;
+        }
+      }
+    }
+    const parsed = new Date(str);
+    if (!isNaN(parsed.getTime())) {
+      const d = parsed.getDate().toString().padStart(2, '0');
+      const m = (parsed.getMonth() + 1).toString().padStart(2, '0');
+      const y = parsed.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    return str;
+  }
+
   carregarClientes(): void {
     this.clienteService.getClientes().subscribe({
       next: (clientes: Cliente[]) => {
@@ -639,6 +701,19 @@ export class NovoServico implements OnInit {
       (c as any).nome_exibicao.toLowerCase().includes(query)
     );
   }
+
+  formatarDuracao(event: any): void {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+    
+    if (value.length >= 3) {
+      value = value.replace(/(\d{2})(\d{1,2})/, '$1:$2');
+    }
+    
+    event.target.value = value;
+    this.form.get('duracao')?.setValue(value);
+  }
+
   salvarServico(): void {
     if (this.form.valid) {
       // Map form values to Servico interface

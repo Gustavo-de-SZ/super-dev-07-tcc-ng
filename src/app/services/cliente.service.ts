@@ -46,7 +46,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.get<Cliente[]>(`${this.configService.getApiUrl()}/clientes`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -65,7 +65,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/${email}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -84,7 +84,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.get<ClientesStats>(`${this.configService.getApiUrl()}/clientes/stats`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -103,7 +103,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes`, cliente, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -122,7 +122,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes/tecnico`, cliente, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -141,7 +141,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.put<Cliente>(`${this.configService.getApiUrl()}/clientes/${cliente.email}`, cliente, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -160,7 +160,7 @@ export class ClienteService {
         this.logTokenPayload(token);
         return this.http.delete<void>(`${this.configService.getApiUrl()}/clientes/${email}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

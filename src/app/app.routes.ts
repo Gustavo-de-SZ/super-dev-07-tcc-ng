@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { authGuardFn } from '@auth0/auth0-angular';
+import { appAuthGuardFn } from './services/auth.service';
+import { profileGuardFn } from './core/guards/profile.guard';
 
 export const routes: Routes = [
 {path: '', loadComponent: () => import('./pages/landing-page/landing-page').then(m => m.LandingPage)},
 {path: 'painel',
-canActivate: [authGuardFn],
+canActivate: [appAuthGuardFn, profileGuardFn],
   loadComponent: () => import('./core/painel-layout/painel-layout').then(m => m.PainelLayout),
     children: [
       {path: 'dashboard', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)},
@@ -23,12 +24,26 @@ canActivate: [authGuardFn],
 
 {
     path: 'cliente',
-    canActivate: [authGuardFn],
+    canActivate: [appAuthGuardFn, profileGuardFn],
     loadComponent: () => import('./core/painel-layout/layout-cliente/layout-cliente').then(m => m.PainelClienteLayout),
     children: [
       { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) },
       { path: 'solicitacao', loadComponent: () => import('./pages/nova-solicitacao/nova-solicitacao-create').then(m => m.NovaSolicitacao) },
       { path: 'meus-chamados', loadComponent: () => import('./pages/meus-chamados/meus-chamados').then(m => m.MeusChamados) }
     ]},
+{
+    path: 'admin',
+    canActivate: [appAuthGuardFn],
+    loadComponent: () => import('./core/painel-layout/layout-admin/layout-admin').then(m => m.PainelAdminLayout),
+    children: [
+      { path: 'dashboard', loadComponent: () => import('./pages/admin/dashboard/dashboard-admin').then(m => m.DashboardAdmin) },
+      { path: 'tecnicos', loadComponent: () => import('./pages/admin/tecnicos/tecnicos-admin').then(m => m.TecnicosAdmin) }
+    ]
+  },
+  {
+    path: 'completar-cadastro',
+    canActivate: [appAuthGuardFn],
+    loadComponent: () => import('./pages/cadastro/cadastro').then(m => m.Cadastro)
+  },
   { path: '**', redirectTo: '' }
 ];

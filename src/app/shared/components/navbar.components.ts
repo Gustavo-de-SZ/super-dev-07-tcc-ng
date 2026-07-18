@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router'; // Necessario se for usar routerLink ou Router
 import { ButtonModule } from 'primeng/button';
 import { ThemeService } from '../../core/services/theme.service';
-// 1. Importamos o AuthService do pacote do Auth0
-import { AuthService } from '@auth0/auth0-angular';
+// 1. Importamos o AuthService do nosso wrapper local
+import { AuthService } from '../../services/auth.service';
 import { take } from 'rxjs/operators';
 
 @Component({
@@ -62,7 +62,7 @@ import { take } from 'rxjs/operators';
 })
 export class NavbarComponent implements OnInit {
   theme = inject(ThemeService);
-  // 5. Injetamos o serviço do Auth0
+  // 5. Injetamos o serviço do Auth
   auth = inject(AuthService);
   // 6. Injetamos o Router para navegação programática
   private router = inject(Router);

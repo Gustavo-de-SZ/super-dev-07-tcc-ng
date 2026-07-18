@@ -40,7 +40,7 @@ export class FinanceiroService {
         this.logTokenPayload(token);
         return this.http.get<Transacao[]>(`${this.configService.getApiUrl()}/transacoes`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -59,7 +59,7 @@ export class FinanceiroService {
         this.logTokenPayload(token);
         return this.http.post<Transacao>(`${this.configService.getApiUrl()}/transacoes`, transacao, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -78,7 +78,7 @@ export class FinanceiroService {
         this.logTokenPayload(token);
         return this.http.put<Transacao>(`${this.configService.getApiUrl()}/transacoes/${transacao.titulo}`, transacao, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -97,7 +97,7 @@ export class FinanceiroService {
         this.logTokenPayload(token);
         return this.http.delete<void>(`${this.configService.getApiUrl()}/transacoes/${titulo}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

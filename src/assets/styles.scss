@@ -246,7 +246,7 @@ body {
    ========================================================= */
 
 .p-autocomplete-panel,
-.p-datepicker,
+.p-datepicker-panel,
 .p-select-panel {
   background-color: #ffffff !important;
   border: 1px solid #94a3b8 !important; /* Cor da borda alinhada com os inputs */
@@ -280,4 +280,65 @@ body {
 .p-datepicker table td > span.p-highlight {
   background-color: #3b82f6 !important;
   color: #ffffff !important;
+}
+
+/* Modo escuro para os componentes de overlay PrimeNG */
+body.tp-dark-theme {
+  .p-autocomplete-panel,
+  .p-datepicker-panel,
+  .p-select-panel {
+    background-color: #131c2c !important;
+    border: 1px solid #223047 !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .p-datepicker-header {
+    background-color: #131c2c !important;
+    border-bottom: 1px solid #223047 !important;
+    color: #f1f5f9 !important;
+  }
+  
+  .p-datepicker-title,
+  .p-datepicker-prev-icon,
+  .p-datepicker-next-icon,
+  .p-datepicker-prev,
+  .p-datepicker-next {
+    color: #f1f5f9 !important;
+  }
+  
+  .p-datepicker-weekday {
+    color: #94a3b8 !important;
+  }
+  
+  .p-datepicker-day {
+    color: #f1f5f9 !important;
+  }
+  
+  .p-datepicker table td > span {
+    color: #f1f5f9 !important;
+  }
+
+  .p-datepicker table td > span:not(.p-highlight):hover {
+    background-color: #1e293b !important;
+    color: #3b82f6 !important;
+  }
+
+  .p-datepicker table td > span.p-highlight {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+  }
+  
+  .p-autocomplete-option,
+  .p-select-option {
+    color: #f1f5f9 !important;
+  }
+  
+  .p-autocomplete-option:hover,
+  .p-autocomplete-option.p-focus,
+  .p-select-option:hover,
+  .p-select-option.p-focus {
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
 }

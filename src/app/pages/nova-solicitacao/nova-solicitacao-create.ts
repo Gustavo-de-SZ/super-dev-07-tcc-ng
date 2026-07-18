@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 
 // PrimeNG Modules
 import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { Solicitacao } from '../../models/solicitacao';
@@ -21,6 +22,7 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
     ReactiveFormsModule,
     RouterModule,
     SelectModule,
+    DatePickerModule,
     ToastModule
   ],
   providers: [MessageService],
@@ -57,36 +59,42 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
                 }
               </div>
 
-              <div class="ns-form-row-2">
-                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('descricao')">
-                  <label for="descricao">Descrição do Problema *</label>
-                  <textarea id="descricao" formControlName="descricao" class="ns-input ns-textarea"
-                    rows="4" placeholder="Descreva o problema detalhadamente"></textarea>
-                  @if (hasError('descricao', 'required')) {
-                    <span class="ns-error-text"><i class="pi pi-info-circle"></i> Descrição é obrigatória</span>
-                  }
-                  @else if (hasError('descricao', 'minlength')) {
-                    <span class="ns-error-text"><i class="pi pi-info-circle"></i> Mínimo de 10 caracteres</span>
-                  }
-                </div>
-
-                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('categoriaId')">
-                  <label for="categoriaId">Categoria *</label>
-                  <p-select formControlName="categoriaId" [options]="categoriasOptions"
-                    optionLabel="label" optionValue="value" placeholder="Selecione a categoria"
-                    class="ns-select w-full"></p-select>
-                  @if (hasError('categoriaId', 'required')) {
-                    <span class="ns-error-text"><i class="pi pi-info-circle"></i> Categoria é obrigatória</span>
-                  }
-                </div>
+              <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('categoriaId')">
+                <label for="categoriaId">Categoria *</label>
+                <p-select formControlName="categoriaId" [options]="categoriasOptions"
+                  optionLabel="label" optionValue="value" placeholder="Selecione a categoria"
+                  class="ns-select w-full"></p-select>
+                @if (hasError('categoriaId', 'required')) {
+                  <span class="ns-error-text"><i class="pi pi-info-circle"></i> Categoria é obrigatória</span>
+                }
               </div>
 
               <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('dataCriacao')">
                 <label for="dataCriacao">Data de Criação *</label>
-                <input id="dataCriacao" type="date" formControlName="dataCriacao" class="ns-input"
-                  placeholder="dd/mm/aaaa" />
+                <p-datePicker
+                  id="dataCriacao"
+                  formControlName="dataCriacao"
+                  dateFormat="dd/mm/yy"
+                  placeholder="dd/mm/yyyy"
+                  [showIcon]="true"
+                  iconDisplay="input"
+                  appendTo="body"
+                  class="ns-datepicker"
+                ></p-datePicker>
                 @if (hasError('dataCriacao', 'required')) {
                   <span class="ns-error-text"><i class="pi pi-info-circle"></i> Data é obrigatória</span>
+                }
+              </div>
+
+              <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('descricao')">
+                <label for="descricao">Descrição do Problema *</label>
+                <textarea id="descricao" formControlName="descricao" class="ns-input ns-textarea"
+                  rows="4" placeholder="Descreva o problema detalhadamente"></textarea>
+                @if (hasError('descricao', 'required')) {
+                  <span class="ns-error-text"><i class="pi pi-info-circle"></i> Descrição é obrigatória</span>
+                }
+                @else if (hasError('descricao', 'minlength')) {
+                  <span class="ns-error-text"><i class="pi pi-info-circle"></i> Mínimo de 10 caracteres</span>
                 }
               </div>
             </section>
@@ -117,7 +125,7 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
               </div>
               <div class="ns-summary-item">
                 <span class="label">Data</span>
-                <span class="value">{{ formatDate(solicitacaoForm.get('dataCriacao')?.value) }}</span>
+                <span class="value">{{ formatarDataExibicao(solicitacaoForm.get('dataCriacao')?.value) }}</span>
               </div>
             </div>
 
@@ -218,9 +226,20 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
     @media (max-width: 768px) { .ns-form-row-2, .ns-form-row-3 { grid-template-columns: 1fr; } }
 
     /* Padronização de Inputs Nativos e PrimeNG */
-    ::ng-deep .ns-input,
-    ::ng-deep .ns-datepicker .p-inputtext {
+    ::ng-deep .ns-datepicker,
+    ::ng-deep .ns-datepicker.p-datepicker {
       width: 100% !important;
+      display: inline-flex !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+    ::ng-deep .ns-input,
+    ::ng-deep .ns-datepicker input,
+    ::ng-deep .ns-datepicker .p-inputtext,
+    ::ng-deep .ns-select {
+      width: 100% !important;
+      height: 44px !important;
       border-radius: 8px !important;
       padding: 10px 14px !important;
       font-size: 14px !important;
@@ -230,16 +249,24 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
       background-color: var(--bg-card) !important;
       color: var(--text-main) !important;
       border: 1px solid var(--border-input) !important;
+      box-sizing: border-box !important;
     }
+    ::ng-deep .ns-select { padding: 0 !important; }
+    ::ng-deep .ns-select .p-select-label { color: var(--text-main); padding: 10px 14px; font-family: inherit; font-size: 14px; }
+    ::ng-deep .ns-select .p-select-dropdown { color: var(--text-muted); }
+
     ::ng-deep .ns-input::placeholder,
+    ::ng-deep .ns-datepicker input::placeholder,
     ::ng-deep .ns-datepicker .p-inputtext::placeholder {
       color: var(--text-muted) !important;
       opacity: 0.7;
     }
     ::ng-deep .ns-input:focus,
-    ::ng-deep .ns-datepicker .p-inputtext:focus {
+    ::ng-deep .ns-datepicker input:focus,
+    ::ng-deep .ns-datepicker .p-inputtext:focus,
+    ::ng-deep .ns-select:not(.p-disabled).p-focus {
       border-color: var(--primary) !important;
-      outline: none;
+      outline: none !important;
       box-shadow: 0 0 0 1px var(--primary) !important;
     }
 
@@ -251,7 +278,9 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
     .ns-error-text { color: var(--error); font-size: 12px; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
     .ns-is-invalid label { color: var(--error) !important; }
     .ns-is-invalid ::ng-deep .ns-input,
-    .ns-is-invalid ::ng-deep .ns-datepicker .p-inputtext {
+    .ns-is-invalid ::ng-deep .ns-datepicker input,
+    .ns-is-invalid ::ng-deep .ns-datepicker .p-inputtext,
+    .ns-is-invalid ::ng-deep .ns-select {
       border-color: var(--error) !important;
       background-color: var(--error-bg) !important;
     }
@@ -319,24 +348,54 @@ export class NovaSolicitacao implements OnInit {
     return !! (control && control.hasError(errorName) && (control.dirty || control.touched));
   }
 
-  // Formata data para exibição (dd/mm/yyyy)
-  formatDate(date: any): string {
-    if (!date) return '—';
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
+  formatarDataExibicao(data: any): string {
+    if (!data) return '—';
+    if (data instanceof Date) {
+      if (isNaN(data.getTime())) return '—';
+      const d = data.getDate().toString().padStart(2, '0');
+      const m = (data.getMonth() + 1).toString().padStart(2, '0');
+      const y = data.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    const str = String(data);
+    if (str.toLowerCase().includes('invalid')) {
+      return '—';
+    }
+    if (str.includes('/')) {
+      return str;
+    }
+    if (str.includes('-')) {
+      const partes = str.split('T')[0].split('-');
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        } else {
+          return `${partes[0]}/${partes[1]}/${partes[2]}`;
+        }
+      }
+    }
+    const parsed = new Date(str);
+    if (!isNaN(parsed.getTime())) {
+      const d = parsed.getDate().toString().padStart(2, '0');
+      const m = (parsed.getMonth() + 1).toString().padStart(2, '0');
+      const y = parsed.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    return str;
   }
 
   criarSolicitacao(): void {
     if (this.solicitacaoForm.valid) {
       const formValue = this.solicitacaoForm.getRawValue();
 
+      const catId = typeof formValue.categoriaId === 'object' && formValue.categoriaId !== null
+        ? formValue.categoriaId.value
+        : formValue.categoriaId;
+
       const solicitacao: Solicitacao = {
         titulo: formValue.titulo,
         descricao_problema: formValue.descricao,
-        categoria_id: formValue.categoriaId.value,
+        categoria_id: catId,
         dataCriacao: formValue.dataCriacao instanceof Date
           ? formValue.dataCriacao.toISOString().split('T')[0] // YYYY-MM-DD
           : String(formValue.dataCriacao)
@@ -350,8 +409,9 @@ export class NovaSolicitacao implements OnInit {
             summary: 'Sucesso',
             detail: 'Solicitação criada com sucesso!'
           });
+          const todayStr = new Date().toISOString().split('T')[0];
           this.solicitacaoForm.reset({
-            dataCriacao: new Date() // reset date to today
+            dataCriacao: new Date() // reset date to today as Date object
           });
           // Redireciona para a lista de solicitações após 1 segundo
           setTimeout(() => this.router.navigate(['/painel/solicitacoes']), 1000);

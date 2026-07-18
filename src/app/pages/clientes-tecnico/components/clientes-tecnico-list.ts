@@ -18,7 +18,7 @@ import { Cliente } from '../../../models/cliente';
 
           <div class="tcc-client-content">
             <div class="tcc-client-header">
-              <h3>{{ cliente.nome }}</h3>
+              <h3>{{ cliente.nome_completo || cliente.nome }}</h3>
               <span class="tcc-company-badge">{{ cliente.empresa }}</span>
               <span class="tcc-rating">
                 <i class="pi pi-star-fill"></i> {{ cliente.avaliacao }}
@@ -27,7 +27,7 @@ import { Cliente } from '../../../models/cliente';
 
             <div class="tcc-client-meta">
               <span class="tcc-meta-item"><i class="pi pi-envelope"></i> {{ cliente.email }}</span>
-              <span class="tcc-meta-item"><i class="pi pi-phone"></i> {{ cliente.telefone }}</span>
+              <span class="tcc-meta-item"><i class="pi pi-phone"></i> {{ formatPhone(cliente.telefone) }}</span>
               <span class="tcc-meta-item"><i class="pi pi-map-marker"></i> {{ cliente.local }}</span>
             </div>
           </div>
@@ -209,6 +209,16 @@ import { Cliente } from '../../../models/cliente';
     }
   `]
 })
-export class ClientesList {
+  export class ClientesList {
   @Input() clientes: Cliente[] = [];
+
+  formatPhone(phone: string): string {
+    if (!phone) return '';
+    const cleaned = ('' + phone).replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{2})(\d{4,5})(\d{4})$/);
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return phone;
+  }
 }

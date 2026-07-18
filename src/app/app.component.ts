@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { ProfileService } from './services/profile.service';
 import { AuthService } from './services/auth.service';
 import { filter, switchMap, take } from 'rxjs/operators';
@@ -15,7 +15,8 @@ export class App {
 
   constructor(
     private profileService: ProfileService,
-    private auth: AuthService
+    private auth: AuthService,
+    private router: Router
   ) {
     this.verificarECriarPerfilSeNecessario();
   }
@@ -31,32 +32,8 @@ export class App {
         this.profileService.verificarPerfilExistente().subscribe({
           next: (response) => {
             if (!response.exists) {
-              // Perfil não existe, criar baseado no role
-              const roles = user['https://tcc-ng.com/roles'] || [];
-              const userRole = roles.length > 0 ? roles[0] : 'tecnico'; // padrão para tecnico
-
-              let perfilData: any = {
-                email: user.email,
-                nome: user.name || user.given_name || 'Usuário'
-              };
-
-              if (userRole.toLowerCase() === 'cliente') {
-                this.profileService.criarPerfilCliente(perfilData).subscribe({
-                  next: (cliente) => {
-                    console.log('Perfil de cliente criado:', cliente);
-                    // Opcional: marcar no app_metadata que perfil foi criado
-                  },
-                  error: (err) => console.error('Erro ao criar perfil de cliente:', err)
-                });
-              } else {
-                // Assumindo tecnico como padrão
-                this.profileService.criarPerfilTecnico(perfilData).subscribe({
-                  next: (tecnico) => {
-                    console.log('Perfil de técnico criado:', tecnico);
-                  },
-                  error: (err) => console.error('Erro ao criar perfil de técnico:', err)
-                });
-              }
+              // Redireciona para completar o cadastro se o perfil não existe
+              this.router.navigate(['/completar-cadastro']);
             }
           },
           error: (err) => console.error('Erro ao verificar perfil:', err)

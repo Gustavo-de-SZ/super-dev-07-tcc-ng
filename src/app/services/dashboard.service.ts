@@ -46,7 +46,7 @@ export class DashboardService {
         this.logTokenPayload(token);
         return this.http.get<DashboardData>(`${this.configService.getApiUrl()}/dashboard`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -66,7 +66,7 @@ export class DashboardService {
         this.logTokenPayload(token);
         return this.http.get<StatCard[]>(`${this.configService.getApiUrl()}/clientes/stats`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -85,7 +85,7 @@ export class DashboardService {
         this.logTokenPayload(token);
         return this.http.get<Agendamento[]>(`${this.configService.getApiUrl()}/agendamentos`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

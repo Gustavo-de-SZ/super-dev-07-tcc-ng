@@ -34,7 +34,7 @@ import { ClienteService } from '../../../services/cliente.service';
       </div>
 
       <main class="ns-main-content">
-        <div class="ns-grid-layout">
+        <form [formGroup]="form" (ngSubmit)="atualizarServico()" class="ns-grid-layout">
           <div class="ns-form-column">
 
             <section class="ns-card">
@@ -42,7 +42,7 @@ import { ClienteService } from '../../../services/cliente.service';
                 <i class="pi pi-file-edit text-primary"></i> Editar Serviço
               </h2>
 
-              <form [formGroup]="form" (ngSubmit)="atualizarServico()">
+              <div class="w-full">
 
                 <div class="ns-form-row">
                   <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('titulo')">
@@ -109,7 +109,7 @@ import { ClienteService } from '../../../services/cliente.service';
                   </div>
                 </div>
 
-              </form>
+              </div>
             </section>
 
             <section class="ns-card">
@@ -122,13 +122,12 @@ import { ClienteService } from '../../../services/cliente.service';
                   <label>Data *</label>
                   <p-datePicker
                     formControlName="data"
-                    dateFormat="dd/mm/yyyy"
+                    dateFormat="dd/mm/yy"
                     placeholder="dd/mm/yyyy"
                     [showIcon]="true"
                     iconDisplay="input"
                     appendTo="body"
                     class="ns-datepicker"
-                    locale="pt-BR"
                   ></p-datePicker>
                 </div>
 
@@ -183,7 +182,7 @@ import { ClienteService } from '../../../services/cliente.service';
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Data</span>
-                  <span class="value">{{ form.get('data')?.value ? (form.get('data')?.value | date:'dd/MM/yyyy') : '—' }}</span>
+                  <span class="value">{{ formatarDataExibicao(form.get('data')?.value) }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Duração</span>
@@ -209,7 +208,7 @@ import { ClienteService } from '../../../services/cliente.service';
             </div>
           </aside>
 
-        </div>
+        </form>
       </main>
 
       <p-toast position="bottom-right"></p-toast>
@@ -328,32 +327,40 @@ import { ClienteService } from '../../../services/cliente.service';
     }
 
     ::ng-deep .ns-input,
+    ::ng-deep .ns-autocomplete input,
     ::ng-deep .ns-autocomplete .p-autocomplete-input,
+    ::ng-deep .ns-datepicker input,
     ::ng-deep .ns-datepicker .p-inputtext {
-      width: 100%;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 14px;
-      transition: all 0.2s;
-      box-shadow: none;
-      font-family: inherit;
+      width: 100% !important;
+      height: 44px !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      transition: all 0.2s !important;
+      box-shadow: none !important;
+      font-family: inherit !important;
       background-color: var(--tcc-surface, #ffffff) !important;
       color: var(--tcc-text-main, #0f172a) !important;
       border: 1px solid var(--tcc-border, #e2e8f0) !important;
+      box-sizing: border-box !important;
     }
 
     ::ng-deep .ns-input::placeholder,
+    ::ng-deep .ns-autocomplete input::placeholder,
     ::ng-deep .ns-autocomplete .p-autocomplete-input::placeholder,
+    ::ng-deep .ns-datepicker input::placeholder,
     ::ng-deep .ns-datepicker .p-inputtext::placeholder {
       color: var(--tcc-text-muted, #94a3b8) !important;
       opacity: 0.7;
     }
 
     ::ng-deep .ns-input:focus,
+    ::ng-deep .ns-autocomplete input:focus,
     ::ng-deep .ns-autocomplete .p-autocomplete-input:focus,
+    ::ng-deep .ns-datepicker input:focus,
     ::ng-deep .ns-datepicker .p-inputtext:focus {
       border-color: #3b82f6 !important;
-      outline: none;
+      outline: none !important;
       box-shadow: 0 0 0 1px #3b82f6 !important;
     }
 
@@ -381,9 +388,24 @@ import { ClienteService } from '../../../services/cliente.service';
       font-size: 14px;
     }
 
-    .ns-has-icon-left { padding-left: 38px !important; }
-    .ns-has-prefix-left { padding-left: 38px !important; }
-    ::ng-deep .ns-autocomplete { width: 100%; }
+    ::ng-deep .ns-has-icon-left,
+    ::ng-deep .ns-autocomplete input,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input {
+      padding-left: 38px !important;
+    }
+    ::ng-deep .ns-has-prefix-left { padding-left: 38px !important; }
+    ::ng-deep .ns-autocomplete,
+    ::ng-deep .ns-autocomplete .p-autocomplete {
+      width: 100% !important;
+    }
+    ::ng-deep .ns-datepicker,
+    ::ng-deep .ns-datepicker.p-datepicker {
+      width: 100% !important;
+      display: inline-flex !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
 
     /* Força o ícone nativo do datepicker a herdar a cor correta */
     ::ng-deep .ns-datepicker .p-datepicker-dropdown-icon,
@@ -611,6 +633,42 @@ export class EditarServico implements OnInit {
     const currentId = this.form.get('categoria')?.value;
     const cat = this.categorias.find(c => c.id === currentId);
     return cat ? cat.label : '—';
+  }
+
+  formatarDataExibicao(data: any): string {
+    if (!data) return '—';
+    if (data instanceof Date) {
+      if (isNaN(data.getTime())) return '—';
+      const d = data.getDate().toString().padStart(2, '0');
+      const m = (data.getMonth() + 1).toString().padStart(2, '0');
+      const y = data.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    const str = String(data);
+    if (str.toLowerCase().includes('invalid')) {
+      return '—';
+    }
+    if (str.includes('/')) {
+      return str;
+    }
+    if (str.includes('-')) {
+      const partes = str.split('T')[0].split('-');
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        } else {
+          return `${partes[0]}/${partes[1]}/${partes[2]}`;
+        }
+      }
+    }
+    const parsed = new Date(str);
+    if (!isNaN(parsed.getTime())) {
+      const d = parsed.getDate().toString().padStart(2, '0');
+      const m = (parsed.getMonth() + 1).toString().padStart(2, '0');
+      const y = parsed.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    return str;
   }
 
   carregarClientes(): void {

@@ -115,16 +115,16 @@ import { ClienteService } from '../../../services/cliente.service';
 
           <aside class="ns-summary-column">
             <div class="ns-card ns-summary-card">
-              <h3>Resumo</h3>
+              <h3>Resumo do Cliente</h3>
 
               <div class="ns-summary-list">
                 <div class="ns-summary-item">
                   <span class="label">Nome</span>
-                  <span class="value">{{ form.get('nome')?.value || '—' }}</span>
+                  <span class="value ns-truncate" [title]="form.get('nome')?.value">{{ form.get('nome')?.value || '—' }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">E-mail</span>
-                  <span class="value">{{ form.get('email')?.value || '—' }}</span>
+                  <span class="value ns-truncate" [title]="form.get('email')?.value">{{ form.get('email')?.value || '—' }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Telefone</span>
@@ -132,11 +132,11 @@ import { ClienteService } from '../../../services/cliente.service';
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Empresa</span>
-                  <span class="value">{{ form.get('empresa')?.value || '—' }}</span>
+                  <span class="value ns-truncate" [title]="form.get('empresa')?.value">{{ form.get('empresa')?.value || '—' }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Local</span>
-                  <span class="value">{{ form.get('local')?.value || '—' }}</span>
+                  <span class="value ns-truncate" [title]="form.get('local')?.value">{{ form.get('local')?.value || '—' }}</span>
                 </div>
                 <div class="ns-summary-item">
                   <span class="label">Avaliação</span>
@@ -152,12 +152,16 @@ import { ClienteService } from '../../../services/cliente.service';
                 </div>
               </div>
 
-              <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarCliente()">
-                Atualizar Cliente
-              </button>
-              <button type="button" routerLink="/painel/clientes" class="ns-btn-cancel">
-                Cancelar
-              </button>
+              <div class="ns-summary-divider"></div>
+
+              <div class="ns-summary-actions">
+                <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarCliente()">
+                  Atualizar Cliente
+                </button>
+                <button type="button" routerLink="/painel/clientes" class="ns-btn-cancel">
+                  Cancelar
+                </button>
+              </div>
             </div>
           </aside>
         </div>
@@ -278,18 +282,33 @@ import { ClienteService } from '../../../services/cliente.service';
       gap: 16px;
     }
 
-    ::ng-deep .ns-input,
-    ::ng-deep .ns-textarea .p-inputtext {
-      width: 100%;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 14px;
-      transition: all 0.2s;
-      box-shadow: none;
-      font-family: inherit;
+    ::ng-deep .ns-input {
+      width: 100% !important;
+      height: 44px !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      transition: all 0.2s !important;
+      box-shadow: none !important;
+      font-family: inherit !important;
       background-color: var(--tcc-surface, #ffffff) !important;
       color: var(--tcc-text-main, #0f172a) !important;
       border: 1px solid var(--tcc-border, #e2e8f0) !important;
+      box-sizing: border-box !important;
+    }
+
+    ::ng-deep .ns-textarea .p-inputtext {
+      width: 100% !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      transition: all 0.2s !important;
+      box-shadow: none !important;
+      font-family: inherit !important;
+      background-color: var(--tcc-surface, #ffffff) !important;
+      color: var(--tcc-text-main, #0f172a) !important;
+      border: 1px solid var(--tcc-border, #e2e8f0) !important;
+      box-sizing: border-box !important;
     }
 
     ::ng-deep .ns-input::placeholder,
@@ -352,10 +371,19 @@ import { ClienteService } from '../../../services/cliente.service';
       background-color: var(--error-bg) !important;
     }
 
+    /* Summary Card Styling */
+    .ns-summary-column { position: sticky; top: 24px; }
+    .ns-summary-card h3 { font-size: 16px; font-weight: 700; margin: 0 0 20px 0; }
+    .ns-summary-list { display: flex; flex-direction: column; gap: 14px; }
+    .ns-summary-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 16px; }
+    .ns-summary-item .label { color: var(--text-muted, #64748b); font-weight: 500; white-space: nowrap; }
+    .ns-summary-item .value { font-weight: 500; text-align: right; color: var(--text-main, #0f172a); }
+    .ns-summary-divider { height: 1px; background-color: var(--border, #e2e8f0); margin: 20px 0; }
+    .ns-summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
 
     .ns-btn-submit {
       width: 100%; background: #3b82f6; color: #ffffff; border: none; padding: 12px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-bottom: 12px;
+      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
     .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
     .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }

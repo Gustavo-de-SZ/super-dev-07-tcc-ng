@@ -12,8 +12,8 @@ import { Agendamento } from '../../../shared/models';
       @for (item of compromissos; track item.titulo) {
         <div class="tcc-agenda-card">
           <div class="tcc-agenda-datetime-col">
-            <span class="tcc-date-month">{{ item.mes }}</span>
-            <span class="tcc-date-day">{{ item.dia }}</span>
+            <span class="tcc-date-month">{{ getDisplayMonth(item) }}</span>
+            <span class="tcc-date-day">{{ getDisplayDay(item) }}</span>
             <span class="tcc-date-time">{{ item.hora }}</span>
           </div>
 
@@ -117,6 +117,59 @@ import { Agendamento } from '../../../shared/models';
 })
 export class AgendaList {
   @Input() compromissos: Agendamento[] = [];
+
+  getDisplayDay(item: Agendamento): string {
+    const dia = item.dia || '15';
+    if (dia.includes('-')) {
+      const partes = dia.split('-');
+      if (partes.length === 3) {
+        return partes[2]; // Year-Month-Day -> Day
+      }
+    } else if (dia.includes('/')) {
+      const partes = dia.split('/');
+      if (partes.length === 3) {
+        return partes[0]; // Day/Month/Year -> Day
+      }
+    }
+    return dia;
+  }
+
+  getDisplayMonth(item: Agendamento): string {
+    const dia = item.dia || '';
+    let mes = item.mes || 'Julho';
+    
+    let monthNum = 0;
+    if (dia.includes('-')) {
+      const partes = dia.split('-');
+      if (partes.length === 3) {
+        monthNum = parseInt(partes[1], 10);
+      }
+    } else if (dia.includes('/')) {
+      const partes = dia.split('/');
+      if (partes.length === 3) {
+        monthNum = parseInt(partes[1], 10);
+      }
+    }
+
+    if (monthNum >= 1 && monthNum <= 12) {
+      const meses = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+      ];
+      mes = meses[monthNum - 1];
+    }
+
+    // Clean any trailing dot
+    if (mes.endsWith('.')) {
+      mes = mes.slice(0, -1);
+    }
+    
+    // Convert to a neat 3-letter uppercase format so it ALWAYS fits beautifully!
+    if (mes.length > 3) {
+      return mes.substring(0, 3).toUpperCase();
+    }
+    return mes.toUpperCase();
+  }
 
   getBadgeClass(status: string): string {
     switch (status) {

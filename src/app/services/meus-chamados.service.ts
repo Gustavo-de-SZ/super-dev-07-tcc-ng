@@ -40,7 +40,7 @@ export class MeusChamadosService {
         this.logTokenPayload(token);
         return this.http.get<Chamado[]>(`${this.configService.getApiUrl()}/solicitacoes`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

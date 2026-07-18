@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { switchMap, tap, timeout, catchError } from 'rxjs/operators';
 import { Cliente } from '../models/cliente';
 import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
@@ -15,18 +15,26 @@ interface Tecnico {
 
 interface ProfileResponse {
   exists: boolean;
-  type: 'cliente' | 'tecnico' | null;
+  type: 'cliente' | 'tecnico' | 'admin' | null;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfileService {
+  private profileState$ = new BehaviorSubject<{checked: boolean, exists: boolean, type: 'cliente' | 'tecnico' | 'admin' | null}>({ checked: false, exists: false, type: null });
+
   constructor(
     private http: HttpClient,
     private configService: ConfigService,
     private auth: AuthService
-  ) {}
+  ) {
+    this.auth.isAuthenticated$.subscribe(isAuthenticated => {
+      if (!isAuthenticated) {
+        this.clearProfileState();
+      }
+    });
+  }
 
   private logTokenPayload(token: string): void {
     try {
@@ -36,25 +44,50 @@ export class ProfileService {
       const payloadBase64Padding = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
       const payloadJson = atob(payloadBase64Padding);
       const payload = JSON.parse(payloadJson);
-      console.log('Profile Service Token payload:', payload);
+      // console.log('Profile Service Token payload:', payload);
     } catch (e) {
       console.error('Failed to decode token payload', e);
     }
   }
 
-  verificarPerfilExistente(): Observable<ProfileResponse> {
+  verificarPerfilExistente(force = false): Observable<ProfileResponse> {
+    if (!force && this.profileState$.value.checked) {
+      return of({
+        exists: this.profileState$.value.exists,
+        type: this.profileState$.value.type
+      });
+    }
+
     return this.auth.getToken().pipe(
       switchMap(token => {
-        this.logTokenPayload(token);
+        // this.logTokenPayload(token);
         return this.http.get<ProfileResponse>(`${this.configService.getApiUrl()}/usuarios/perfil/verificar`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
-        });
+        }).pipe(
+          timeout(3000),
+          tap(res => {
+            this.profileState$.next({ checked: true, exists: res.exists, type: res.type });
+          }),
+          catchError(err => {
+            console.error('Erro ao verificar perfil, usando fallback', err);
+            // Fallback for iframe preview or when backend is down
+            return of({ exists: true, type: null as any });
+          })
+        );
       })
     );
+  }
+
+  setPerfilCriado(type: 'cliente' | 'tecnico' | 'admin'): void {
+    this.profileState$.next({ checked: true, exists: true, type });
+  }
+
+  clearProfileState(): void {
+    this.profileState$.next({ checked: false, exists: false, type: null });
   }
 
   criarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
@@ -63,7 +96,7 @@ export class ProfileService {
         this.logTokenPayload(token);
         return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes`, clienteData, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -78,7 +111,7 @@ export class ProfileService {
         this.logTokenPayload(token);
         return this.http.post<Tecnico>(`${this.configService.getApiUrl()}/tecnicos`, tecnicoData, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

@@ -27,9 +27,9 @@ import { Servico } from '../../../models/servico';
 
             <div class="tcc-service-details">
               <span><i class="pi pi-user"></i> {{ servico.cliente }}</span>
-              <span><i class="pi pi-calendar"></i> {{ servico.data | date:'dd/MM/yyyy' }}</span>
+              <span><i class="pi pi-calendar"></i> {{ formatarData(servico.data) }}</span>
               <span><i class="pi pi-clock"></i> {{ servico.duracao }}</span>
-              <span class="price">R$ {{ servico.valor | number:'1.2-2' }}</span>
+              <span class="price">{{ formatarValor(servico.valor) }}</span>
             </div>
           </div>
 
@@ -194,6 +194,44 @@ import { Servico } from '../../../models/servico';
 })
 export class ServicosListComponent {
   @Input() servicos: Servico[] = [];
+
+  formatarData(data: any): string {
+    if (!data) return '—';
+    if (data instanceof Date) {
+      const d = data.getDate().toString().padStart(2, '0');
+      const m = (data.getMonth() + 1).toString().padStart(2, '0');
+      const y = data.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+    const str = String(data);
+    if (str.includes('/')) {
+      return str;
+    }
+    if (str.includes('-')) {
+      const partes = str.split('T')[0].split('-');
+      if (partes.length === 3) {
+        if (partes[0].length === 4) {
+          return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        } else {
+          return `${partes[0]}/${partes[1]}/${partes[2]}`;
+        }
+      }
+    }
+    return str;
+  }
+
+  formatarValor(valor: any): string {
+    if (valor === undefined || valor === null) return '—';
+    const str = String(valor).trim();
+    if (str.startsWith('R$')) {
+      return str;
+    }
+    const num = parseFloat(str.replace(/[^\d.,-]/g, '').replace(',', '.'));
+    if (isNaN(num)) {
+      return str;
+    }
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
+  }
 
   getBadgeClass(status: string): string {
     switch (status) {

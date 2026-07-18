@@ -294,9 +294,9 @@ import { Cliente } from '../../../models/cliente';
     @media (max-width: 768px) { .ns-form-row-2, .ns-form-row-3, .ns-form-row-3-cep { grid-template-columns: 1fr; } }
 
     /* Padronização de Inputs Nativos e PrimeNG */
-    ::ng-deep .ns-input, 
-    ::ng-deep p-inputmask.ns-input input {
+    ::ng-deep .ns-input:not(p-inputmask) {
       width: 100% !important; 
+      height: 44px !important;
       border-radius: 8px !important; 
       padding: 10px 14px !important; 
       font-size: 14px !important; 
@@ -306,11 +306,41 @@ import { Cliente } from '../../../models/cliente';
       background-color: var(--bg-card) !important; 
       color: var(--text-main) !important; 
       border: 1px solid var(--border-input) !important; 
+      box-sizing: border-box !important;
     }
-    ::ng-deep .ns-input::placeholder { color: var(--text-muted) !important; opacity: 0.7; }
+    ::ng-deep p-inputmask.ns-input {
+      width: 100% !important;
+      display: inline-flex !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    ::ng-deep p-inputmask.ns-input input,
+    ::ng-deep p-inputmask.ns-input .p-inputtext {
+      width: 100% !important;
+      height: 44px !important;
+      border-radius: 8px !important;
+      padding: 10px 14px !important;
+      font-size: 14px !important;
+      transition: all 0.2s !important;
+      box-shadow: none !important;
+      font-family: inherit !important;
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border-input) !important;
+      box-sizing: border-box !important;
+    }
+    ::ng-deep .ns-input::placeholder,
+    ::ng-deep p-inputmask.ns-input input::placeholder {
+      color: var(--text-muted) !important;
+      opacity: 0.7;
+    }
     ::ng-deep .ns-input:focus, 
     ::ng-deep p-inputmask.ns-input input:focus {
-      border-color: var(--primary) !important; outline: none; box-shadow: 0 0 0 1px var(--primary) !important;
+      border-color: var(--primary) !important;
+      outline: none !important;
+      box-shadow: 0 0 0 1px var(--primary) !important;
     }
     .ns-textarea { resize: vertical; min-height: 100px; }
 
@@ -319,7 +349,7 @@ import { Cliente } from '../../../models/cliente';
        ========================================================================== */
     .ns-error-text { color: var(--error); font-size: 12px; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
     .ns-is-invalid label { color: var(--error) !important; }
-    .ns-is-invalid ::ng-deep .ns-input, 
+    .ns-is-invalid ::ng-deep .ns-input:not(p-inputmask), 
     .ns-is-invalid ::ng-deep p-inputmask.ns-input input {
       border-color: var(--error) !important;
       background-color: var(--error-bg) !important;

@@ -40,7 +40,7 @@ export class ServicoService {
         this.logTokenPayload(token);
         return this.http.get<Servico[]>(`${this.configService.getApiUrl()}/servicos`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -59,7 +59,7 @@ export class ServicoService {
         this.logTokenPayload(token);
         return this.http.get<Servico>(`${this.configService.getApiUrl()}/servicos/${titulo}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -78,7 +78,7 @@ export class ServicoService {
         this.logTokenPayload(token);
         return this.http.post<Servico>(`${this.configService.getApiUrl()}/servicos`, servico, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -97,7 +97,7 @@ export class ServicoService {
         this.logTokenPayload(token);
         return this.http.put<Servico>(`${this.configService.getApiUrl()}/servicos/${servico.titulo}`, servico, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -116,7 +116,7 @@ export class ServicoService {
         this.logTokenPayload(token);
         return this.http.delete<void>(`${this.configService.getApiUrl()}/servicos/${titulo}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

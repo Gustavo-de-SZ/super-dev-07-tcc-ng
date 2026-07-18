@@ -1,5 +1,6 @@
 export interface Cliente {
   nome: string;
+  nome_completo?: string;
   empresa: string;
   avaliacao: number;
   email: string;

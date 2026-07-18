@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 // PrimeNG Modules (Apenas o essencial)
 import { SelectModule } from 'primeng/select';
 import { AutoCompleteModule } from 'primeng/autocomplete';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
@@ -30,6 +31,7 @@ interface TipoAtendimentoCard {
     RouterModule,
     SelectModule,
     AutoCompleteModule,
+    DatePickerModule,
     ToastModule
   ],
   providers: [MessageService],
@@ -114,7 +116,16 @@ interface TipoAtendimentoCard {
               <div class="ns-form-row-3">
                 <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('data')">
                   <label for="data">Data *</label>
-                  <input id="data" type="date" formControlName="data" class="ns-input" />
+                  <p-datePicker
+                    id="data"
+                    formControlName="data"
+                    dateFormat="dd/mm/yy"
+                    placeholder="dd/mm/yyyy"
+                    [showIcon]="true"
+                    iconDisplay="input"
+                    appendTo="body"
+                    class="ns-datepicker"
+                  ></p-datePicker>
                   @if (hasError('data', 'required')) {
                     <span class="ns-error-text"><i class="pi pi-info-circle"></i> Obrigatório</span>
                   }
@@ -122,14 +133,17 @@ interface TipoAtendimentoCard {
 
                 <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('hora')">
                   <label for="hora">Hora *</label>
-                  <input id="hora" type="time" formControlName="hora" class="ns-input" />
+                  <div class="ns-input-icon-wrapper">
+                    <i class="pi pi-clock ns-icon-left"></i>
+                    <input id="hora" type="text" formControlName="hora" class="ns-input ns-has-icon-left" placeholder="00:00" (input)="formatarHora($event)" />
+                  </div>
                   @if (hasError('hora', 'required')) {
                     <span class="ns-error-text"><i class="pi pi-info-circle"></i> Obrigatório</span>
                   }
                 </div>
 
                 <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('duracao')">
-                  <label for="duracao">Duração Estimada *</label>
+                  <label for="duracao">Duração Estimada (h:m) *</label>
                   <div class="ns-input-icon-wrapper">
                     <i class="pi pi-clock ns-icon-left"></i>
                     <input 
@@ -137,7 +151,8 @@ interface TipoAtendimentoCard {
                       type="text" 
                       formControlName="duracao" 
                       class="ns-input ns-has-icon-left" 
-                      placeholder="Ex: 1h 30m" 
+                      placeholder="Ex: 01:30" 
+                      (input)="formatarDuracao($event)"
                     />
                   </div>
                   @if (hasError('duracao', 'required')) {
@@ -343,9 +358,13 @@ interface TipoAtendimentoCard {
 
     /* Estilização central de inputs nativos e componentes PrimeNG */
     ::ng-deep .ns-input, 
+    ::ng-deep .ns-autocomplete input,
     ::ng-deep .ns-autocomplete .p-autocomplete-input,
+    ::ng-deep .ns-datepicker input,
+    ::ng-deep .ns-datepicker .p-inputtext,
     ::ng-deep .ns-select {
       width: 100% !important; 
+      height: 44px !important;
       border-radius: 8px !important; 
       padding: 10px 14px !important; 
       font-size: 14px !important; 
@@ -355,18 +374,23 @@ interface TipoAtendimentoCard {
       background-color: var(--bg-card) !important; 
       color: var(--text-main) !important; 
       border: 1px solid var(--border-input) !important; 
+      box-sizing: border-box !important;
     }
     ::ng-deep .ns-select { padding: 0 !important; } /* O select tem o padding interno no label */
     ::ng-deep .ns-select .p-select-label { color: var(--text-main); padding: 10px 14px; font-family: inherit; font-size: 14px; }
     ::ng-deep .ns-select .p-select-dropdown { color: var(--text-muted); }
 
     ::ng-deep .ns-input::placeholder,
-    ::ng-deep .ns-autocomplete .p-autocomplete-input::placeholder {
+    ::ng-deep .ns-autocomplete input::placeholder,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input::placeholder,
+    ::ng-deep .ns-datepicker .p-inputtext::placeholder {
       color: var(--text-muted) !important; opacity: 0.7;
     }
     
     ::ng-deep .ns-input:focus, 
+    ::ng-deep .ns-autocomplete input:focus,
     ::ng-deep .ns-autocomplete .p-autocomplete-input:focus,
+    ::ng-deep .ns-datepicker .p-inputtext:focus,
     ::ng-deep .ns-select:not(.p-disabled).p-focus {
       border-color: var(--primary) !important; outline: none; box-shadow: 0 0 0 1px var(--primary) !important;
     }
@@ -375,8 +399,23 @@ interface TipoAtendimentoCard {
     /* Wrappers de ícones dentro do input */
     .ns-input-icon-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
     .ns-icon-left { position: absolute; left: 14px; color: var(--text-muted); z-index: 2; pointer-events: none; }
-    .ns-has-icon-left { padding-left: 38px !important; }
-    ::ng-deep .ns-autocomplete { width: 100%; }
+    ::ng-deep .ns-has-icon-left,
+    ::ng-deep .ns-autocomplete input,
+    ::ng-deep .ns-autocomplete .p-autocomplete-input {
+      padding-left: 38px !important;
+    }
+    ::ng-deep .ns-autocomplete,
+    ::ng-deep .ns-autocomplete .p-autocomplete {
+      width: 100% !important;
+    }
+    ::ng-deep .ns-datepicker,
+    ::ng-deep .ns-datepicker.p-datepicker {
+      width: 100% !important;
+      display: inline-flex !important;
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
 
     .ns-category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100%; }
     .ns-category-card {
@@ -408,9 +447,59 @@ interface TipoAtendimentoCard {
     .ns-error-text { color: var(--error); font-size: 12px; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
     .ns-is-invalid label { color: var(--error) !important; }
     .ns-is-invalid ::ng-deep .ns-input, 
-    .ns-is-invalid ::ng-deep .ns-autocomplete .p-autocomplete-input {
+    .ns-is-invalid ::ng-deep .ns-autocomplete .p-autocomplete-input,
+    .ns-is-invalid ::ng-deep .p-inputtext {
       border-color: var(--error) !important;
       background-color: var(--error-bg) !important;
+    }
+
+    /* Força o ícone do datepicker a herdar a cor correta */
+    ::ng-deep .ns-datepicker .p-datepicker-dropdown-icon,
+    ::ng-deep .ns-datepicker .p-datepicker-input-icon {
+      color: var(--text-muted) !important;
+    }
+
+    /* Fundo do painel do Datepicker, Select e Autocomplete */
+    ::ng-deep body.tp-dark-theme .p-datepicker-panel,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-overlay,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-panel,
+    ::ng-deep body.tp-dark-theme .p-select-panel {
+      background-color: var(--bg-card) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text-main) !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Cabeçalho e calendário interno do Datepicker no Modo Escuro */
+    ::ng-deep body.tp-dark-theme .p-datepicker-header {
+      background-color: var(--bg-card) !important;
+      border-bottom: 1px solid var(--border) !important;
+      color: var(--text-main) !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-title,
+    ::ng-deep body.tp-dark-theme .p-datepicker-prev-icon,
+    ::ng-deep body.tp-dark-theme .p-datepicker-next-icon {
+      color: var(--text-main) !important;
+    }
+
+    /* Dias da semana e números do mês */
+    ::ng-deep body.tp-dark-theme .p-datepicker-weekday {
+      color: var(--text-muted) !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day {
+      color: var(--text-main) !important;
+    }
+
+    /* Efeitos de Hover e Seleção nos dias do Datepicker */
+    ::ng-deep body.tp-dark-theme .p-datepicker-day:not(.p-datepicker-day-selected):hover {
+      background-color: #1e293b !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day-selected {
+      background-color: var(--primary) !important;
+      color: #ffffff !important;
     }
 
     .ns-summary-column { position: sticky; top: 24px; }
@@ -542,6 +631,30 @@ export class NovoAgendamento implements OnInit {
     );
   }
 
+  formatarHora(event: any): void {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+    
+    if (value.length >= 3) {
+      value = value.replace(/(\d{2})(\d{1,2})/, '$1:$2');
+    }
+    
+    event.target.value = value;
+    this.agendamentoForm.get('hora')?.setValue(value);
+  }
+
+  formatarDuracao(event: any): void {
+    let value = event.target.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+    
+    if (value.length >= 3) {
+      value = value.replace(/(\d{2})(\d{1,2})/, '$1:$2');
+    }
+    
+    event.target.value = value;
+    this.agendamentoForm.get('duracao')?.setValue(value);
+  }
+
   selecionarTipo(valor: string) {
     this.agendamentoForm.get('tipoAtendimento')?.setValue(valor);
   }
@@ -559,6 +672,13 @@ export class NovoAgendamento implements OnInit {
     const data = this.agendamentoForm.get('data')?.value;
     if (!data) return '—';
     
+    if ((data as any) instanceof Date) {
+      const dia = String((data as any).getDate()).padStart(2, '0');
+      const mes = String((data as any).getMonth() + 1).padStart(2, '0');
+      const ano = (data as any).getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    }
+
     // Converte de yyyy-mm-dd para dd/mm/yyyy
     const partes = String(data).split('-');
     if (partes.length === 3) {
@@ -576,8 +696,36 @@ export class NovoAgendamento implements OnInit {
         ? (formData.cliente as any).nome 
         : formData.cliente;
 
+      // Extract month and day from the selected date field
+      const dataSelecionada = formData.data;
+      let diaStr = '15';
+      let mesStr = 'Julho';
+
+      if ((dataSelecionada as any) instanceof Date) {
+        diaStr = String((dataSelecionada as any).getDate()).padStart(2, '0');
+        const meses = [
+          'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+        mesStr = meses[(dataSelecionada as any).getMonth()];
+      } else if (dataSelecionada) {
+        const partes = String(dataSelecionada).split('-');
+        if (partes.length === 3) {
+          diaStr = partes[2];
+          const mNum = parseInt(partes[1], 10);
+          const meses = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+          ];
+          if (mNum >= 1 && mNum <= 12) {
+            mesStr = meses[mNum - 1];
+          }
+        }
+      }
+
       const agendamento: Agendamento = {
-        dia: formData.data!, 
+        dia: diaStr, 
+        mes: mesStr,
         hora: formData.hora!,
         titulo: formData.titulo!,
         cliente: nomeDoClienteStr,

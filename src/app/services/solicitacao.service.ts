@@ -40,7 +40,7 @@ export class SolicitacaoService {
         this.logTokenPayload(token);
         return this.http.post<Solicitacao>(`${this.configService.getApiUrl()}/solicitacoes`, data, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -60,7 +60,7 @@ export class SolicitacaoService {
         this.logTokenPayload(token);
         return this.http.get<Solicitacao[]>(`${this.configService.getApiUrl()}/solicitacoes`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -79,7 +79,7 @@ export class SolicitacaoService {
         this.logTokenPayload(token);
         return this.http.put<Solicitacao>(`${this.configService.getApiUrl()}/solicitacoes/${solicitacao.id}`, solicitacao, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -98,7 +98,7 @@ export class SolicitacaoService {
         this.logTokenPayload(token);
         return this.http.delete<void>(`${this.configService.getApiUrl()}/solicitacoes/${id}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }

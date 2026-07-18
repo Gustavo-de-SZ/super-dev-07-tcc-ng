@@ -40,7 +40,7 @@ export class AgendaService {
         this.logTokenPayload(token);
         return this.http.get<Agendamento[]>(`${this.configService.getApiUrl()}/agendamentos`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -59,7 +59,7 @@ export class AgendaService {
         this.logTokenPayload(token);
         return this.http.post<Agendamento>(`${this.configService.getApiUrl()}/agendamentos`, agendamento, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -78,7 +78,7 @@ export class AgendaService {
         this.logTokenPayload(token);
         return this.http.put<Agendamento>(`${this.configService.getApiUrl()}/agendamentos/${agendamento.id}`, agendamento, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
@@ -97,7 +97,7 @@ export class AgendaService {
         this.logTokenPayload(token);
         return this.http.delete<void>(`${this.configService.getApiUrl()}/agendamentos/${id}`, {
           headers: {
-            Authorization: `Bearer${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
