@@ -22,13 +22,14 @@ export class App {
   }
 
   private verificarECriarPerfilSeNecessario(): void {
-    // Aguarda autenticação confirmada
+    // Aguarda autenticação confirmada e dados do usuário disponíveis
     this.auth.isAuthenticated$.pipe(
       filter(authenticated => authenticated),
-      take(1),
-      switchMap(() => this.auth.user$.pipe(take(1)))
-    ).subscribe(user => {
-      if (user) {
+      switchMap(() => this.auth.user$),
+      filter(user => !!user), // Aguarda até ter dados reais do usuário
+      take(1) // Pega a primeira emissão válida do usuário
+    ).subscribe({
+      next: (user) => {
         this.profileService.verificarPerfilExistente().subscribe({
           next: (response) => {
             if (!response.exists) {
@@ -38,7 +39,8 @@ export class App {
           },
           error: (err) => console.error('Erro ao verificar perfil:', err)
         });
-      }
+      },
+      error: (err) => console.error('Erro ao obter dados do usuário:', err)
     });
   }
 }

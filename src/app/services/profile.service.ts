@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
 interface Tecnico {
   nome: string;
   email: string;
-  especialidades?: string[];
+  especialidadePrincipal?: string;
   // outros campos específicos de técnico
 }
 
@@ -75,7 +75,8 @@ export class ProfileService {
           catchError(err => {
             console.error('Erro ao verificar perfil, usando fallback', err);
             // Fallback for iframe preview or when backend is down
-            return of({ exists: true, type: null as any });
+            // Assume no profile exists to allow completion flow to proceed
+            return of({ exists: false, type: null as any });
           })
         );
       })
@@ -94,7 +95,7 @@ export class ProfileService {
     return this.auth.getToken().pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes`, clienteData, {
+        return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes/auth0`, clienteData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

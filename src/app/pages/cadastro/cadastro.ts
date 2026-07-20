@@ -172,7 +172,20 @@ import { Observable, of } from 'rxjs';
                 />
                 @if (isFieldInvalid('cliente', 'telefone')) {
                   <span class="cd-error">
-                    <i class="pi pi-info-circle"></i> Formato inválido. Use (XX) 99999-9999
+                    <i class="pi pi-info-circle"></i>
+                    @if (clienteForm.get('telefone')?.hasError('required')) {
+                      Telefone é obrigatório
+                    } @else if (clienteForm.get('telefone')?.hasError('invalidPhone')) {
+                      Formato inválido. Use (XX) 99999-9999
+                    } @else if (clienteForm.get('telefone')?.hasError('invalidPhoneLength')) {
+                      Telefone deve ter 10 ou 11 dígitos
+                    } @else if (clienteForm.get('telefone')?.hasError('invalidMobileFormat')) {
+                      Para celular, o terceiro dígito deve ser 9 (ex: (11) 99999-9999)
+                    } @else if (clienteForm.get('telefone')?.hasError('invalidAreaCode')) {
+                      DDD inválido. DDDS válidos: 11-99, exceto: 00,01,02,03,05,08,09,10
+                    } @else {
+                      Formato inválido. Use (XX) 99999-9999
+                    }
                   </span>
                 }
               </div>
@@ -287,7 +300,20 @@ import { Observable, of } from 'rxjs';
                 />
                 @if (isFieldInvalid('tecnico', 'telefone')) {
                   <span class="cd-error">
-                    <i class="pi pi-info-circle"></i> Formato inválido. Use (XX) 99999-9999
+                    <i class="pi pi-info-circle"></i>
+                    @if (tecnicoForm.get('telefone')?.hasError('required')) {
+                      Telefone é obrigatório
+                    } @else if (tecnicoForm.get('telefone')?.hasError('invalidPhone')) {
+                      Formato inválido. Use (XX) 99999-9999
+                    } @else if (tecnicoForm.get('telefone')?.hasError('invalidPhoneLength')) {
+                      Telefone deve ter 10 ou 11 dígitos
+                    } @else if (tecnicoForm.get('telefone')?.hasError('invalidMobileFormat')) {
+                      Para celular, o terceiro dígito deve ser 9 (ex: (11) 99999-9999)
+                    } @else if (tecnicoForm.get('telefone')?.hasError('invalidAreaCode')) {
+                      DDD inválido. DDDS válidos: 11-99, exceto: 00,01,02,03,05,08,09,10
+                    } @else {
+                      Formato inválido. Use (XX) 99999-9999
+                    }
                   </span>
                 }
               </div>
@@ -650,7 +676,7 @@ export class Cadastro implements OnInit {
       nome: ['', [Validators.required, Validators.minLength(3)]],
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       empresa: ['', [Validators.required, Validators.minLength(2)]],
-      telefone: ['', [Validators.required, Validators.pattern(/^[0-9()s-]{8,20}$/)]],
+      telefone: ['', [Validators.required, this.phoneNumberValidator]],
       local: ['', [Validators.required, Validators.minLength(3)]],
       tipoCliente: ['PME', [Validators.required]]
     });
@@ -660,7 +686,7 @@ export class Cadastro implements OnInit {
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       especialidadePrincipal: ['Suporte Técnico', [Validators.required]],
       local: ['', [Validators.required, Validators.minLength(3)]],
-      telefone: ['', [Validators.required, Validators.pattern(/^[0-9()s-]{8,20}$/)]],
+      telefone: ['', [Validators.required, this.phoneNumberValidator]],
       tempoResposta: ['Em até 1 hora', [Validators.required]]
     });
 
@@ -701,6 +727,51 @@ export class Cadastro implements OnInit {
     const form = formType === 'cliente' ? this.clienteForm : this.tecnicoForm;
     const ctrl = form.get(field);
     return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
+  }
+
+  private phoneNumberValidator(control: any): { [key: string]: any } | null {
+    const value = control.value;
+
+    // Allow empty values (required validator will handle empty case)
+    if (!value) {
+      return null;
+    }
+
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, '');
+
+    // Brazilian phone number validation:
+    // Mobile: (XX) 9XXXX-XXXX (11 digits)
+    // Landline: (XX) XXXX-XXXX (10 digits)
+    // Both formats allow optional parentheses and hyphen/spaces
+
+    // Check if it matches Brazilian phone patterns
+    const phonePattern = /^\(?\d{2}\)?\s?9?\d{4}-?\d{4}$/;
+
+    if (!phonePattern.test(value)) {
+      return { 'invalidPhone': true };
+    }
+
+    // Additional validation for digit count
+    // Should be 10 or 11 digits after removing formatting
+    if (digitsOnly.length !== 10 && digitsOnly.length !== 11) {
+      return { 'invalidPhoneLength': true };
+    }
+
+    // Validate area code (DDD) - should be between 11 and 99 and not in invalid ranges
+    const areaCode = parseInt(digitsOnly.substring(0, 2));
+    // Invalid area codes in Brazil: 00, 01, 02, 03, 05, 08, 09, 10 and above 99
+    const invalidAreaCodes = [0, 1, 2, 3, 5, 8, 9, 10];
+    if (areaCode < 11 || areaCode > 99 || invalidAreaCodes.includes(areaCode)) {
+      return { 'invalidAreaCode': true };
+    }
+
+    // For 11-digit numbers, the third digit (after area code) should be 9 (mobile)
+    if (digitsOnly.length === 11 && digitsOnly[2] !== '9') {
+      return { 'invalidMobileFormat': true };
+    }
+
+    return null;
   }
 
   private checkProfileExistsAndRedirect(): Observable<boolean> {
@@ -803,7 +874,7 @@ export class Cadastro implements OnInit {
         const tecnicoData = {
           nome: formValue.nome,
           email: email,
-          especialidades: [formValue.especialidadePrincipal],
+          especialidadePrincipal: formValue.especialidadePrincipal,
           local: formValue.local,
           telefone: formValue.telefone,
           tempoResposta: formValue.tempoResposta
