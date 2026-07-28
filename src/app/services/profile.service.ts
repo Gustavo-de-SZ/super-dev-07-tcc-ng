@@ -94,8 +94,23 @@ export class ProfileService {
   criarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
     return this.auth.getToken().pipe(
       switchMap(token => {
-        this.logTokenPayload(token);
-        return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes/auth0`, clienteData, {
+        // Decode token to get email and auth0_id
+        const payloadBase64 = token.split('.')[1];
+        const payloadBase64Padding = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+        const payloadJson = atob(payloadBase64Padding);
+        const payload = JSON.parse(payloadJson);
+
+        // Add email and auth0_id to the cliente data
+        // Only add email if it's present and non-empty in the token
+        const enhancedData = {
+          ...clienteData,
+          auth0_id: payload.sub
+        };
+        if (payload.email !== undefined && payload.email !== null && payload.email.trim() !== '') {
+          enhancedData.email = payload.email;
+        }
+
+        return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes/auth0`, enhancedData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -109,8 +124,106 @@ export class ProfileService {
   criarPerfilTecnico(tecnicoData: Partial<Tecnico>): Observable<Tecnico> {
     return this.auth.getToken().pipe(
       switchMap(token => {
+        // Decode token to get email and auth0_id
+        const payloadBase64 = token.split('.')[1];
+        const payloadBase64Padding = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+        const payloadJson = atob(payloadBase64Padding);
+        const payload = JSON.parse(payloadJson);
+
+        // Add email and auth0_id to the tecnico data
+        // Only add email if it's present and non-empty in the token
+        const enhancedData = {
+          ...tecnicoData,
+          auth0_id: payload.sub
+        };
+        if (payload.email !== undefined && payload.email !== null && payload.email.trim() !== '') {
+          enhancedData.email = payload.email;
+        }
+
+        return this.http.post<Tecnico>(`${this.configService.getApiUrl()}/tecnicos`, enhancedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  // NEW METHODS FOR SETTINGS PAGE
+  obterPerfilTecnico(): Observable<Tecnico> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.post<Tecnico>(`${this.configService.getApiUrl()}/tecnicos`, tecnicoData, {
+        return this.http.get<Tecnico>(`${this.configService.getApiUrl()}/tecnicos/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  atualizarPerfilTecnico(tecnicoData: Partial<Tecnico>): Observable<Tecnico> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        // Decode token to get auth0_id
+        const payloadBase64 = token.split('.')[1];
+        const payloadBase64Padding = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+        const payloadJson = atob(payloadBase64Padding);
+        const payload = JSON.parse(payloadJson);
+
+        // Add auth0_id to the tecnico data
+        const enhancedData = {
+          ...tecnicoData,
+          auth0_id: payload.sub
+        };
+
+        return this.http.put<Tecnico>(`${this.configService.getApiUrl()}/tecnicos/me`, enhancedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  obterPerfilCliente(): Observable<Cliente> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        this.logTokenPayload(token);
+        return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  atualizarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        // Decode token to get auth0_id
+        const payloadBase64 = token.split('.')[1];
+        const payloadBase64Padding = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+        const payloadJson = atob(payloadBase64Padding);
+        const payload = JSON.parse(payloadJson);
+
+        // Add auth0_id to the cliente data
+        const enhancedData = {
+          ...clienteData,
+          auth0_id: payload.sub
+        };
+
+        return this.http.put<Cliente>(`${this.configService.getApiUrl()}/clientes/me`, enhancedData, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

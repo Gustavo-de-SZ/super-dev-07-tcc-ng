@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -11,6 +11,7 @@ import { ProfileService } from '../../services/profile.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { take, switchMap, tap, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
+import { PhoneMaskDirective } from '../../shared/directives/phone-mask.directive';
 
 @Component({
   selector: 'app-cadastro',
@@ -20,7 +21,8 @@ import { Observable, of } from 'rxjs';
     ReactiveFormsModule,
     SelectModule,
     ToastModule,
-    ButtonModule
+    ButtonModule,
+    PhoneMaskDirective
   ],
   providers: [MessageService],
   template: `
@@ -169,6 +171,7 @@ import { Observable, of } from 'rxjs';
                   placeholder="Ex: (11) 99999-9999"
                   class="ns-input"
                   [class.ns-input-error]="isFieldInvalid('cliente', 'telefone')"
+                  appPhoneMask
                 />
                 @if (isFieldInvalid('cliente', 'telefone')) {
                   <span class="cd-error">
@@ -297,6 +300,7 @@ import { Observable, of } from 'rxjs';
                   placeholder="Ex: (11) 99999-9999"
                   class="ns-input"
                   [class.ns-input-error]="isFieldInvalid('tecnico', 'telefone')"
+                  appPhoneMask
                 />
                 @if (isFieldInvalid('tecnico', 'telefone')) {
                   <span class="cd-error">
@@ -740,20 +744,7 @@ export class Cadastro implements OnInit {
     // Remove all non-digit characters
     const digitsOnly = value.replace(/\D/g, '');
 
-    // Brazilian phone number validation:
-    // Mobile: (XX) 9XXXX-XXXX (11 digits)
-    // Landline: (XX) XXXX-XXXX (10 digits)
-    // Both formats allow optional parentheses and hyphen/spaces
-
-    // Check if it matches Brazilian phone patterns
-    const phonePattern = /^\(?\d{2}\)?\s?9?\d{4}-?\d{4}$/;
-
-    if (!phonePattern.test(value)) {
-      return { 'invalidPhone': true };
-    }
-
-    // Additional validation for digit count
-    // Should be 10 or 11 digits after removing formatting
+    // Validate digit count: should be 10 or 11 digits
     if (digitsOnly.length !== 10 && digitsOnly.length !== 11) {
       return { 'invalidPhoneLength': true };
     }

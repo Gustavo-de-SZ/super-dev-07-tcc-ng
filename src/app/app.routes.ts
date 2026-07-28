@@ -18,7 +18,9 @@ canActivate: [appAuthGuardFn, profileGuardFn],
       {path: 'servicos/novo', loadComponent: () => import('./pages/servicos-tecnico/components/servicos-create').then(m => m.NovoServico)},
       {path: 'servicos/:id/edit', loadComponent: () => import('./pages/servicos-tecnico/components/servicos-edit').then(m => m.EditarServico)},
       {path: 'clientes/novo', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-tecnico-create').then(m => m.NovoCliente)},
-      {path: 'clientes/:email/edit', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-edit').then(m => m.EditarCliente)}
+      {path: 'clientes/:email/edit', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-edit').then(m => m.EditarCliente)},
+      {path: 'configuracoes', loadComponent: () => import('./pages/configuracoes/configuracoes').then(m => m.ConfiguracoesComponent)},
+      {path: 'chat', loadComponent: () => import('./pages/chat/chat').then(m => m.ChatComponent)}
 
     ]},
 
@@ -29,7 +31,9 @@ canActivate: [appAuthGuardFn, profileGuardFn],
     children: [
       { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) },
       { path: 'solicitacao', loadComponent: () => import('./pages/nova-solicitacao/nova-solicitacao-create').then(m => m.NovaSolicitacao) },
-      { path: 'meus-chamados', loadComponent: () => import('./pages/meus-chamados/meus-chamados').then(m => m.MeusChamados) }
+      { path: 'meus-chamados', loadComponent: () => import('./pages/meus-chamados/meus-chamados').then(m => m.MeusChamados) },
+      { path: 'configuracoes', loadComponent: () => import('./pages/configuracoes/configuracoes').then(m => m.ConfiguracoesComponent) },
+      { path: 'chat', loadComponent: () => import('./pages/chat/chat').then(m => m.ChatComponent) }
     ]},
 {
     path: 'admin',

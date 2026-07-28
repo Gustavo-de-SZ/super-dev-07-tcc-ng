@@ -15,6 +15,8 @@ import { Servico } from '../../../models/servico';
 import { ServicoService } from '../../../services/servico.service';
 import { Cliente } from '../../../models/cliente';
 import { ClienteService } from '../../../services/cliente.service';
+import { Equipamento } from '../../../models/equipamento';
+import { EquipamentoService } from '../../../services/equipamento.service';
 
 @Component({
   selector: 'app-novo-servico',
@@ -98,10 +100,11 @@ import { ClienteService } from '../../../services/cliente.service';
             <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('cliente')">
               <div class="ns-input-icon-wrapper">
                 <i class="pi pi-search ns-icon-left"></i>
-                <p-autoComplete 
-                    formControlName="cliente" 
-                    [suggestions]="clientesFiltrados" 
+                <p-autoComplete
+                    formControlName="cliente"
+                    [suggestions]="clientesFiltrados"
                     (completeMethod)="filtrarCliente($event)"
+                    (onSelect)="aoSelecionarCliente($event)"
                     optionLabel="nome_exibicao"
                     placeholder="Buscar cliente por nome ou empresa..."
                     [forceSelection]="true"
@@ -119,6 +122,45 @@ import { ClienteService } from '../../../services/cliente.service';
                       </ng-template>
                   </p-autoComplete>
               </div>
+            </div>
+          </section>
+
+          <!-- Equipment Selection Section -->
+          <section class="ns-card">
+            <h2 class="ns-card-title">
+              <i class="pi pi-box text-primary"></i> Equipamento
+            </h2>
+
+            <div class="ns-form-group">
+              <label>Equipamento Vinculado</label>
+              <div style="display: flex; gap: 8px;">
+                <!-- The Select is disabled until a client is chosen -->
+                <select
+                  formControlName="equipamentoId"
+                  class="ns-input"
+                  style="flex: 1;"
+                  [disabled]="!form.get('cliente')?.value">
+                  <option value="">Selecione um equipamento...</option>
+                  @for (eqp of equipamentosDoCliente; track eqp.id) {
+                    <option [value]="eqp.id">
+                      {{ eqp.tipo }} - {{ eqp.marca }} {{ eqp.modelo }} (S/N: {{ eqp.numeroSerie || 'N/A' }})
+                    </option>
+                  }
+                </select>
+
+                <button
+                  type="button"
+                  class="tcc-btn-outline"
+                  [disabled]="!form.get('cliente')?.value"
+                  (click)="mostrandoModalNovoEquipamento = true">
+                  <i class="pi pi-plus"></i> Novo
+                </button>
+              </div>
+              @if (!form.get('cliente')?.value) {
+                <small style="color: var(--tcc-text-muted, #64748b); margin-top: 4px; display: block;">
+                  Selecione um cliente primeiro para carregar o inventário.
+                </small>
+              }
             </div>
           </section>
 
@@ -222,6 +264,54 @@ import { ClienteService } from '../../../services/cliente.service';
       </div>
     </div>
     <p-toast position="bottom-right"></p-toast>
+
+<!-- Modal for New Equipment -->
+@if (mostrandoModalNovoEquipamento) {
+  <div class="modal-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div class="modal-content ns-card" style="width: 100%; max-width: 500px; padding: 24px; background: var(--tcc-surface);">
+      <h3 style="margin-top: 0; margin-bottom: 20px;">Cadastrar Novo Equipamento</h3>
+
+      <form [formGroup]="equipamentoForm" (ngSubmit)="salvarNovoEquipamento()">
+        <div class="ns-form-group">
+          <label>Tipo</label>
+          <select formControlName="tipo" class="ns-input">
+            <option value="Notebook">Notebook</option>
+            <option value="Desktop">Desktop</option>
+            <option value="Impressora">Impressora</option>
+            <option value="Rede">Equipamento de Rede</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="ns-form-group">
+            <label>Marca</label>
+            <input type="text" formControlName="marca" class="ns-input" placeholder="Ex: Dell">
+          </div>
+          <div class="ns-form-group">
+            <label>Modelo</label>
+            <input type="text" formControlName="modelo" class="ns-input" placeholder="Ex: Inspiron 15">
+          </div>
+        </div>
+
+        <div class="ns-form-group">
+          <label>Número de Série / TAG</label>
+          <input type="text" formControlName="numeroSerie" class="ns-input">
+        </div>
+
+        <div class="ns-form-group">
+          <label>Observações</label>
+          <textarea formControlName="observacoes" class="ns-input ns-textarea" rows="3"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+          <button type="button" class="tcc-btn-outline" (click)="mostrandoModalNovoEquipamento = false">Cancelar</button>
+          <button type="submit" class="tcc-btn-main" [disabled]="equipamentoForm.invalid">Salvar Equipamento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
   `,
   styles: [`
     
@@ -588,10 +678,16 @@ export class NovoServico implements OnInit {
   private clienteService = inject(ClienteService);
   private messageService = inject(MessageService);
   private router = inject(Router);
+  private equipamentoService = inject(EquipamentoService);
 
   form!: FormGroup;
   clientes: Cliente[] = [];
   clientesFiltrados: any[] = [];
+
+  // Equipamento properties
+  equipamentosDoCliente: Equipamento[] = [];
+  mostrandoModalNovoEquipamento = false;
+  equipamentoForm!: FormGroup;
 
   categorias = [
     { id: 'redes', label: 'Redes', icon: 'pi pi-wifi' },
@@ -613,8 +709,78 @@ export class NovoServico implements OnInit {
       valor: ['']
     });
 
+    // Initialize equipamento form
+    this.equipamentoForm = this.fb.group({
+      tipo: ['Notebook', Validators.required],
+      marca: ['', Validators.required],
+      modelo: ['', Validators.required],
+      numeroSerie: [''],
+      observacoes: ['']
+    });
+
     // Load clientes for autocomplete
     this.carregarClientes();
+  }
+
+  salvarNovoEquipamento(): void {
+    if (this.equipamentoForm.valid) {
+      const clienteId = this.form.get('cliente')?.value?.id;
+      if (!clienteId) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Selecione um cliente antes de cadastrar um equipamento.'
+        });
+        return;
+      }
+
+      const equipamento: Equipamento = {
+        clienteId: clienteId,
+        tipo: this.equipamentoForm.get('tipo')?.value,
+        marca: this.equipamentoForm.get('marca')?.value,
+        modelo: this.equipamentoForm.get('modelo')?.value,
+        numeroSerie: this.equipamentoForm.get('numeroSerie')?.value,
+        observacoes: this.equipamentoForm.get('observacoes')?.value
+      };
+
+      this.equipamentoService.addEquipamento(equipamento).subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Equipamento cadastrado com sucesso!'
+          });
+          this.mostrandoModalNovoEquipamento = false;
+          this.equipamentoForm.reset({
+            tipo: 'Notebook'
+          });
+
+          // Reload equipment list for the selected client
+          if (clienteId) {
+            this.equipamentoService.getEquipamentosPorCliente(clienteId)
+              .subscribe({
+                next: (equipamentos) => this.equipamentosDoCliente = equipamentos,
+                error: (err) => console.error('Erro ao recarregar equipamentos', err)
+              });
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao salvar equipamento', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Ocorreu um erro ao cadastrar o equipamento. Por favor, tente novamente.'
+          });
+        }
+      });
+    } else {
+      this.equipamentoForm.markAllAsTouched();
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro de Validação',
+        detail: 'Por favor, preencha todos os campos obrigatórios corretamente'
+      });
+    }
   }
 
   isInvalid(controlName: string): boolean {
@@ -747,6 +913,9 @@ export class NovoServico implements OnInit {
 
       const categoriaValue = categoriaMap[formValue.categoria as keyof typeof categoriaMap];
 
+      // Include equipment ID if selected
+      const equipamentoId = formValue.equipamentoId || null;
+
       const servico: Servico = {
         icone: iconeMap[formValue.categoria as keyof typeof iconeMap] || 'pi pi-wrench', // Map to icon
         categoria: categoriaValue, // Properly typed
@@ -756,7 +925,9 @@ export class NovoServico implements OnInit {
         data: dataFormatada,
         duracao: formValue.duracao || '',
         valor: formValue.valor || '',
-        descricao: formValue.descricao || ''
+        descricao: formValue.descricao || '',
+        // Include equipment ID if selected
+        equipamentoId: formValue.equipamentoId || undefined
       };
 
       
@@ -806,5 +977,22 @@ export class NovoServico implements OnInit {
     const categoriaId = this.form.get('categoria')?.value;
     const categoria = this.categorias.find(c => c.id === categoriaId);
     return categoria ? categoria.icon : 'pi pi-wrench'; // Default to wrench icon
+  }
+
+  /**
+   * Handles client selection from autocomplete
+   * @param event The select event from p-autoComplete
+   */
+  aoSelecionarCliente(event: any): void {
+    const clienteSelecionado = event.value;
+    if (clienteSelecionado && clienteSelecionado.id) {
+      this.equipamentoService.getEquipamentosPorCliente(clienteSelecionado.id)
+        .subscribe({
+          next: (equipamentos) => this.equipamentosDoCliente = equipamentos,
+          error: (err) => console.error('Erro ao buscar equipamentos', err)
+        });
+    } else {
+      this.equipamentosDoCliente = [];
+    }
   }
 }

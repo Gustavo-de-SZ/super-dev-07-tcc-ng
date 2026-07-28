@@ -39,6 +39,10 @@ export class AuthService {
     }
   }
 
+  private base64url(str: string): string {
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
   // Combined user$ state (prioritizes mock authentication)
   public user$ = new Observable<any>(subscriber => {
     this.mockIsAuthenticated$.subscribe(isMockAuth => {

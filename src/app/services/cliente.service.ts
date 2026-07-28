@@ -63,7 +63,7 @@ export class ClienteService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/${email}`, {
+        return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/email/${email}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export class ClienteService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.put<Cliente>(`${this.configService.getApiUrl()}/clientes/${cliente.email}`, cliente, {
+        return this.http.put<Cliente>(`${this.configService.getApiUrl()}/clientes/email/${cliente.email}`, cliente, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export class ClienteService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.delete<void>(`${this.configService.getApiUrl()}/clientes/${email}`, {
+        return this.http.delete<void>(`${this.configService.getApiUrl()}/clientes/email/${email}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
