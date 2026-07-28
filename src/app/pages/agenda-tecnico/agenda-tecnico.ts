@@ -6,6 +6,7 @@ import { AgendaSearch } from './components/agenda-search';
 import { AgendaList } from './components/agenda-list';
 import { Agendamento } from '../../shared/models';
 import { AgendaService } from '../../services/agenda.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-agenda-tecnico',
@@ -17,6 +18,7 @@ import { AgendaService } from '../../services/agenda.service';
     AgendaSearch,
     AgendaList
     ],
+  providers: [MessageService],
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
       <header class="tcc-page-header">

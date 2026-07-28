@@ -430,10 +430,19 @@ export class EditarCliente implements OnInit {
 
     // Get client email from route parameters
     this.route.paramMap.subscribe(params => {
-      this.clienteEmail = params.get('email') || '';
-      if (this.clienteEmail) {
-        this.carregarClienteParaEdicao(this.clienteEmail);
+      const emailParam = params.get('email');
+      if (!emailParam || emailParam.toLowerCase() === 'null') {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Email do cliente inválido. Por favor, selecione um cliente válido para editar.'
+        });
+        // Redirect to the client list
+        setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
+        return;
       }
+      this.clienteEmail = emailParam;
+      this.carregarClienteParaEdicao(this.clienteEmail);
     });
   }
 
@@ -496,7 +505,7 @@ export class EditarCliente implements OnInit {
 
       // Call the service to update the cliente
       this.clienteService.updateCliente(cliente).subscribe({
-        next: (response) => {
+        next: (_) => {
           // Show success message
           this.messageService.add({
             severity: 'success',

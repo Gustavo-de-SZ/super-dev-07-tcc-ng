@@ -6,6 +6,7 @@ import { ServicosListComponent } from './components/servicos-list';
 import { RouterModule } from "@angular/router";
 import { ServicoService } from '../../services/servico.service';
 import { Servico } from '../../models/servico';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-servicos-tecnico',
@@ -17,6 +18,7 @@ import { Servico } from '../../models/servico';
     ServicosListComponent,
     RouterModule
 ],
+  providers: [MessageService],
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
       <header class="tcc-page-header">
@@ -24,7 +26,7 @@ import { Servico } from '../../models/servico';
           <h1 class="tcc-title-lg">Serviços</h1>
           <p class="tcc-subtitle">Gerencie os serviços prestados aos seus clientes</p>
         </div>
-        
+
         <button class="tcc-btn-main" routerLink="/painel/servicos/novo">
           <i class="pi pi-plus"></i> Novo Serviço
         </button>
@@ -37,7 +39,7 @@ import { Servico } from '../../models/servico';
   `,
   styles: [`
     .tcc-page-wrapper { display: flex; flex-direction: column; gap: 24px; padding: 0; }
-    
+
     .tcc-page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
     .tcc-header-title-group { display: flex; flex-direction: column; }
     .tcc-title-lg { font-size: 28px; font-weight: 700; color: var(--tcc-text-main, #0f172a); margin: 0 0 6px 0; }

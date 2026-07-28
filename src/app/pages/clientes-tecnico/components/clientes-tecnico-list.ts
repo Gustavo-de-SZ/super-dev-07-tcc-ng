@@ -9,7 +9,7 @@ import { Cliente } from '../../../models/cliente';
   imports: [CommonModule, RouterModule],
   template: `
     <div class="tcc-client-list">
-      @for (cliente of clientes; track cliente.email) {
+      @for (cliente of clientes; track trackByCliente($index, cliente)) {
         <div class="tcc-client-card">
 
           <div class="tcc-client-icon-box">
@@ -211,6 +211,17 @@ import { Cliente } from '../../../models/cliente';
 })
   export class ClientesList {
   @Input() clientes: Cliente[] = [];
+
+  /**
+   * Track function for clientes to handle cases where email might be empty/null
+   * @param index The index of the item
+   * @param item The cliente item
+   * @returns A unique identifier for tracking
+   */
+  trackByCliente(index: number, item: Cliente): any {
+    // Prefer email if available and not empty, otherwise use index to ensure uniqueness
+    return item.email && item.email.trim() !== '' ? item.email : index;
+  }
 
   formatPhone(phone: string): string {
     if (!phone) return '';

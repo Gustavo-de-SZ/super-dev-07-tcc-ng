@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 // Imports do PrimeNG (v18+)
 import { AutoCompleteModule } from 'primeng/autocomplete';
@@ -9,6 +9,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { take } from 'rxjs/operators';
 
 // Models e Services
 import { Servico } from '../../../models/servico';
@@ -26,6 +27,7 @@ import { EquipamentoService } from '../../../services/equipamento.service';
     ReactiveFormsModule,
     RouterModule,
     AutoCompleteModule,
+    DatePickerModule,
     DatePickerModule,
     ToastModule,
     InputNumberModule
@@ -49,7 +51,7 @@ import { EquipamentoService } from '../../../services/equipamento.service';
 
           <section class="ns-card">
             <h2 class="ns-card-title">
-              <i class="pi pi-file-edit text-primary"></i> Informações do Serviço
+              <i class="pi pi-file-edit text-primary"></i> Informação do Serviço
             </h2>
 
             <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('titulo')">
@@ -110,22 +112,21 @@ import { EquipamentoService } from '../../../services/equipamento.service';
                     [forceSelection]="true"
                     appendTo="body"
                     class="ns-autocomplete"
-                    inputStyleClass="ns-has-icon-left"> 
-                      <ng-template let-cliente pTemplate="item">
-                        <div class="ns-cliente-suggestion">
-                          <div class="ns-cliente-avatar"><i class="pi pi-user"></i></div>
-                          <div class="ns-cliente-info">
-                            <span class="ns-cliente-nome">{{ cliente.nome_completo || cliente.nome || 'Sem nome' }}</span>
-                            <span class="ns-cliente-empresa">{{ cliente.empresa || 'Sem empresa' }}</span>
-                          </div>
-                        </div>
-                      </ng-template>
-                  </p-autoComplete>
+                    inputStyleClass="ns-has-icon-left">
+                  <ng-template let-cliente pTemplate="item">
+                    <div class="ns-cliente-suggestion">
+                      <div class="ns-cliente-avatar"><i class="pi pi-user"></i></div>
+                      <div class="ns-cliente-info">
+                        <span class="cliente-nome">{{ cliente.nome_completo || cliente.nome || 'Sem nome' }}</span>
+                        <span class="cliente-empresa">{{ cliente.empresa || 'Sem empresa' }}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+                </p-autoComplete>
               </div>
             </div>
           </section>
 
-          <!-- Equipment Selection Section -->
           <section class="ns-card">
             <h2 class="ns-card-title">
               <i class="pi pi-box text-primary"></i> Equipamento
@@ -134,14 +135,14 @@ import { EquipamentoService } from '../../../services/equipamento.service';
             <div class="ns-form-group">
               <label>Equipamento Vinculado</label>
               <div style="display: flex; gap: 8px;">
-                <!-- The Select is disabled until a client is chosen -->
+
                 <select
                   formControlName="equipamentoId"
                   class="ns-input"
                   style="flex: 1;"
                   [disabled]="!form.get('cliente')?.value">
                   <option value="">Selecione um equipamento...</option>
-                  @for (eqp of equipamentosDoCliente; track eqp.id) {
+                  @for (eqp of equipamentosDoCliente; track trackByEquipamento($index, eqp)) {
                     <option [value]="eqp.id">
                       {{ eqp.tipo }} - {{ eqp.marca }} {{ eqp.modelo }} (S/N: {{ eqp.numeroSerie || 'N/A' }})
                     </option>
@@ -171,17 +172,17 @@ import { EquipamentoService } from '../../../services/equipamento.service';
 
             <div class="ns-form-row">
               <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('data')">
-                    <label>Data *</label>
-                    <p-datePicker
-                      formControlName="data"
-                      dateFormat="dd/mm/yy"
-                      placeholder="dd/mm/yyyy"
-                      [showIcon]="true"
-                      iconDisplay="input"
-                      appendTo="body"
-                      class="ns-datepicker"
-                    ></p-datePicker>
-                  </div>
+                <label>Data *</label>
+                <p-datePicker
+                  formControlName="data"
+                  dateFormat="dd/mm/yy"
+                  placeholder="dd/mm/yyyy"
+                  [showIcon]="true"
+                  iconDisplay="input"
+                  appendTo="body"
+                  class="ns-datepicker"
+                ></p-datePicker>
+              </div>
 
               <div class="ns-form-group">
                 <label for="duracao">Duração estimada (h:m)</label>
@@ -263,58 +264,9 @@ import { EquipamentoService } from '../../../services/equipamento.service';
 
       </div>
     </div>
-    <p-toast position="bottom-right"></p-toast>
-
-<!-- Modal for New Equipment -->
-@if (mostrandoModalNovoEquipamento) {
-  <div class="modal-overlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-    <div class="modal-content ns-card" style="width: 100%; max-width: 500px; padding: 24px; background: var(--tcc-surface);">
-      <h3 style="margin-top: 0; margin-bottom: 20px;">Cadastrar Novo Equipamento</h3>
-
-      <form [formGroup]="equipamentoForm" (ngSubmit)="salvarNovoEquipamento()">
-        <div class="ns-form-group">
-          <label>Tipo</label>
-          <select formControlName="tipo" class="ns-input">
-            <option value="Notebook">Notebook</option>
-            <option value="Desktop">Desktop</option>
-            <option value="Impressora">Impressora</option>
-            <option value="Rede">Equipamento de Rede</option>
-            <option value="Outro">Outro</option>
-          </select>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <div class="ns-form-group">
-            <label>Marca</label>
-            <input type="text" formControlName="marca" class="ns-input" placeholder="Ex: Dell">
-          </div>
-          <div class="ns-form-group">
-            <label>Modelo</label>
-            <input type="text" formControlName="modelo" class="ns-input" placeholder="Ex: Inspiron 15">
-          </div>
-        </div>
-
-        <div class="ns-form-group">
-          <label>Número de Série / TAG</label>
-          <input type="text" formControlName="numeroSerie" class="ns-input">
-        </div>
-
-        <div class="ns-form-group">
-          <label>Observações</label>
-          <textarea formControlName="observacoes" class="ns-input ns-textarea" rows="3"></textarea>
-        </div>
-
-        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-          <button type="button" class="tcc-btn-outline" (click)="mostrandoModalNovoEquipamento = false">Cancelar</button>
-          <button type="submit" class="tcc-btn-main" [disabled]="equipamentoForm.invalid">Salvar Equipamento</button>
-        </div>
-      </form>
-    </div>
-  </div>
-}
   `,
   styles: [`
-    
+
     .ns-page-container {
       padding: 24px;
       max-width: 1280px;
@@ -380,7 +332,6 @@ import { EquipamentoService } from '../../../services/equipamento.service';
       flex-direction: column;
       gap: 20px;
     }
-
 
     .ns-card {
       background-color: var(--tcc-surface, #ffffff);
@@ -505,7 +456,7 @@ import { EquipamentoService } from '../../../services/equipamento.service';
       background: transparent !important;
       box-shadow: none !important;
     }
-    
+
     /* Força o ícone nativo do datepicker a herdar a cor correta */
     ::ng-deep .ns-datepicker .p-datepicker-dropdown-icon,
     ::ng-deep .ns-datepicker .p-datepicker-input-icon {
@@ -606,7 +557,6 @@ import { EquipamentoService } from '../../../services/equipamento.service';
     }
 
 
-
     /* Fundo do painel do Datepicker e do Autocomplete */
     ::ng-deep body.tp-dark-theme .p-datepicker-panel,
     ::ng-deep body.tp-dark-theme .p-autocomplete-overlay,
@@ -639,7 +589,6 @@ import { EquipamentoService } from '../../../services/equipamento.service';
       color: var(--text-main, #f1f5f9) !important;
     }
 
-    /* Efeitos de Hover e Seleção nos dias do Datepicker */
     ::ng-deep body.tp-dark-theme .p-datepicker-day:not(.p-datepicker-day-selected):hover {
       background-color: #1e293b !important;
     }
@@ -665,11 +614,11 @@ import { EquipamentoService } from '../../../services/equipamento.service';
       width: 32px; height: 32px; border-radius: 50%;
       background: var(--primary-bg, #e2e8f0);
       display: flex; align-items: center; justify-content: center;
-      color: var(--text-muted, #64748b);
+      color: var(--tcc-text-muted, #64748b);
     }
     .ns-cliente-info { display: flex; flex-direction: column; }
     .ns-cliente-nome { font-size: 14px; font-weight: 500; color: var(--text-main, #0f172a); }
-    .ns-cliente-empresa { font-size: 11px; color: var(--text-muted, #64748b); }
+    .ns-cliente-empresa { font-size: 11px; color: var(--tcc-text-muted, #64748b); }
   `]
 })
 export class NovoServico implements OnInit {
@@ -679,6 +628,7 @@ export class NovoServico implements OnInit {
   private messageService = inject(MessageService);
   private router = inject(Router);
   private equipamentoService = inject(EquipamentoService);
+  private route = inject(ActivatedRoute);
 
   form!: FormGroup;
   clientes: Cliente[] = [];
@@ -699,6 +649,36 @@ export class NovoServico implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.initForm();
+    this.initEquipamentoForm();
+
+    // Load clientes first, then handle query params
+    this.clienteService.getClientes().subscribe({
+      next: (clientes: Cliente[]) => {
+        this.clientes = clientes.map(cliente => {
+          const nomeParaExibicao = (cliente as any).nome_completo
+            || cliente.nome
+            || '';
+          return {
+            ...cliente,
+            nome_exibicao: nomeParaExibicao
+          };
+        });
+        this.handleQueryParams();
+      },
+      error: (err) => {
+        console.error('Erro ao carregar clientes', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao carregar clientes para autocompletar'
+        });
+        this.handleQueryParams();
+      }
+    });
+  }
+
+  private initForm(): void {
     this.form = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(4)]],
       categoria: ['redes', Validators.required],
@@ -707,10 +687,11 @@ export class NovoServico implements OnInit {
       data: [new Date(), Validators.required],
       duracao: [''],
       valor: [''],
-      equipamentoId: [null] // Add this line
+      equipamentoId: [null]
     });
+  }
 
-    // Initialize equipamento form
+  private initEquipamentoForm(): void {
     this.equipamentoForm = this.fb.group({
       tipo: ['Notebook', Validators.required],
       marca: ['', Validators.required],
@@ -718,11 +699,37 @@ export class NovoServico implements OnInit {
       numeroSerie: [''],
       observacoes: ['']
     });
-
-    // Load clientes for autocomplete
-    this.carregarClientes();
   }
 
+  private handleQueryParams(): void {
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      if (params['fromAgendamento']) {
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Agendamento Convertido',
+          detail: 'Preencha os detalhes finais (como equipamento e valor) para registrar o serviço.'
+        });
+
+        this.form.patchValue({
+          titulo: params['titulo'] || '',
+        });
+
+        if (params['cliente'] && this.clientes.length > 0) {
+          const clientName = params['cliente'];
+          const foundClient = this.clientes.find(c => c.nome === clientName);
+          if (foundClient) {
+            this.form.patchValue({
+              cliente: foundClient
+            });
+            // Trigger the client selection to load equipment
+            this.aoSelecionarCliente({ value: foundClient });
+          }
+        }
+      }
+    });
+  }
+
+  // Rest of the methods remain the same...
   salvarNovoEquipamento(): void {
     if (this.equipamentoForm.valid) {
       const clienteId = this.form.get('cliente')?.value?.id;
@@ -808,7 +815,8 @@ export class NovoServico implements OnInit {
       const y = data.getFullYear();
       return `${d}/${m}/${y}`;
     }
-    const str = String(data);
+
+    let str = String(data);
     if (str.toLowerCase().includes('invalid')) {
       return '—';
     }
@@ -872,11 +880,11 @@ export class NovoServico implements OnInit {
   formatarDuracao(event: any): void {
     let value = event.target.value.replace(/\D/g, '');
     if (value.length > 4) value = value.slice(0, 4);
-    
+
     if (value.length >= 3) {
       value = value.replace(/(\d{2})(\d{1,2})/, '$1:$2');
     }
-    
+
     event.target.value = value;
     this.form.get('duracao')?.setValue(value);
   }
@@ -931,7 +939,6 @@ export class NovoServico implements OnInit {
         equipamentoId: formValue.equipamentoId || undefined
       };
 
-      
       // Call the service to save the service
       this.servicoService.addServico(servico).subscribe({
         next: (response) => {
@@ -995,5 +1002,16 @@ export class NovoServico implements OnInit {
     } else {
       this.equipamentosDoCliente = [];
     }
+  }
+
+  /**
+   * Track function for equipment items to handle cases where id might be empty/null
+   * @param index The index of the item
+   * @param item The equipment item
+   * @returns A unique identifier for tracking
+   */
+  trackByEquipamento(index: number, item: Equipamento): any {
+    // Prefer id if available, otherwise use index to ensure uniqueness
+    return item.id || index;
   }
 }
