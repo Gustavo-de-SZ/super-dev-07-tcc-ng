@@ -706,7 +706,8 @@ export class NovoServico implements OnInit {
       cliente: [null, Validators.required],
       data: [new Date(), Validators.required],
       duracao: [''],
-      valor: ['']
+      valor: [''],
+      equipamentoId: [null] // Add this line
     });
 
     // Initialize equipamento form
@@ -743,7 +744,7 @@ export class NovoServico implements OnInit {
         observacoes: this.equipamentoForm.get('observacoes')?.value
       };
 
-      this.equipamentoService.addEquipamento(equipamento).subscribe({
+      this.equipamentoService.addEquipamento(equipamento, clienteId).subscribe({
         next: (response) => {
           this.messageService.add({
             severity: 'success',
