@@ -37,7 +37,7 @@ canActivate: [appAuthGuardFn, profileGuardFn],
     ]},
 {
     path: 'admin',
-    canActivate: [appAuthGuardFn],
+    canActivate: [appAuthGuardFn, profileGuardFn],
     loadComponent: () => import('./core/painel-layout/layout-admin/layout-admin').then(m => m.PainelAdminLayout),
     children: [
       { path: 'dashboard', loadComponent: () => import('./pages/admin/dashboard/dashboard-admin').then(m => m.DashboardAdmin) },
@@ -52,7 +52,7 @@ canActivate: [appAuthGuardFn, profileGuardFn],
   {
     path: 'pendente-aprovacao',
     canActivate: [appAuthGuardFn],
-    loadComponent: () => import('./pages/tecnico-pendente/tecnico-pendente.component').then(m => m.TecnicoPendenteComponent)
+    loadComponent: () => import('./pages/pendente/pendente').then(m => m.PendenteComponent)
   },
   { path: '**', redirectTo: '' }
 ];

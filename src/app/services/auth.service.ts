@@ -2,7 +2,7 @@ import { Injectable, inject, InjectionToken } from '@angular/core';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { CanActivateFn, Router } from '@angular/router';
-import { map, take } from 'rxjs/operators';
+import { map, take, timeout } from 'rxjs/operators';
 
 export const REAL_AUTH0_TOKEN = new InjectionToken<any>('REAL_AUTH0_TOKEN');
 
@@ -156,7 +156,9 @@ export class AuthService {
         authorizationParams: {
           audience: 'https://api.tcc-ng.com'
         }
-      });
+      }).pipe(
+        timeout(10000)
+      );
     }
 
     // Default fallback mock token when not authenticated, to prevent hanging

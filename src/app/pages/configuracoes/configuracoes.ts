@@ -8,12 +8,13 @@ import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
 import { first, Observable } from 'rxjs';
+import { CnpjMaskDirective } from '../../shared/directives/cnpj-mask.directive';
 
 // Interface for what we receive from GET /tecnicos/me
 interface TecnicoResponse {
   nome_fantasia: string;
   email: string;
-  cpf?: string;
+  cnpj?: string;
   telefone?: string;
   descricao_servicos?: string;
   aprovado_pelo_admin?: boolean;
@@ -42,7 +43,7 @@ interface ClienteResponse {
 interface TecnicoUpdateRequest {
   nome: string; // maps to nome_fantasia in backend
   telefone?: string;
-  cpf?: string;
+  cnpj?: string;
   descricao_servicos?: string;
 }
 
@@ -57,7 +58,7 @@ interface ClienteUpdateRequest {
 @Component({
   selector: 'app-configuracoes',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputTextModule, ToastModule],
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputTextModule, ToastModule, CnpjMaskDirective],
   providers: [MessageService],
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
@@ -87,10 +88,26 @@ interface ClienteUpdateRequest {
               <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
                 <label class="tcc-label">Nome Fantasia / Seu Nome</label>
                 <input pInputText formControlName="nome_fantasia" type="text" class="w-full" />
+                @if (form.get('nome_fantasia')?.invalid && (form.get('nome_fantasia')?.dirty || form.get('nome_fantasia')?.touched)) {
+                  <p class="text-sm text-red-500">Nome fantasia é obrigatório</p>
+                }
               </div>
               <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
-                <label class="tcc-label">CPF / CNPJ</label>
-                <input pInputText formControlName="cpf" type="text" class="w-full" placeholder="000.000.000-00" />
+                <label class="tcc-label">CNPJ</label>
+                <input pInputText formControlName="cnpj" type="text" class="w-full" placeholder="00.000.000/0000-00" appCnpjMask />
+                @if (form.get('cnpj')?.invalid && (form.get('cnpj')?.dirty || form.get('cnpj')?.touched)) {
+                  <p class="text-sm text-red-500">
+                    @if (form.get('cnpj')?.hasError('required')) {
+                      CNPJ é obrigatório
+                    } @else if (form.get('cnpj')?.hasError('invalidCNPJLength')) {
+                      CNPJ deve ter 14 dígitos
+                    } @else if (form.get('cnpj')?.hasError('invalidCNPJ')) {
+                      CNPJ inválido
+                    } @else {
+                      CNPJ inválido
+                    }
+                  </p>
+                }
               </div>
               <div class="form-group" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px;">
                 <label class="tcc-label">Descrição dos Serviços</label>
@@ -146,6 +163,57 @@ export class ConfiguracoesComponent implements OnInit {
   loading = false;
   isLoadingInitialData = true;
 
+  private cnpjValidator(control: any): { [key: string]: any } | null {
+    const value = control.value;
+
+    // Allow empty values (required validator will handle empty case)
+    if (!value) {
+      return null;
+    }
+
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, '');
+
+    // Validate digit count: should be exactly 14 digits
+    if (digitsOnly.length !== 14) {
+      return { 'invalidCNPJLength': true };
+    }
+
+    // Validate first 8 digits (should not be all zeros)
+    if (digitsOnly.substring(0, 8) === '00000000') {
+      return { 'invalidCNPJ': true };
+    }
+
+    // Validate the two check digits
+    let sum = 0;
+    let weight;
+
+    // Calculate first verification digit
+    weight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    for (let i = 0; i < 12; i++) {
+      sum += parseInt(digitsOnly.charAt(i)) * weight[i];
+    }
+    let remainder = sum % 11;
+    let digit = (remainder < 2) ? 0 : 11 - remainder;
+    if (parseInt(digitsOnly.charAt(12)) !== digit) {
+      return { 'invalidCNPJ': true };
+    }
+
+    // Calculate second verification digit
+    sum = 0;
+    weight = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    for (let i = 0; i < 13; i++) {
+      sum += parseInt(digitsOnly.charAt(i)) * weight[i];
+    }
+    remainder = sum % 11;
+    digit = (remainder < 2) ? 0 : 11 - remainder;
+    if (parseInt(digitsOnly.charAt(13)) !== digit) {
+      return { 'invalidCNPJ': true };
+    }
+
+    return null;
+  }
+
   ngOnInit() {
     this.auth.user$.pipe(first()).subscribe(user => {
       if (user) {
@@ -164,7 +232,7 @@ export class ConfiguracoesComponent implements OnInit {
         email: [{value: email, disabled: true}],
         telefone: ['', Validators.required],
         nome_fantasia: ['', Validators.required],
-        cpf: [''],
+        cnpj: ['', [this.cnpjValidator]],
         descricao_servicos: ['']
       });
     } else {
@@ -193,7 +261,7 @@ export class ConfiguracoesComponent implements OnInit {
           this.form.patchValue({
             telefone: data.telefone || '',
             nome_fantasia: data.nome_fantasia || '',
-            cpf: data.cpf || '',
+            cnpj: data.cnpj || '',
             descricao_servicos: data.descricao_servicos || ''
           });
         } else {
@@ -232,14 +300,14 @@ salvarConfiguracoes() {
       ? this.profileService.atualizarPerfilTecnico({
           nome: formData.nome_fantasia,
           telefone: formData.telefone,
-          cpf: formData.cpf,
+          cnpj: formData.cnpj,
           descricao_servicos: formData.descricao_servicos
         } as TecnicoUpdateRequest)
       : this.profileService.atualizarPerfilCliente({
           nome: formData.nome_completo,
           telefone: formData.telefone,
           empresa: formData.empresa,
-          local: formData.endereco 
+          local: formData.endereco
         } as ClienteUpdateRequest);
 
     saveProfile$.pipe(
