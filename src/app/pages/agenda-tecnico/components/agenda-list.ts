@@ -16,7 +16,7 @@ import { MessageService } from 'primeng/api';
   imports: [CommonModule, RouterModule, MenuModule],
   template: `
     <div class="tcc-agenda-list">
-      @for (item of compromissos; track item.titulo) {
+      @for (item of compromissos; track trackByAgendamento($index, item)) {
         <div class="tcc-agenda-card">
           <div class="tcc-agenda-datetime-col">
             <span class="tcc-date-month">{{ getDisplayMonth(item) }}</span>
@@ -269,5 +269,16 @@ export class AgendaList {
       case 'Cancelado': return 'pi-times-circle';
       default: return 'pi-info-circle';
     }
+  }
+
+  /**
+   * Track function for agendamentos to handle cases where id might be empty/null
+   * @param index The index of the item
+   * @param item The agendamento item
+   * @returns A unique identifier for tracking
+   */
+  trackByAgendamento(index: number, item: Agendamento): any {
+    // Prefer id if available and not empty, otherwise use index to ensure uniqueness
+    return item.id && item.id.trim() !== '' ? item.id : index;
   }
 }

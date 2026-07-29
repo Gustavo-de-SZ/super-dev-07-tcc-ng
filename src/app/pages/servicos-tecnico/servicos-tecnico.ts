@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { ServicosFiltersComponent } from './components/servicos-filters';
 import { ServicosSearchComponent } from './components/servicos-search';
 import { ServicosListComponent } from './components/servicos-list';
-import { RouterModule } from "@angular/router";
-import { ServicoService } from '../../services/servico.service';
 import { Servico } from '../../models/servico';
+import { ServicoService } from '../../services/servico.service';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -17,7 +17,7 @@ import { MessageService } from 'primeng/api';
     ServicosSearchComponent,
     ServicosListComponent,
     RouterModule
-],
+  ],
   providers: [MessageService],
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
@@ -32,9 +32,9 @@ import { MessageService } from 'primeng/api';
         </button>
       </header>
 
-      <app-servicos-filters [servicos]="servicos"></app-servicos-filters>
-      <app-servicos-search></app-servicos-search>
-      <app-servicos-list [servicos]="servicos"></app-servicos-list>
+      <app-servicos-filters [servicos]="servicos" (filterChange)="onFilterChange($event)"></app-servicos-filters>
+      <app-servicos-search (searchChange)="onSearchChange($event)" (categoryChange)="onCategoryChange($event)"></app-servicos-search>
+      <app-servicos-list [servicos]="filteredServicos"></app-servicos-list>
     </div>
   `,
   styles: [`
@@ -63,16 +63,62 @@ import { MessageService } from 'primeng/api';
 })
 export class ServicosTecnico {
   servicos: Servico[] = [];
+  filteredServicos: Servico[] = [];
+  searchTerm: string = '';
+  categoryFilter: string = '';
+  selectedFilter: string = 'Todos';
 
-  constructor(private servicoService: ServicoService) {
+  constructor(private servicoService: ServicoService, private messageService: MessageService) {
     this.servicoService.getServicos().subscribe({
       next: (servicos) => {
         this.servicos = servicos;
+        this.filteredServicos = servicos;
       },
       error: (err) => {
         console.error('Erro ao carregar serviços', err);
         this.servicos = [];
+        this.filteredServicos = [];
       }
     });
+  }
+
+  onFilterChange(filter: string): void {
+    this.selectedFilter = filter;
+    this.applyFilters();
+  }
+
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    this.applyFilters();
+  }
+
+  onCategoryChange(category: string): void {
+    this.categoryFilter = category;
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    let result = [...this.servicos];
+
+    // Filter by status (selectedFilter)
+    if (this.selectedFilter !== 'Todos') {
+      result = result.filter(servico => servico.status === this.selectedFilter);
+    }
+
+    // Filter by search term (title or client name)
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(servico =>
+        servico.titulo.toLowerCase().includes(term) ||
+        servico.cliente.toLowerCase().includes(term)
+      );
+    }
+
+    // Filter by category
+    if (this.categoryFilter) {
+      result = result.filter(servico => servico.categoria === this.categoryFilter);
+    }
+
+    this.filteredServicos = result;
   }
 }

@@ -29,17 +29,23 @@ import { ClienteService } from '../../../services/cliente.service';
   providers: [MessageService],
   template: `
     <div class="ns-page-container">
-      <div class="ns-back-btn" (click)="goBack()">
-        <i class="pi pi-arrow-left"></i>
-      </div>
+  
+      <header class="ns-page-header">
+        <a routerLink="/painel/servicos" class="ns-back-btn">
+          <i class="pi pi-chevron-left"></i>
+        </a>
+        <div>
+          <h1>Editar Serviço</h1>
+          <p>Atualize as informações do serviço</p>
+        </div>
+      </header>
 
-      <main class="ns-main-content">
-        <form [formGroup]="form" (ngSubmit)="atualizarServico()" class="ns-grid-layout">
-          <div class="ns-form-column">
+      <form [formGroup]="form" (ngSubmit)="atualizarServico()" class="ns-grid-layout">
+        <main class="ns-form-column">
 
             <section class="ns-card">
               <h2 class="ns-card-title">
-                <i class="pi pi-file-edit text-primary"></i> Editar Serviço
+                <i class="pi pi-file-edit text-primary"></i> Informação do Serviço
               </h2>
 
               <div class="w-full">
@@ -161,8 +167,6 @@ import { ClienteService } from '../../../services/cliente.service';
               </div>
             </section>
 
-          </div>
-
           <aside class="ns-summary-column">
             <div class="ns-card ns-summary-card">
               <h3>Resumo</h3>
@@ -208,8 +212,8 @@ import { ClienteService } from '../../../services/cliente.service';
             </div>
           </aside>
 
-        </form>
-      </main>
+        </main>
+      </form>
 
       <p-toast position="bottom-right"></p-toast>
     </div>

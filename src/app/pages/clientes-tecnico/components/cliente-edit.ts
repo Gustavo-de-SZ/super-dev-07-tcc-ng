@@ -27,145 +27,149 @@ import { ClienteService } from '../../../services/cliente.service';
   providers: [MessageService],
   template: `
     <div class="ns-page-container">
-      <div class="ns-back-btn" (click)="goBack()">
-        <i class="pi pi-arrow-left"></i>
-      </div>
+      <!-- Replace the old ns-back-btn block with this header -->
+      <header class="ns-page-header">
+        <a routerLink="/painel/clientes" class="ns-back-btn">
+          <i class="pi pi-chevron-left"></i>
+        </a>
+        <div>
+          <h1>Editar Cliente</h1>
+          <p>Atualize as informações do cliente</p>
+        </div>
+      </header>
 
-      <main class="ns-main-content">
-        <div class="ns-grid-layout">
-          <div class="ns-form-column">
+      <div class="ns-grid-layout">
+        <main class="ns-form-column">
+          <section class="ns-card">
+            <h2 class="ns-card-title">
+              <i class="pi pi-user-edit text-primary"></i> Informações do Cliente
+            </h2>
 
-            <section class="ns-card">
-              <h2 class="ns-card-title">
-                <i class="pi pi-user-edit text-primary"></i> Editar Cliente
-              </h2>
+            <form [formGroup]="form" (ngSubmit)="atualizarCliente()">
 
-              <form [formGroup]="form" (ngSubmit)="atualizarCliente()">
-
-                <div class="ns-form-row">
-                  <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('nome')">
-                    <label>Nome *</label>
-                    <input type="text" formControlName="nome" class="ns-input" placeholder="Digite o nome completo">
-                    <div *ngIf="isInvalid('nome')" class="ns-error-message">
-                      O nome é obrigatório
-                    </div>
-                  </div>
-
-                  <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('email')">
-                    <label>E-mail *</label>
-                    <input type="email" formControlName="email" class="ns-input" placeholder="Digite o e-mail">
-                    <div *ngIf="isInvalid('email')" class="ns-error-message">
-                      O e-mail é obrigatório e deve ser válido
-                    </div>
+              <div class="ns-form-row">
+                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('nome')">
+                  <label>Nome *</label>
+                  <input type="text" formControlName="nome" class="ns-input" placeholder="Digite o nome completo">
+                  <div *ngIf="isInvalid('nome')" class="ns-error-message">
+                    O nome é obrigatório
                   </div>
                 </div>
 
-                <div class="ns-form-row">
-                  <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('telefone')">
-                    <label>Telefone</label>
-                    <input type="tel" formControlName="telefone" class="ns-input" placeholder="(xx) xxxxx-xxxx">
+                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('email')">
+                  <label>E-mail *</label>
+                  <input type="email" formControlName="email" class="ns-input" placeholder="Digite o e-mail">
+                  <div *ngIf="isInvalid('email')" class="ns-error-message">
+                    O e-mail é obrigatório e deve ser válido
                   </div>
-
-                  <div class="ns-form-group">
-                    <label>Empresa</label>
-                    <input type="text" formControlName="empresa" class="ns-input" placeholder="Nome da empresa">
-                  </div>
-                </div>
-
-                <div class="ns-form-row">
-                  <div class="ns-form-group">
-                    <label>Local</label>
-                    <input type="text" formControlName="local" class="ns-input" placeholder="Cidade, estado">
-                  </div>
-
-                  <div class="ns-form-group">
-                    <label>Avaliação</label>
-                    <input type="number" formControlName="avaliacao" class="ns-input" min="0" max="5" step="0.1" placeholder="0.0 a 5.0">
-                  </div>
-                </div>
-
-                <div class="ns-form-row">
-                  <div class="ns-form-group">
-                    <label>Serviços Ativos</label>
-                    <input type="number" formControlName="servicosAtivos" class="ns-input" min="0" placeholder="Número de serviços ativos">
-                  </div>
-
-                  <div class="ns-form-group">
-                    <label>Serviços Concluídos</label>
-                    <input type="number" formControlName="servicosConcluidos" class="ns-input" min="0" placeholder="Número de serviços concluídos">
-                  </div>
-                </div>
-
-                <div class="ns-form-row">
-                  <div class="ns-form-group">
-                    <label>Tipo de Cliente</label>
-                    <p-select formControlName="tipoCliente" [options]="tiposCliente" optionLabel="label" placeholder="Selecione o tipo" class="ns-select"></p-select>
-                  </div>
-
-                  <div class="ns-form-group">
-                    <label>Status</label>
-                    <p-select formControlName="status" [options]="statusOptions" optionLabel="label" placeholder="Selecione o status" class="ns-select"></p-select>
-                  </div>
-                </div>
-
-              </form>
-            </section>
-
-          </div>
-
-          <aside class="ns-summary-column">
-            <div class="ns-card ns-summary-card">
-              <h3>Resumo do Cliente</h3>
-
-              <div class="ns-summary-list">
-                <div class="ns-summary-item">
-                  <span class="label">Nome</span>
-                  <span class="value ns-truncate" [title]="form.get('nome')?.value">{{ form.get('nome')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">E-mail</span>
-                  <span class="value ns-truncate" [title]="form.get('email')?.value">{{ form.get('email')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">Telefone</span>
-                  <span class="value">{{ form.get('telefone')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">Empresa</span>
-                  <span class="value ns-truncate" [title]="form.get('empresa')?.value">{{ form.get('empresa')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">Local</span>
-                  <span class="value ns-truncate" [title]="form.get('local')?.value">{{ form.get('local')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">Avaliação</span>
-                  <span class="value">{{ form.get('avaliacao')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">Serviços Ativos</span>
-                  <span class="value">{{ form.get('servicosAtivos')?.value || '—' }}</span>
-                </div>
-                <div class="ns-summary-item">
-                  <span class="label">Serviços Concluídos</span>
-                  <span class="value">{{ form.get('servicosConcluidos')?.value || '—' }}</span>
                 </div>
               </div>
 
-              <div class="ns-summary-divider"></div>
+              <div class="ns-form-row">
+                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('telefone')">
+                  <label>Telefone</label>
+                  <input type="tel" formControlName="telefone" class="ns-input" placeholder="(xx) xxxxx-xxxx">
+                </div>
 
-              <div class="ns-summary-actions">
-                <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarCliente()">
-                  Atualizar Cliente
-                </button>
-                <button type="button" routerLink="/painel/clientes" class="ns-btn-cancel">
-                  Cancelar
-                </button>
+                <div class="ns-form-group">
+                  <label>Empresa</label>
+                  <input type="text" formControlName="empresa" class="ns-input" placeholder="Nome da empresa">
+                </div>
+              </div>
+
+              <div class="ns-form-row">
+                <div class="ns-form-group">
+                  <label>Local</label>
+                  <input type="text" formControlName="local" class="ns-input" placeholder="Cidade, estado">
+                </div>
+
+                <div class="ns-form-group">
+                  <label>Avaliação</label>
+                  <input type="number" formControlName="avaliacao" class="ns-input" min="0" max="5" step="0.1" placeholder="0.0 a 5.0">
+                </div>
+              </div>
+
+              <div class="ns-form-row">
+                <div class="ns-form-group">
+                  <label>Serviços Ativos</label>
+                  <input type="number" formControlName="servicosAtivos" class="ns-input" min="0" placeholder="Número de serviços ativos">
+                </div>
+
+                <div class="ns-form-group">
+                  <label>Serviços Concluídos</label>
+                  <input type="number" formControlName="servicosConcluidos" class="ns-input" min="0" placeholder="Número de serviços concluídos">
+                </div>
+              </div>
+
+              <div class="ns-form-row">
+                <div class="ns-form-group">
+                  <label>Tipo de Cliente</label>
+                  <p-select formControlName="tipoCliente" [options]="tiposCliente" optionLabel="label" placeholder="Selecione o tipo" class="ns-select"></p-select>
+                </div>
+
+                <div class="ns-form-group">
+                  <label>Status</label>
+                  <p-select formControlName="status" [options]="statusOptions" optionLabel="label" placeholder="Selecione o status" class="ns-select"></p-select>
+                </div>
+              </div>
+
+            </form>
+          </section>
+        </main>
+
+        <aside class="ns-summary-column">
+          <!-- ... Keep summary aside ... -->
+          <div class="ns-card ns-summary-card">
+            <h3>Resumo do Cliente</h3>
+
+            <div class="ns-summary-list">
+              <div class="ns-summary-item">
+                <span class="label">Nome</span>
+                <span class="value ns-truncate" [title]="form.get('nome')?.value">{{ form.get('nome')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">E-mail</span>
+                <span class="value ns-truncate" [title]="form.get('email')?.value">{{ form.get('email')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Telefone</span>
+                <span class="value">{{ form.get('telefone')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Empresa</span>
+                <span class="value ns-truncate" [title]="form.get('empresa')?.value">{{ form.get('empresa')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Local</span>
+                <span class="value ns-truncate" [title]="form.get('local')?.value">{{ form.get('local')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Avaliação</span>
+                <span class="value">{{ form.get('avaliacao')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Serviços Ativos</span>
+                <span class="value">{{ form.get('servicosAtivos')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Serviços Concluídos</span>
+                <span class="value">{{ form.get('servicosConcluidos')?.value || '—' }}</span>
               </div>
             </div>
-          </aside>
-        </div>
-      </main>
+
+            <div class="ns-summary-divider"></div>
+
+            <div class="ns-summary-actions">
+              <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarCliente()">
+                Atualizar Cliente
+              </button>
+              <button type="button" routerLink="/painel/clientes" class="ns-btn-cancel">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
 
       <p-toast position="bottom-right"></p-toast>
     </div>

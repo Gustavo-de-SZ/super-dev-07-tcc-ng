@@ -1,12 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
 import { Cliente } from '../../../models/cliente';
 
 @Component({
   selector: 'app-clientes-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MenuModule],
   template: `
     <div class="tcc-client-list">
       @for (cliente of clientes; track trackByCliente($index, cliente)) {
@@ -44,8 +46,12 @@ import { Cliente } from '../../../models/cliente';
           </div>
 
           <div class="tcc-client-actions">
-            <button class="icon-btn" title="Editar" [routerLink]="['/painel/clientes/', cliente.email, 'edit']"><i class="pi pi-pencil"></i></button>
-            <button class="tcc-btn-outline small">
+            <button class="icon-btn" title="Editar" [routerLink]="['/painel/clientes/', cliente.email, 'edit']">
+              <i class="pi pi-pencil"></i>
+            </button>
+
+            <!-- Modify the button to trigger the menu -->
+            <button class="tcc-btn-outline small" (click)="menu.toggle($event); setMenuContext(cliente)">
               Ações <i class="pi pi-chevron-down"></i>
             </button>
           </div>
@@ -53,6 +59,9 @@ import { Cliente } from '../../../models/cliente';
         </div>
       }
     </div>
+
+    <!-- Add the menu component -->
+    <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
   `,
   styles: [`
     .tcc-client-list { display: flex; flex-direction: column; gap: 12px; }
@@ -211,6 +220,35 @@ import { Cliente } from '../../../models/cliente';
 })
   export class ClientesList {
   @Input() clientes: Cliente[] = [];
+
+  private router = inject(Router);
+
+  menuItems: MenuItem[] = [];
+  selectedCliente: Cliente | null = null;
+
+  setMenuContext(cliente: Cliente) {
+    this.selectedCliente = cliente;
+    this.menuItems = [
+      {
+        label: 'Ver Detalhes',
+        icon: 'pi pi-eye',
+        command: () => {
+          if (this.selectedCliente) {
+            this.router.navigate(['/painel/clientes', this.selectedCliente.email]);
+          }
+        }
+      },
+      {
+        label: 'Editar Cliente',
+        icon: 'pi pi-pencil',
+        command: () => {
+          if (this.selectedCliente) {
+            this.router.navigate(['/painel/clientes', this.selectedCliente.email, 'edit']);
+          }
+        }
+      }
+    ];
+  }
 
   /**
    * Track function for clientes to handle cases where email might be empty/null

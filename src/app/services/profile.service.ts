@@ -7,10 +7,15 @@ import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
 
 interface Tecnico {
-  nome: string;
+  id: number;
+  usuario_id: number;
+  nome_fantasia: string;
+  cpf?: string;
+  telefone?: string;
+  descricao_servicos?: string;
+  aprovado_pelo_admin: boolean;
+  criado_em: string;
   email: string;
-  especialidadePrincipal?: string;
-  // outros campos específicos de técnico
 }
 
 interface ProfileResponse {
@@ -68,15 +73,15 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(3000),
+          timeout(8000),
           tap(res => {
             this.profileState$.next({ checked: true, exists: res.exists, type: res.type });
           }),
           catchError(err => {
-            console.error('Erro ao verificar perfil, usando fallback', err);
-            // Fallback for iframe preview or when backend is down
-            // Assume no profile exists to allow completion flow to proceed
-            return of({ exists: false, type: null as any });
+            console.error('Erro ao verificar perfil', err);
+            // On error, return last known state to prevent incorrect redirects
+            // This avoids sending users to completion page on temporary failures
+            return of(this.profileState$.value);
           })
         );
       })
