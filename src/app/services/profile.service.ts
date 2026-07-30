@@ -101,8 +101,8 @@ export class ProfileService {
     );
   }
 
-  setPerfilCriado(type: 'cliente' | 'tecnico' | 'admin'): void {
-    this.profileState$.next({ checked: true, exists: true, type });
+  setPerfilCriado(type: 'cliente' | 'tecnico' | 'admin', aprovado?: boolean): void {
+    this.profileState$.next({ checked: true, exists: true, type, aprovado });
   }
 
   clearProfileState(): void {

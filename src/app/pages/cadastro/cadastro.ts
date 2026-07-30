@@ -1052,7 +1052,7 @@ export class Cadastro implements OnInit {
         if (result) { // Only proceed if we didn't redirect due to existing profile
           // Local persistence and state update
           localStorage.setItem(`tcc_profile_completed_${result.email}`, 'true');
-          this.profileService.setPerfilCriado('tecnico');
+          this.profileService.setPerfilCriado('tecnico', result.res.aprovado_pelo_admin);
           this.messageService.add({
             severity: 'success',
             summary: 'Cadastro Concluído',
@@ -1060,7 +1060,12 @@ export class Cadastro implements OnInit {
             life: 3000
           });
           setTimeout(() => {
-            this.router.navigate(['/painel/dashboard']);
+            // Navigate to appropriate page based on approval status
+            if (result.res.aprovado_pelo_admin) {
+              this.router.navigate(['/painel/dashboard']);
+            } else {
+              this.router.navigate(['/pendente-aprovacao']);
+            }
           }, 1500);
         }
         this.loading = false;

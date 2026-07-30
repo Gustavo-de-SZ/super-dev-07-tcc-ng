@@ -28,6 +28,18 @@ export const profileGuardFn: CanActivateFn = (route, state) => {
            return false;
         }
 
+        // Regra 4: Cliente tentando acessar área do técnico
+        if (res.type === 'cliente' && state.url.startsWith('/painel')) {
+           router.navigate(['/cliente/inicio']);
+           return false;
+        }
+
+        // Regra 5: Técnico tentando acessar área do cliente
+        if (res.type === 'tecnico' && state.url.startsWith('/cliente')) {
+           router.navigate(['/painel/dashboard']);
+           return false;
+        }
+
         return true;
       }
 
