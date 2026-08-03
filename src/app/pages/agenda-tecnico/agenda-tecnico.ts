@@ -18,7 +18,7 @@ import { MessageService } from 'primeng/api';
     AgendaSearch,
     AgendaList
   ],
-  providers: [MessageService],
+  
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
       <header class="tcc-page-header">
@@ -32,7 +32,7 @@ import { MessageService } from 'primeng/api';
         </button>
       </header>
 
-      <app-agenda-filters (filterChange)="onFilterChange($event)"></app-agenda-filters>
+      <app-agenda-filters [compromissos]="compromissos" (filterChange)="onFilterChange($event)"></app-agenda-filters>
       <app-agenda-search (searchChange)="onSearchChange($event)" (typeChange)="onTypeChange($event)"></app-agenda-search>
       <app-agenda-list [compromissos]="filteredCompromissos"></app-agenda-list>
     </div>

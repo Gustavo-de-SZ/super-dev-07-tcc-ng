@@ -14,6 +14,7 @@ import { Servico } from '../../../models/servico';
 import { ServicoService } from '../../../services/servico.service';
 import { Cliente } from '../../../models/cliente';
 import { ClienteService } from '../../../services/cliente.service';
+import { FinanceiroService } from '../../../services/financeiro.service';
 
 @Component({
   selector: 'app-editar-servico',
@@ -26,7 +27,7 @@ import { ClienteService } from '../../../services/cliente.service';
     DatePickerModule,
     ToastModule
   ],
-  providers: [MessageService],
+  
   template: `
     <div class="ns-page-container">
   
@@ -40,7 +41,7 @@ import { ClienteService } from '../../../services/cliente.service';
         </div>
       </header>
 
-      <form [formGroup]="form" (ngSubmit)="atualizarServico()" class="ns-grid-layout">
+      <div class="ns-grid-layout" [formGroup]="form">
         <main class="ns-form-column">
 
             <section class="ns-card">
@@ -143,7 +144,7 @@ import { ClienteService } from '../../../services/cliente.service';
                     <i class="pi pi-clock ns-icon-left"></i>
                     <input
                       id="duracao"
-                      type="text"
+                    type="time"
                       formControlName="duracao"
                       class="ns-input ns-has-icon-left"
                       placeholder="Ex: 2h"
@@ -157,10 +158,11 @@ import { ClienteService } from '../../../services/cliente.service';
                     <span class="ns-prefix-left">R$</span>
                     <input
                       id="valor"
-                      type="text"
+                      type="number"
+                      step="0.01"
                       formControlName="valor"
                       class="ns-input ns-has-icon-left"
-                      placeholder="0,00"
+                      placeholder="0.00"
                     />
                   </div>
                 </div>
@@ -210,13 +212,8 @@ import { ClienteService } from '../../../services/cliente.service';
                 Cancelar
               </button>
             </div>
-          </aside>
+                          </aside>
 
-        </main>
-      </form>
-
-      <p-toast position="bottom-right"></p-toast>
-    </div>
   `,
   styles: [`
 
@@ -580,6 +577,7 @@ export class EditarServico implements OnInit {
   private fb = inject(FormBuilder);
   private servicoService = inject(ServicoService);
   private clienteService = inject(ClienteService);
+  private financeiroService = inject(FinanceiroService);
   private messageService = inject(MessageService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -797,6 +795,23 @@ export class EditarServico implements OnInit {
       // Call the service to update the service
       this.servicoService.updateServico(servico).subscribe({
         next: (response) => {
+          // Update transaction in financeiro
+          const transacao = {
+            titulo: `Pagamento: ${servico.titulo}`,
+            cliente: servico.cliente,
+            data: servico.data,
+            valor: parseFloat(servico.valor.toString()) || 0,
+            status: servico.status === 'Concluído' ? 'Pago' as const : 'Pendente' as const
+          };
+          this.financeiroService.updateTransacao(transacao).subscribe({
+            next: () => console.log('Transação atualizada no financeiro'),
+            error: (err) => {
+              if (err.status === 404) {
+                 this.financeiroService.addTransacao(transacao).subscribe();
+              }
+            }
+          });
+
           // Show success message
           this.messageService.add({
             severity: 'success',

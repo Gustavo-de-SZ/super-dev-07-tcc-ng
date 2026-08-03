@@ -8,8 +8,8 @@ import { AuthService } from '@auth0/auth0-angular';
 
 export interface ClientesStats {
   total: number;
-  ativosEsteMes: number;
-  novosEsteMes: number;
+  ativos: number;
+  inativos: number;
 }
 
 @Injectable({
@@ -131,7 +131,8 @@ export class ClienteService {
     );
   }
 
-  updateCliente(cliente: Cliente): Observable<Cliente> {
+  updateCliente(cliente: Cliente, originalId?: string): Observable<Cliente> {
+    const id = originalId || cliente.email || cliente.id || cliente.nome;
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -139,7 +140,7 @@ export class ClienteService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.put<Cliente>(`${this.configService.getApiUrl()}/clientes/email/${cliente.email}`, cliente, {
+        return this.http.put<Cliente>(`${this.configService.getApiUrl()}/clientes/email/${id}`, cliente, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

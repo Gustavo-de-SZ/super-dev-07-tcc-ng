@@ -18,7 +18,7 @@ import { MessageService } from 'primeng/api';
     ServicosListComponent,
     RouterModule
   ],
-  providers: [MessageService],
+  
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
       <header class="tcc-page-header">

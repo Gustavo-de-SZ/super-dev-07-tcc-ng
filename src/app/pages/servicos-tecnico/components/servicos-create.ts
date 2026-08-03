@@ -18,6 +18,7 @@ import { Cliente } from '../../../models/cliente';
 import { ClienteService } from '../../../services/cliente.service';
 import { Equipamento } from '../../../models/equipamento';
 import { EquipamentoService } from '../../../services/equipamento.service';
+import { FinanceiroService } from '../../../services/financeiro.service';
 
 @Component({
   selector: 'app-novo-servico',
@@ -32,7 +33,7 @@ import { EquipamentoService } from '../../../services/equipamento.service';
     ToastModule,
     InputNumberModule
   ],
-  providers: [MessageService],
+  
   template: `
     <div class="ns-page-container">
       <header class="ns-page-header">
@@ -140,7 +141,7 @@ import { EquipamentoService } from '../../../services/equipamento.service';
                   formControlName="equipamentoId"
                   class="ns-input"
                   style="flex: 1;"
-                  [disabled]="!form.get('cliente')?.value">
+                  >
                   <option value="">Selecione um equipamento...</option>
                   @for (eqp of equipamentosDoCliente; track trackByEquipamento($index, eqp)) {
                     <option [value]="eqp.id">
@@ -190,11 +191,11 @@ import { EquipamentoService } from '../../../services/equipamento.service';
                   <i class="pi pi-clock ns-icon-left"></i>
                   <input
                     id="duracao"
-                    type="text"
+                    type="time"
                     formControlName="duracao"
                     class="ns-input ns-has-icon-left"
                     placeholder="Ex: 02:30"
-                    (input)="formatarDuracao($event)"
+                    
                   />
                 </div>
               </div>
@@ -202,15 +203,14 @@ import { EquipamentoService } from '../../../services/equipamento.service';
               <div class="ns-form-group">
                 <label for="valor">Valor (R$)</label>
                 <div class="ns-input-icon-wrapper">
-                  <p-inputNumber
+                  <input
                     id="valor"
+                    type="number"
+                    step="0.01"
                     formControlName="valor"
-                    mode="currency"
-                    currency="BRL"
-                    locale="pt-BR"
-                    styleClass="ns-inputnumber w-full"
-                    placeholder="R$ 0,00"
-                  ></p-inputNumber>
+                    class="ns-input ns-has-icon-left"
+                    placeholder="0.00"
+                  />
                 </div>
               </div>
             </div>
@@ -262,6 +262,55 @@ import { EquipamentoService } from '../../../services/equipamento.service';
           </div>
         </aside>
 
+      </div>
+    </div>
+
+    <!-- Modal Novo Equipamento -->
+    <div class="tcc-modal-overlay" *ngIf="mostrandoModalNovoEquipamento" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+      <div class="tcc-modal" style="background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);" (click)="$event.stopPropagation()">
+        <div class="tcc-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
+          <h3 style="margin: 0; font-size: 1.25rem; color: #1e293b; font-weight: 600;"><i class="pi pi-box"></i> Novo Equipamento</h3>
+          <button class="tcc-close-btn" style="background: transparent; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;" (click)="mostrandoModalNovoEquipamento = false">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+        
+        <form [formGroup]="equipamentoForm" (ngSubmit)="salvarNovoEquipamento()">
+          <div class="tcc-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="tcc-form-group">
+              <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Tipo de Equipamento</label>
+              <input type="text" formControlName="tipo" class="tcc-input" placeholder="Ex: Ar Condicionado, Computador" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
+            </div>
+            
+            <div class="tcc-form-row" style="display: flex; gap: 16px;">
+              <div class="tcc-form-group" style="flex: 1;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Marca</label>
+                <input type="text" formControlName="marca" class="tcc-input" placeholder="Ex: Samsung, Dell" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              </div>
+              <div class="tcc-form-group" style="flex: 1;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Modelo</label>
+                <input type="text" formControlName="modelo" class="tcc-input" placeholder="Ex: Split 12000 BTUs" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              </div>
+            </div>
+            
+            <div class="tcc-form-group">
+              <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Número de Série</label>
+              <input type="text" formControlName="numeroSerie" class="tcc-input" placeholder="Ex: SN123456789" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
+            </div>
+            
+            <div class="tcc-form-group">
+              <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Observações</label>
+              <textarea formControlName="observacoes" class="tcc-input" rows="3" placeholder="Detalhes adicionais do equipamento" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
+            </div>
+          </div>
+          
+          <div class="tcc-modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+            <button type="button" class="tcc-btn-secondary" style="padding: 8px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer;" (click)="mostrandoModalNovoEquipamento = false">Cancelar</button>
+            <button type="submit" class="tcc-btn-primary" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;" [disabled]="equipamentoForm.invalid">
+              <i class="pi pi-save"></i> Salvar
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   `,
@@ -628,6 +677,7 @@ export class NovoServico implements OnInit {
   private messageService = inject(MessageService);
   private router = inject(Router);
   private equipamentoService = inject(EquipamentoService);
+  private financeiroService = inject(FinanceiroService);
   private route = inject(ActivatedRoute);
 
   form!: FormGroup;
@@ -942,6 +992,19 @@ export class NovoServico implements OnInit {
       // Call the service to save the service
       this.servicoService.addServico(servico).subscribe({
         next: (response) => {
+          // Add transaction to financeiro
+          const transacao = {
+            titulo: `Pagamento: ${servico.titulo}`,
+            cliente: servico.cliente,
+            data: servico.data,
+            valor: parseFloat(servico.valor.toString()) || 0,
+            status: servico.status === 'Concluído' ? 'Pago' as const : 'Pendente' as const
+          };
+          this.financeiroService.addTransacao(transacao).subscribe({
+            next: () => console.log('Transação registrada no financeiro'),
+            error: (err) => console.error('Erro ao registrar transação', err)
+          });
+
           // Show success message
           this.messageService.add({
             severity: 'success',

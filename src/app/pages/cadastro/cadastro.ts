@@ -29,9 +29,9 @@ import { HttpClient } from '@angular/common/http';
     PhoneMaskDirective,
     CnpjMaskDirective
   ],
-  providers: [MessageService],
+  
   template: `
-    <p-toast></p-toast>
+    
 
     <div class="cd-layout">
 

@@ -10,7 +10,7 @@ import { StatCard } from '../../../shared/models';
   standalone: true,
   imports: [CommonModule, RouterModule, StatsGridComponent],
   template: `
-    <div class="tcc-fade-in tcc-p-lg">
+    <div class="tcc-fade-in tcc-p-lg max-w-7xl mx-auto">
       <section class="tcc-gap-md mb-8">
         <div>
           <h1 class="tcc-title-lg">Visão Geral - Admin</h1>
@@ -22,19 +22,7 @@ import { StatCard } from '../../../shared/models';
 
       <ng-template #loadingState>
         <section class="tcc-grid-auto">
-          <!-- Esqueletos tcc-card-base animados -->
-          <div class="tcc-card-base animate-pulse">
-            <div class="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
-            <div class="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>
-          <!-- (Repita 3x) -->
-          <div class="tcc-card-base animate-pulse">
-            <div class="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
-            <div class="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
-            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>
-          <div class="tcc-card-base animate-pulse">
+          <div *ngFor="let item of [1, 2, 3]" class="tcc-card-base animate-pulse">
             <div class="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
             <div class="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
             <div class="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -42,17 +30,19 @@ import { StatCard } from '../../../shared/models';
         </section>
       </ng-template>
 
-      <div class="tcc-card-base mt-8">
-        <h2 class="tcc-title-md mb-4">Ações Rápidas</h2>
-        <div class="tcc-grid-2-1">
-          <button routerLink="/admin/tecnicos" class="tcc-btn-outline" style="justify-content: flex-start; padding: 16px; height: auto;">
-             <div class="flex items-center gap-4">
-               <i class="pi pi-check-circle text-blue-500 text-2xl"></i>
-               <div style="text-align: left;">
-                 <p class="font-medium text-gray-900 m-0">Aprovar Técnicos</p>
-                 <p class="text-sm text-gray-500 m-0">Analise cadastros pendentes na plataforma</p>
-               </div>
-             </div>
+      <div class="tcc-card-base mt-8 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-semibold text-gray-800 m-0">Ações Rápidas</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <button routerLink="/admin/tecnicos" class="flex items-start gap-4 p-5 rounded-xl border border-gray-200 bg-white hover:border-blue-500 hover:shadow-md transition-all duration-200 text-left w-full group">
+            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <i class="pi pi-user-plus text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="font-semibold text-gray-900 m-0 mb-1 group-hover:text-blue-700 transition-colors">Aprovar Técnicos</p>
+              <p class="text-sm text-gray-500 m-0 leading-relaxed">Analise e gerencie cadastros pendentes de profissionais na plataforma.</p>
+            </div>
           </button>
         </div>
       </div>
@@ -68,7 +58,6 @@ export class DashboardAdmin implements OnInit {
   ngOnInit() {
     this.adminService.getEstatisticasDashboard().subscribe({
       next: (data) => {
-        // Conversão dos dados em StatCard pro Componente Genérico
         this.statsData = [
           {
             titulo: 'Técnicos Pendentes', valor: data.pendentes.toString(),

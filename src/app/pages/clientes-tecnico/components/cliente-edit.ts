@@ -1,3 +1,6 @@
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { HttpClient } from '@angular/common/http';
+import { timeout, TimeoutError } from 'rxjs';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -17,6 +20,7 @@ import { ClienteService } from '../../../services/cliente.service';
   selector: 'app-editar-cliente',
   standalone: true,
   imports: [
+    AutoCompleteModule,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
@@ -24,7 +28,7 @@ import { ClienteService } from '../../../services/cliente.service';
     SelectModule,
     ToastModule
   ],
-  providers: [MessageService],
+  
   template: `
     <div class="ns-page-container">
       <!-- Replace the old ns-back-btn block with this header -->
@@ -80,7 +84,17 @@ import { ClienteService } from '../../../services/cliente.service';
               <div class="ns-form-row">
                 <div class="ns-form-group">
                   <label>Local</label>
-                  <input type="text" formControlName="local" class="ns-input" placeholder="Cidade, estado">
+                  <p-autoComplete
+                      id="editLocal"
+                      formControlName="local"
+                      [suggestions]="filteredCidades"
+                      (completeMethod)="filterCidades($event)"
+                      field="label"
+                      placeholder="Ex: São Paulo - SP"
+                      inputStyleClass="ns-input"
+                      [styleClass]="isInvalid('local') ? 'ns-input-error' : ''"
+                      autocomplete="off"
+                    ></p-autoComplete>
                 </div>
 
                 <div class="ns-form-group">
@@ -171,7 +185,7 @@ import { ClienteService } from '../../../services/cliente.service';
         </aside>
       </div>
 
-      <p-toast position="bottom-right"></p-toast>
+      
     </div>
   `,
   styles: [`
@@ -396,6 +410,11 @@ import { ClienteService } from '../../../services/cliente.service';
   `]
 })
 export class EditarCliente implements OnInit {
+  cidades: any[] = [];
+  filteredCidades: any[] = [];
+  private readonly http = inject(HttpClient);
+  
+  
   private fb = inject(FormBuilder);
   private clienteService = inject(ClienteService);
   private messageService = inject(MessageService);
@@ -419,9 +438,10 @@ export class EditarCliente implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.carregarCidades();
     this.form = this.fb.group({
       nome: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.email]],
       telefone: [''],
       empresa: [''],
       local: [''],
@@ -468,7 +488,7 @@ export class EditarCliente implements OnInit {
           email: cliente.email,
           telefone: cliente.telefone,
           empresa: cliente.empresa,
-          local: cliente.local,
+          local: cliente.local ? { label: cliente.local, value: cliente.local } : null,
           avaliacao: cliente.avaliacao,
           servicosAtivos: cliente.servicosAtivos,
           servicosConcluidos: cliente.servicosConcluidos,
@@ -476,7 +496,7 @@ export class EditarCliente implements OnInit {
           status: this.statusOptions.find(s => s.value === cliente.status) || null
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao carregar cliente para edição', err);
         this.messageService.add({
           severity: 'error',
@@ -493,9 +513,12 @@ export class EditarCliente implements OnInit {
     if (this.form.valid) {
       // Map form values to Cliente interface
       const formValue = this.form.value;
+      if (formValue.local && typeof formValue.local === "object") {
+        formValue.local = (formValue.local as any).value;
+      }
 
       const cliente: Cliente = {
-        email: this.clienteEmail, // Mantemos o email original (usado como ID)
+        email: formValue.email, // Usamos o email do form
         nome: formValue.nome,
         empresa: formValue.empresa,
         avaliacao: formValue.avaliacao,
@@ -508,7 +531,7 @@ export class EditarCliente implements OnInit {
       };
 
       // Call the service to update the cliente
-      this.clienteService.updateCliente(cliente).subscribe({
+      this.clienteService.updateCliente(cliente, this.clienteEmail).subscribe({
         next: (_) => {
           // Show success message
           this.messageService.add({
@@ -519,7 +542,7 @@ export class EditarCliente implements OnInit {
           // Navigate to clientes list page
           setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
         },
-        error: (err) => {
+        error: (err: any) => {
           // Log error for debugging (acceptable use of console.error)
           console.error('Erro ao atualizar cliente', err);
           // Show error message to user
@@ -540,4 +563,52 @@ export class EditarCliente implements OnInit {
       });
     }
   }
-}
+
+  carregarCidades() {
+    this.http.get<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
+      .pipe(timeout(20000))
+      .subscribe({
+        next: (data: any[]) => {
+          this.cidades = data
+            .filter((municipio: any) => municipio.microrregiao)
+            .map((municipio: any) => {
+              const estadoSigla = municipio.microrregiao?.mesorregiao?.UF?.sigla ?? '';
+              const label = estadoSigla
+                ? `${municipio.nome} - ${estadoSigla}`
+                : municipio.nome;
+              return { label, value: label };
+            });
+          this.filteredCidades = this.cidades.slice(0, 20);
+        },
+        error: (err: any) => {
+          this.cidades = [
+            { label: 'São Paulo - SP', value: 'São Paulo - SP' },
+            { label: 'Rio de Janeiro - RJ', value: 'Rio de Janeiro - RJ' },
+            { label: 'Belo Horizonte - MG', value: 'Belo Horizonte - MG' },
+            { label: 'Brasília - DF', value: 'Brasília - DF' },
+            { label: 'Salvador - BA', value: 'Salvador - BA' },
+            { label: 'Fortaleza - CE', value: 'Fortaleza - CE' },
+            { label: 'Curitiba - PR', value: 'Curitiba - PR' }
+          ];
+          this.filteredCidades = this.cidades.slice();
+        }
+      });
+  }
+
+  filterCidades(event: any): void {
+    const query = event.query;
+    this.filteredCidades = this.filterCidade(query, this.cidades);
+  }
+
+  filterCidade(query: string, cidades: any[]): any[] {
+    const filtered: any[] = [];
+    const lowerQuery = query.toLowerCase();
+    for (let i = 0; i < cidades.length; i++) {
+      const cidade = cidades[i];
+      if (cidade.label.toLowerCase().indexOf(lowerQuery) === 0) {
+        filtered.push(cidade);
+      }
+    }
+    return filtered;
+  }
+  }

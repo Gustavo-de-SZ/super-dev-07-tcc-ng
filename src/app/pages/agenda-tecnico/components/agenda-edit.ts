@@ -28,7 +28,7 @@ import { ClienteService } from '../../../services/cliente.service';
     SelectModule,
     ToastModule
   ],
-  providers: [MessageService],
+  
   template: `
     <div class="ns-page-container">
     
@@ -189,7 +189,7 @@ import { ClienteService } from '../../../services/cliente.service';
           </aside>
         </div>
 
-      <p-toast position="bottom-right"></p-toast>
+      
     </div>
   `,
   styles: [`

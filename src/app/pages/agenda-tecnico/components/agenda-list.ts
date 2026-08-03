@@ -17,7 +17,7 @@ import { MessageService } from 'primeng/api';
   template: `
     <div class="tcc-agenda-list">
       @for (item of compromissos; track trackByAgendamento($index, item)) {
-        <div class="tcc-agenda-card">
+        <div class="tcc-agenda-card" (click)="openDetails(item)">
           <div class="tcc-agenda-datetime-col">
             <span class="tcc-date-month">{{ getDisplayMonth(item) }}</span>
             <span class="tcc-date-day">{{ getDisplayDay(item) }}</span>
@@ -41,12 +41,12 @@ import { MessageService } from 'primeng/api';
           </div>
 
           <div class="tcc-agenda-actions">
-            <button class="icon-btn" title="Editar" [routerLink]="['/painel/agenda/', item.id, 'edit']">
+            <button class="icon-btn" title="Editar" [routerLink]="['/painel/agenda/', item.id, 'edit']" (click)="$event.stopPropagation();">
               <i class="pi pi-pencil"></i>
             </button>
 
             <!-- Changed button to trigger PrimeNG Menu -->
-            <button class="tcc-btn-outline small" (click)="menu.toggle($event); setMenuContext(item)">
+            <button class="tcc-btn-outline small" (click)="menu.toggle($event); setMenuContext(item); $event.stopPropagation();">
               Ações <i class="pi pi-chevron-down"></i>
             </button>
             <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
@@ -63,7 +63,7 @@ import { MessageService } from 'primeng/api';
       border-radius: 12px; padding: 16px 24px; /* IGUAL A SERVIÇOS */
       display: flex; align-items: center; gap: 24px; transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .tcc-agenda-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+    .tcc-agenda-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); cursor: pointer; }
 
     .tcc-agenda-datetime-col {
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
@@ -196,6 +196,12 @@ export class AgendaList {
         titulo: item.titulo
       }
     });
+  }
+
+  openDetails(item: any): void {
+    if (item.id) {
+      this.router.navigate(['/painel/agenda/', item.id, 'edit']);
+    }
   }
 
   getDisplayDay(item: Agendamento): string {
