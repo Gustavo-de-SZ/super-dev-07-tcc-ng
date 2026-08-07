@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ConfigService } from './config.service';
-import { AuthService } from '@auth0/auth0-angular';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,11 +30,8 @@ export class HomeClienteService {
   }
 
   getFavoritos(): Observable<any[]> {
-    return this.auth.getAccessTokenSilently({
-      authorizationParams: {
-        audience: 'https://api.tcc-ng.com'
-      }
-    }).pipe(
+    return this.auth.getToken().pipe(
+
       switchMap(token => {
         this.logTokenPayload(token);
         return this.http.get<any[]>(`${this.configService.getApiUrl()}/profissionais/favoritos`, {
@@ -48,12 +45,57 @@ export class HomeClienteService {
     );
   }
 
+
+  getProfissionais(busca?: string, categoria?: string): Observable<any[]> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        const params: Record<string, string> = {};
+        if (busca && busca.trim()) params['busca'] = busca.trim();
+        if (categoria && categoria !== 'Todos') params['categoria'] = categoria.trim();
+
+        return this.http.get<any[]>(`${this.configService.getApiUrl()}/profissionais`, {
+          params,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  favoritarProfissional(id: number | string): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        return this.http.post<any>(`${this.configService.getApiUrl()}/profissionais/${id}/favoritar`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  desfavoritarProfissional(id: number | string): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        return this.http.delete<any>(`${this.configService.getApiUrl()}/profissionais/${id}/favoritar`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
   getCategorias(): Observable<string[]> {
-    return this.auth.getAccessTokenSilently({
-      authorizationParams: {
-        audience: 'https://api.tcc-ng.com'
-      }
-    }).pipe(
+    return this.auth.getToken().pipe(
+
       switchMap(token => {
         this.logTokenPayload(token);
         return this.http.get<string[]>(`${this.configService.getApiUrl()}/categorias`, {

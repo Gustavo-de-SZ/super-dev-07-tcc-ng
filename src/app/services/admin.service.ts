@@ -1,9 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, of } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
+
+export interface AdminEstatisticas {
+  total_tecnicos: number;
+  tecnicos_pendentes: number;
+  tecnicos_aprovados: number;
+  total_clientes: number;
+  total_chamados: number;
+  total_servicos: number;
+}
 
 export interface TecnicoAdmin {
   id: number;
@@ -11,10 +20,24 @@ export interface TecnicoAdmin {
   nome_fantasia: string;
   cnpj: string;
   telefone: string;
-  descricao_servicos: string;
+  descricao_servicos?: string;
   aprovado_pelo_admin: boolean;
   criado_em: string;
-  email?: string; // May need to be joined with users table or populated
+  email?: string;
+  ativo?: boolean;
+  total_chamados?: number;
+  total_servicos?: number;
+}
+
+export interface ClienteAdmin {
+  id: number;
+  usuario_id: number;
+  nome_completo: string;
+  telefone?: string;
+  email?: string;
+  empresa?: string;
+  criado_em?: string;
+  total_chamados?: number;
 }
 
 @Injectable({
@@ -35,65 +58,94 @@ export class AdminService {
     };
   }
 
-  getTodosTecnicos(): Observable<TecnicoAdmin[]> {
+  getEstatisticas(): Observable<AdminEstatisticas> {
     return this.auth.getToken().pipe(
-      switchMap(token => 
-        this.http.get<TecnicoAdmin[]>(`${this.config.getApiUrl()}/profissionais`, {
+      switchMap(token =>
+        this.http.get<AdminEstatisticas>(`${this.config.getApiUrl()}/admin/estatisticas`, {
           headers: this.getHeaders(token)
         })
       )
     );
+  }
+
+  getTecnicos(statusFilter: 'todos' | 'pendente' | 'aprovado' = 'todos', q?: string): Observable<TecnicoAdmin[]> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        let params = new HttpParams().set('status_filter', statusFilter);
+        if (q && q.trim()) {
+          params = params.set('q', q.trim());
+        }
+        return this.http.get<TecnicoAdmin[]>(`${this.config.getApiUrl()}/admin/tecnicos`, {
+          headers: this.getHeaders(token),
+          params
+        });
+      })
+    );
+  }
+
+  getTecnicoPorId(id: number): Observable<TecnicoAdmin> {
+    return this.auth.getToken().pipe(
+      switchMap(token =>
+        this.http.get<TecnicoAdmin>(`${this.config.getApiUrl()}/admin/tecnicos/${id}`, {
+          headers: this.getHeaders(token)
+        })
+      )
+    );
+  }
+
+  aprovarTecnico(id: number): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token =>
+        this.http.patch<any>(`${this.config.getApiUrl()}/admin/tecnicos/${id}/aprovar`, {}, {
+          headers: this.getHeaders(token)
+        })
+      )
+    );
+  }
+
+  rejeitarTecnico(id: number): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token =>
+        this.http.patch<any>(`${this.config.getApiUrl()}/admin/tecnicos/${id}/rejeitar`, {}, {
+          headers: this.getHeaders(token)
+        })
+      )
+    );
+  }
+
+  getClientes(q?: string): Observable<ClienteAdmin[]> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        let params = new HttpParams();
+        if (q && q.trim()) {
+          params = params.set('q', q.trim());
+        }
+        return this.http.get<ClienteAdmin[]>(`${this.config.getApiUrl()}/admin/clientes`, {
+          headers: this.getHeaders(token),
+          params
+        });
+      })
+    );
+  }
+
+  // Compatibilidade com código legado
+  getTodosTecnicos(): Observable<TecnicoAdmin[]> {
+    return this.getTecnicos('todos');
   }
 
   getTecnicosPendentes(): Observable<TecnicoAdmin[]> {
-    return this.getTodosTecnicos().pipe(
-      map(tecnicos => tecnicos.filter(t => !t.aprovado_pelo_admin))
-    );
+    return this.getTecnicos('pendente');
   }
 
-  aprovarTecnico(id: number): Observable<void> {
-    return this.auth.getToken().pipe(
-      switchMap(token =>
-        this.http.patch<void>(`${this.config.getApiUrl()}/profissionais/${id}/aprovar`, {}, {
-          headers: this.getHeaders(token)
-        })
-      )
-    );
-  }
-
-  rejeitarTecnico(id: number): Observable<void> {
-    return this.auth.getToken().pipe(
-      switchMap(token =>
-        this.http.patch<void>(`${this.config.getApiUrl()}/profissionais/${id}/rejeitar`, {}, {
-          headers: this.getHeaders(token)
-        })
-      )
-    );
-  }
-  
-  getEstatisticasDashboard(): Observable<any> {
-    return this.auth.getToken().pipe(
-      switchMap(token => {
-        const profissionais$ = this.http.get<any[]>(`${this.config.getApiUrl()}/profissionais`, { headers: this.getHeaders(token) }).pipe(catchError(() => of([])));
-        const clientes$ = this.http.get<any[]>(`${this.config.getApiUrl()}/clientes`, { headers: this.getHeaders(token) }).pipe(catchError(() => of([])));
-
-        return forkJoin({
-          profissionais: profissionais$,
-          clientes: clientes$
-        }).pipe(
-          map(({ profissionais, clientes }) => {
-            const pendentes = profissionais.filter((p: any) => !p.aprovado_pelo_admin).length;
-            const totalTecnicos = profissionais.length;
-            const totalClientes = clientes.length;
-
-            return {
-              pendentes,
-              totalTecnicos,
-              totalClientes
-            };
-          })
-        );
-      })
+  getEstatisticasDashboard(): Observable<{ pendentes: number; totalTecnicos: number; totalClientes: number }> {
+    return this.getEstatisticas().pipe(
+      switchMap((stats: AdminEstatisticas) => [
+        {
+          pendentes: stats.tecnicos_pendentes,
+          totalTecnicos: stats.total_tecnicos,
+          totalClientes: stats.total_clientes
+        }
+      ])
     );
   }
 }

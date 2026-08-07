@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { AgendaFilters } from './components/agenda-filters';
 import { AgendaSearch } from './components/agenda-search';
 import { AgendaList } from './components/agenda-list';
-import { Agendamento, StatusAgendamento, TipoAgendamento } from '../../models/agendamento';
+import { Agendamento } from '../../models/agendamento';
 import { AgendaService } from '../../services/agenda.service';
 import { MessageService } from 'primeng/api';
+import { isAgendamentoAtrasado } from '../../shared/utils/agendamento-utils';
 
 @Component({
   selector: 'app-agenda-tecnico',
@@ -18,13 +19,12 @@ import { MessageService } from 'primeng/api';
     AgendaSearch,
     AgendaList
   ],
-  
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
       <header class="tcc-page-header">
         <div class="tcc-header-title-group">
           <h1 class="tcc-title-lg">Agenda</h1>
-          <p class="tcc-subtitle">Gerencie seus agendamentos</p>
+          <p class="tcc-subtitle">Gerencie seus agendamentos e atendimentos programados</p>
         </div>
 
         <button class="tcc-btn-main" routerLink="/painel/agenda/novo">
@@ -32,8 +32,17 @@ import { MessageService } from 'primeng/api';
         </button>
       </header>
 
-      <app-agenda-filters [compromissos]="compromissos" (filterChange)="onFilterChange($event)"></app-agenda-filters>
-      <app-agenda-search (searchChange)="onSearchChange($event)" (typeChange)="onTypeChange($event)"></app-agenda-search>
+      <app-agenda-filters 
+        [compromissos]="compromissos" 
+        [currentFilter]="selectedFilter"
+        (filterChange)="onFilterChange($event)">
+      </app-agenda-filters>
+
+      <app-agenda-search 
+        (searchChange)="onSearchChange($event)" 
+        (typeChange)="onTypeChange($event)">
+      </app-agenda-search>
+
       <app-agenda-list [compromissos]="filteredCompromissos"></app-agenda-list>
     </div>
   `,
@@ -61,18 +70,33 @@ import { MessageService } from 'primeng/api';
     }
   `]
 })
-export class AgendaTecnico {
+export class AgendaTecnico implements OnInit {
   compromissos: Agendamento[] = [];
   filteredCompromissos: Agendamento[] = [];
   selectedFilter: string = 'Todos';
   searchTerm: string = '';
   typeFilter: string = '';
 
-  constructor(private agendaService: AgendaService, private messageService: MessageService) {
+  constructor(
+    private agendaService: AgendaService, 
+    private messageService: MessageService,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['filtro']) {
+        this.selectedFilter = params['filtro'];
+      }
+      this.carregarAgendamentos();
+    });
+  }
+
+  carregarAgendamentos(): void {
     this.agendaService.getAgendamentos().subscribe({
       next: (agendamentos) => {
         this.compromissos = agendamentos;
-        this.filteredCompromissos = agendamentos;
+        this.applyFilters();
       },
       error: (err) => {
         console.error('Erro ao carregar agendamentos', err);
@@ -100,9 +124,15 @@ export class AgendaTecnico {
   applyFilters(): void {
     let result = [...this.compromissos];
 
-    // Filter by status (selectedFilter)
-    if (this.selectedFilter !== 'Todos') {
-      result = result.filter(compromisso => compromisso.status === this.selectedFilter);
+    // Filter by selectedFilter
+    if (this.selectedFilter === 'Atrasado') {
+      result = result.filter(c => isAgendamentoAtrasado(c));
+    } else if (this.selectedFilter === 'Pendente') {
+      result = result.filter(c => c.status === 'Pendente' && !isAgendamentoAtrasado(c));
+    } else if (this.selectedFilter === 'Confirmado') {
+      result = result.filter(c => c.status === 'Confirmado' && !isAgendamentoAtrasado(c));
+    } else if (this.selectedFilter !== 'Todos') {
+      result = result.filter(c => c.status === this.selectedFilter);
     }
 
     // Filter by search term (title or client name)
@@ -110,7 +140,9 @@ export class AgendaTecnico {
       const term = this.searchTerm.toLowerCase();
       result = result.filter(compromisso =>
         (compromisso.titulo?.toLowerCase().includes(term) ?? false) ||
-        (compromisso.cliente?.toLowerCase().includes(term) ?? false)
+        (compromisso.cliente?.toLowerCase().includes(term) ?? false) ||
+        (compromisso.servico?.toLowerCase().includes(term) ?? false) ||
+        (compromisso.empresa?.toLowerCase().includes(term) ?? false)
       );
     }
 

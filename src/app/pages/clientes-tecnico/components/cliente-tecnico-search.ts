@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-clientes-search',
@@ -31,7 +32,10 @@ export class ClientesSearch {
   @Output() search = new EventEmitter<string>();
 
   constructor() {
-    this.searchControl.valueChanges.subscribe(value => {
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(value => {
       this.search.emit(value || '');
     });
   }

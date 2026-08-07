@@ -15,6 +15,7 @@ import { MessageService } from 'primeng/api';
 // Models e Services
 import { Cliente } from '../../../models/cliente';
 import { ClienteService } from '../../../services/cliente.service';
+import { ConsultaExternaService } from '../../../services/consulta-externa.service';
 
 @Component({
   selector: 'app-editar-cliente',
@@ -31,7 +32,7 @@ import { ClienteService } from '../../../services/cliente.service';
   
   template: `
     <div class="ns-page-container">
-      <!-- Replace the old ns-back-btn block with this header -->
+   
       <header class="ns-page-header">
         <a routerLink="/painel/clientes" class="ns-back-btn">
           <i class="pi pi-chevron-left"></i>
@@ -55,17 +56,21 @@ import { ClienteService } from '../../../services/cliente.service';
                 <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('nome')">
                   <label>Nome *</label>
                   <input type="text" formControlName="nome" class="ns-input" placeholder="Digite o nome completo">
-                  <div *ngIf="isInvalid('nome')" class="ns-error-message">
-                    O nome é obrigatório
-                  </div>
+                  @if (isInvalid('nome')) {
+                    <div class="ns-error-message">
+                      O nome é obrigatório
+                    </div>
+                  }
                 </div>
 
                 <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('email')">
-                  <label>E-mail *</label>
-                  <input type="email" formControlName="email" class="ns-input" placeholder="Digite o e-mail">
-                  <div *ngIf="isInvalid('email')" class="ns-error-message">
-                    O e-mail é obrigatório e deve ser válido
-                  </div>
+                  <label>E-mail</label>
+                  <input type="email" formControlName="email" class="ns-input" placeholder="Digite o e-mail (opcional)">
+                  @if (isInvalid('email')) {
+                    <div class="ns-error-message">
+                      O e-mail deve ser válido
+                    </div>
+                  }
                 </div>
               </div>
 
@@ -91,6 +96,7 @@ import { ClienteService } from '../../../services/cliente.service';
                       (completeMethod)="filterCidades($event)"
                       field="label"
                       placeholder="Ex: São Paulo - SP"
+                      emptyMessage="Nenhum resultado encontrado"
                       inputStyleClass="ns-input"
                       [styleClass]="isInvalid('local') ? 'ns-input-error' : ''"
                       autocomplete="off"
@@ -132,7 +138,7 @@ import { ClienteService } from '../../../services/cliente.service';
         </main>
 
         <aside class="ns-summary-column">
-          <!-- ... Keep summary aside ... -->
+        
           <div class="ns-card ns-summary-card">
             <h3>Resumo do Cliente</h3>
 
@@ -174,10 +180,11 @@ import { ClienteService } from '../../../services/cliente.service';
             <div class="ns-summary-divider"></div>
 
             <div class="ns-summary-actions">
-              <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="atualizarCliente()">
+              <button type="button" class="tcc-btn-main" [disabled]="form.invalid || enviando" (click)="atualizarCliente()" style="display:flex; align-items:center; gap:8px;">
+                @if(enviando) { <i class="pi pi-spin pi-spinner"></i> }
                 Atualizar Cliente
               </button>
-              <button type="button" routerLink="/painel/clientes" class="ns-btn-cancel">
+              <button type="button" routerLink="/painel/clientes" class="tcc-btn-cancel">
                 Cancelar
               </button>
             </div>
@@ -399,22 +406,21 @@ import { ClienteService } from '../../../services/cliente.service';
     .ns-summary-divider { height: 1px; background-color: var(--border, #e2e8f0); margin: 20px 0; }
     .ns-summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
 
-    .ns-btn-submit {
+    .tcc-btn-main {
       width: 100%; background: #3b82f6; color: #ffffff; border: none; padding: 12px;
       border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
-    .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
-    .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    .ns-btn-cancel { width: 100%; background: transparent; border: none; color: var(--tcc-text-muted, #64748b); font-size: 13px; cursor: pointer; text-align: center; }
-    .ns-btn-cancel:hover { color: var(--tcc-text-main, #0f172a); }
+    .tcc-btn-main:hover:not(:disabled) { background: #2563eb; }
+    .tcc-btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tcc-btn-cancel { width: 100%; background: transparent; border: none; color: var(--tcc-text-muted, #64748b); font-size: 13px; cursor: pointer; text-align: center; }
+    .tcc-btn-cancel:hover { color: var(--tcc-text-main, #0f172a); }
   `]
 })
 export class EditarCliente implements OnInit {
   cidades: any[] = [];
   filteredCidades: any[] = [];
   private readonly http = inject(HttpClient);
-  
-  
+  private consultaExternaService = inject(ConsultaExternaService);
   private fb = inject(FormBuilder);
   private clienteService = inject(ClienteService);
   private messageService = inject(MessageService);
@@ -422,9 +428,10 @@ export class EditarCliente implements OnInit {
   private route = inject(ActivatedRoute);
 
   form!: FormGroup;
+  enviando = false;
 
-  // Para armazenar o cliente sendo editado
-  clienteEmail!: string;
+  // Para armazenar o identificador do cliente sendo editado (ID ou e-mail)
+  clienteIdentificador!: string | number;
 
   tiposCliente = [
     { label: 'Pessoa Física', value: 'fisica' },
@@ -452,21 +459,22 @@ export class EditarCliente implements OnInit {
       status: [null]
     });
 
-    // Get client email from route parameters
+    // Obter ID ou email dos parâmetros da rota
     this.route.paramMap.subscribe(params => {
-      const emailParam = params.get('email');
-      if (!emailParam || emailParam.toLowerCase() === 'null') {
+      const idParam = params.get('id') || params.get('email');
+      if (!idParam || idParam.toLowerCase() === 'null') {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Email do cliente inválido. Por favor, selecione um cliente válido para editar.'
+          detail: 'Identificador do cliente inválido. Por favor, selecione um cliente válido para editar.'
         });
-        // Redirect to the client list
+        
+        this.enviando = false;
         setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
         return;
       }
-      this.clienteEmail = emailParam;
-      this.carregarClienteParaEdicao(this.clienteEmail);
+      this.clienteIdentificador = idParam;
+      this.carregarClienteParaEdicao(this.clienteIdentificador);
     });
   }
 
@@ -479,21 +487,22 @@ export class EditarCliente implements OnInit {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  carregarClienteParaEdicao(email: string): void {
-    this.clienteService.getClienteByEmail(email).subscribe({
-      next: (cliente: Cliente) => {
+  carregarClienteParaEdicao(identificador: string | number): void {
+    this.clienteService.getClienteByEmail(identificador).subscribe({
+      next: (cliente: any) => {
+        const localValue = cliente.endereco || cliente.local || '';
         // Preencher o formulário com os dados do cliente
         this.form.patchValue({
-          nome: cliente.nome,
-          email: cliente.email,
-          telefone: cliente.telefone,
-          empresa: cliente.empresa,
-          local: cliente.local ? { label: cliente.local, value: cliente.local } : null,
-          avaliacao: cliente.avaliacao,
-          servicosAtivos: cliente.servicosAtivos,
-          servicosConcluidos: cliente.servicosConcluidos,
-          tipoCliente: this.tiposCliente.find(t => t.value === cliente.tipoCliente) || null,
-          status: this.statusOptions.find(s => s.value === cliente.status) || null
+          nome: cliente.nome_completo || cliente.nome || '',
+          email: cliente.email || '',
+          telefone: cliente.telefone || '',
+          empresa: cliente.empresa || '',
+          local: localValue ? { label: localValue, value: localValue } : null,
+          avaliacao: cliente.avaliacao !== undefined && cliente.avaliacao !== null ? cliente.avaliacao : 0,
+          servicosAtivos: cliente.servicos_ativos !== undefined ? cliente.servicos_ativos : (cliente.servicosAtivos || 0),
+          servicosConcluidos: cliente.servicos_concluidos !== undefined ? cliente.servicos_concluidos : (cliente.servicosConcluidos || 0),
+          tipoCliente: this.tiposCliente.find(t => t.value === (cliente.tipoCliente || cliente.tipo_cliente)) || null,
+          status: this.statusOptions.find(s => s.value === (cliente.status || (cliente.ativo ? 'ativo' : 'inativo'))) || null
         });
       },
       error: (err: any) => {
@@ -503,14 +512,17 @@ export class EditarCliente implements OnInit {
           summary: 'Erro',
           detail: 'Erro ao carregar dados do cliente para edição'
         });
-        // Redirecionar para a lista em caso de erro
+        
+        this.enviando = false;
         setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
       }
     });
   }
 
   atualizarCliente(): void {
+    if (this.enviando) return;
     if (this.form.valid) {
+      this.enviando = true;
       // Map form values to Cliente interface
       const formValue = this.form.value;
       if (formValue.local && typeof formValue.local === "object") {
@@ -518,7 +530,7 @@ export class EditarCliente implements OnInit {
       }
 
       const cliente: Cliente = {
-        email: formValue.email, // Usamos o email do form
+        email: formValue.email || undefined,
         nome: formValue.nome,
         empresa: formValue.empresa,
         avaliacao: formValue.avaliacao,
@@ -531,21 +543,20 @@ export class EditarCliente implements OnInit {
       };
 
       // Call the service to update the cliente
-      this.clienteService.updateCliente(cliente, this.clienteEmail).subscribe({
+      this.clienteService.updateCliente(cliente, this.clienteIdentificador).subscribe({
         next: (_) => {
-          // Show success message
           this.messageService.add({
             severity: 'success',
             summary: 'Sucesso',
             detail: 'Cliente atualizado com sucesso!'
           });
-          // Navigate to clientes list page
+          
+          this.enviando = false;
           setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
         },
         error: (err: any) => {
-          // Log error for debugging (acceptable use of console.error)
           console.error('Erro ao atualizar cliente', err);
-          // Show error message to user
+          this.enviando = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
@@ -565,34 +576,17 @@ export class EditarCliente implements OnInit {
   }
 
   carregarCidades() {
-    this.http.get<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
-      .pipe(timeout(20000))
-      .subscribe({
-        next: (data: any[]) => {
-          this.cidades = data
-            .filter((municipio: any) => municipio.microrregiao)
-            .map((municipio: any) => {
-              const estadoSigla = municipio.microrregiao?.mesorregiao?.UF?.sigla ?? '';
-              const label = estadoSigla
-                ? `${municipio.nome} - ${estadoSigla}`
-                : municipio.nome;
-              return { label, value: label };
-            });
+    this.consultaExternaService.consultarMunicipios().subscribe({
+      next: (municipios) => {
+        if (municipios && municipios.length > 0) {
+          this.cidades = municipios.map(m => ({ label: m.formatado, value: m.formatado }));
           this.filteredCidades = this.cidades.slice(0, 20);
-        },
-        error: (err: any) => {
-          this.cidades = [
-            { label: 'São Paulo - SP', value: 'São Paulo - SP' },
-            { label: 'Rio de Janeiro - RJ', value: 'Rio de Janeiro - RJ' },
-            { label: 'Belo Horizonte - MG', value: 'Belo Horizonte - MG' },
-            { label: 'Brasília - DF', value: 'Brasília - DF' },
-            { label: 'Salvador - BA', value: 'Salvador - BA' },
-            { label: 'Fortaleza - CE', value: 'Fortaleza - CE' },
-            { label: 'Curitiba - PR', value: 'Curitiba - PR' }
-          ];
-          this.filteredCidades = this.cidades.slice();
         }
-      });
+      },
+      error: (err) => {
+        console.error('Erro ao carregar cidades:', err);
+      }
+    });
   }
 
   filterCidades(event: any): void {

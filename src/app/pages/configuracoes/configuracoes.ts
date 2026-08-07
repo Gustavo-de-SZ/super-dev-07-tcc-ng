@@ -1,250 +1,1156 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
+import { Router, RouterModule } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
 import { first, Observable } from 'rxjs';
 import { CnpjMaskDirective } from '../../shared/directives/cnpj-mask.directive';
+import { ConsultaExternaService } from '../../services/consulta-externa.service';
+import { validarCNPJ } from '../../shared/validators/documento.validator';
 
-// Interface for what we receive from GET /tecnicos/me
-interface TecnicoResponse {
-  nome_fantasia: string;
-  email: string;
-  cnpj?: string;
-  telefone?: string;
-  descricao_servicos?: string;
-  aprovado_pelo_admin?: boolean;
-  criado_em?: string;
-  usuario_id?: number;
-  id?: number;
-}
-
-// Interface for what we receive from GET /clientes/me
-interface ClienteResponse {
-  nomeCompleto: string;
-  email: string;
-  telefone?: string;
-  empresa?: string;
-  endereco?: string;
-  avaliacao?: number;
-  servicos_ativos?: number;
-  servicos_concluidos?: number;
-  ativo?: boolean;
-  criado_em?: string;
-  usuario_id?: number;
-  id?: number;
-}
-
-// Interface for what we send to PUT /tecnicos/me (maps to TecnicoUpdateRequest)
+// Interface for what we send to PUT /tecnicos/me
 interface TecnicoUpdateRequest {
-  nome: string; // maps to nome_fantasia in backend
+  nome: string;
   telefone?: string;
   cnpj?: string;
   descricao_servicos?: string;
 }
 
-// Interface for what we send to PUT /clientes/me (maps to ClienteUpdateRequest)
+// Interface for what we send to PUT /clientes/me
 interface ClienteUpdateRequest {
-  nome: string; // maps to nome_completo in backend
+  nome: string;
   telefone?: string;
   empresa?: string;
-  local?: string; // maps to endereco in DB
+  local?: string;
 }
 
 @Component({
   selector: 'app-configuracoes',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, InputTextModule, ToastModule, CnpjMaskDirective],
-  
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    ToastModule,
+    CnpjMaskDirective
+  ],
+  providers: [MessageService],
   template: `
-    <div class="tcc-page-wrapper tcc-fade-in p-8 max-w-5xl mx-auto">
-      <header class="tcc-page-header mb-8">
-        <div class="tcc-header-title-group">
-          <h1 class="tcc-title-lg text-slate-800 text-3xl font-bold">Configurações da Conta</h1>
-          <p class="tcc-subtitle text-slate-500 mt-2 text-lg">Atualize suas informações de perfil e preferências</p>
+    <p-toast></p-toast>
+
+    <div class="cfg-page tcc-fade-in">
+    
+      <header class="cfg-page-header">
+        <div class="cfg-header-text">
+          <h1 class="cfg-title">Configurações da Conta</h1>
+          <p class="cfg-subtitle">Gerencie suas informações de perfil, dados de contato e preferências.</p>
+        </div>
+        <div class="cfg-role-badge" [ngClass]="userRole === 'admin' ? 'badge-admin' : (userRole === 'tecnico' ? 'badge-tecnico' : 'badge-cliente')">
+          <i class="pi" [ngClass]="userRole === 'admin' ? 'pi-shield' : (userRole === 'tecnico' ? 'pi-wrench' : 'pi-user')"></i>
+          <span>{{ userRole === 'admin' ? 'Administrador' : (userRole === 'tecnico' ? 'Perfil Técnico' : 'Perfil Cliente') }}</span>
         </div>
       </header>
 
-      <div class="tcc-card bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        
-        <div class="p-6 md:p-8 bg-slate-50 border-b border-slate-100 flex items-center gap-4">
-          <div class="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl font-bold">
-            {{ userRole === 'tecnico' ? 'T' : 'C' }}
-          </div>
-          <div>
-            <h2 class="text-xl font-bold text-slate-800">Perfil de {{ userRole === 'tecnico' ? 'Técnico' : 'Cliente' }}</h2>
-            <p class="text-sm text-slate-500">Gerencie seus dados e informações comerciais</p>
+    
+      @if (isLoadingInitialData) {
+        <div class="cfg-skeleton-wrapper">
+          <div class="cfg-skeleton-banner"></div>
+          <div class="cfg-skeleton-card"></div>
+        </div>
+      } @else {
+    
+        <div class="cfg-profile-banner">
+          <div class="cfg-banner-cover"></div>
+          <div class="cfg-banner-body">
+            <div class="cfg-avatar-wrapper">
+              @if (userPicture) {
+                <img [src]="userPicture" alt="Foto do Usuário" class="cfg-avatar-img" />
+              } @else {
+                <div class="cfg-avatar-fallback" [ngClass]="userRole === 'admin' ? 'avatar-admin' : (userRole === 'tecnico' ? 'avatar-tecnico' : 'avatar-cliente')">
+                  {{ getUserInitials() }}
+                </div>
+              }
+              <div class="cfg-avatar-status" title="Conta ativa">
+                <i class="pi pi-check"></i>
+              </div>
+            </div>
+
+            <div class="cfg-user-meta">
+              <div class="cfg-user-name-row">
+                <h2 class="cfg-user-name">
+                  {{ getDisplayName() || (userRole === 'admin' ? 'Administrador' : (userRole === 'tecnico' ? 'Técnico Especialista' : 'Cliente')) }}
+                </h2>
+                <span class="cfg-status-pill">
+                  <i class="pi pi-shield"></i> Conta Verificada
+                </span>
+              </div>
+              <p class="cfg-user-email">
+                <i class="pi pi-envelope"></i> {{ userEmail }}
+              </p>
+            </div>
           </div>
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="salvarConfiguracoes()" class="p-6 md:p-8 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+        <form [formGroup]="form" (ngSubmit)="salvarConfiguracoes()" class="cfg-form-container">
+          
+        
+          <section class="cfg-section-card">
+            <div class="cfg-section-header">
+              <div class="cfg-section-icon icon-blue">
+                <i class="pi pi-lock"></i>
+              </div>
+              <div>
+                <h3 class="cfg-section-title">Acesso & Identificação</h3>
+                <p class="cfg-section-desc">Dados da conta vinculados ao login e canais de contato direto</p>
+              </div>
+            </div>
+
+            <div class="cfg-grid-2">
+           
+              <div class="cfg-form-group">
+                <label class="cfg-label" for="cfg-email">E-mail da Conta</label>
+                <div class="cfg-input-icon-wrap readonly">
+                  <i class="pi pi-envelope"></i>
+                  <input
+                    id="cfg-email"
+                    formControlName="email"
+                    type="text"
+                    class="cfg-input"
+                    readonly
+                  />
+                  <span class="cfg-readonly-badge" title="E-mail fixo da autenticação">
+                    <i class="pi pi-lock"></i> Fixo
+                  </span>
+                </div>
+                <span class="cfg-hint">O e-mail de login é gerenciado pela autenticação e não pode ser alterado.</span>
+              </div>
+
             
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-slate-700">Email da Conta</label>
-              <input pInputText formControlName="email" type="text" class="w-full bg-slate-50 text-slate-500 border-slate-200 p-3 rounded-xl" readonly />
-              <span class="text-xs text-slate-400">O email de login não pode ser alterado.</span>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-semibold text-slate-700">Telefone para Contato</label>
-              <input pInputText formControlName="telefone" type="text" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="(11) 99999-9999" />
-            </div>
-
-            @if (userRole === 'tecnico') {
-              <div class="flex flex-col gap-2">
-                <label class="text-sm font-semibold text-slate-700">Nome Fantasia / Seu Nome</label>
-                <input pInputText formControlName="nome_fantasia" type="text" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Nome do negócio" />
-                @if (form.get('nome_fantasia')?.invalid && (form.get('nome_fantasia')?.dirty || form.get('nome_fantasia')?.touched)) {
-                  <p class="text-xs text-red-500 font-medium mt-1">O Nome Fantasia é obrigatório.</p>
+              <div class="cfg-form-group" [class.has-error]="isInvalid('telefone')">
+                <label class="cfg-label" for="cfg-tel">
+                  Telefone / WhatsApp <span class="cfg-required">*</span>
+                </label>
+                <div class="cfg-input-icon-wrap">
+                  <i class="pi pi-phone"></i>
+                  <input
+                    id="cfg-tel"
+                    formControlName="telefone"
+                    type="text"
+                    class="cfg-input"
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+                @if (isInvalid('telefone')) {
+                  <span class="cfg-error-text">
+                    <i class="pi pi-exclamation-circle"></i> O telefone para contato é obrigatório.
+                  </span>
                 }
               </div>
+            </div>
+          </section>
 
-              <div class="flex flex-col gap-2">
-                <label class="text-sm font-semibold text-slate-700">CNPJ (Opcional)</label>
-                <input pInputText formControlName="cnpj" type="text" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="00.000.000/0000-00" appCnpjMask />
-                @if (form.get('cnpj')?.invalid && (form.get('cnpj')?.dirty || form.get('cnpj')?.touched)) {
-                  <p class="text-xs text-red-500 font-medium mt-1">CNPJ inválido ou incompleto.</p>
-                }
+        
+          @if (userRole === 'tecnico') {
+            <section class="cfg-section-card">
+              <div class="cfg-section-header">
+                <div class="cfg-section-icon icon-purple">
+                  <i class="pi pi-briefcase"></i>
+                </div>
+                <div>
+                  <h3 class="cfg-section-title">Informações Profissionais & Serviços</h3>
+                  <p class="cfg-section-desc">Essas informações são exibidas aos clientes ao visualizarem seu perfil e serviços</p>
+                </div>
               </div>
 
-              <div class="flex flex-col gap-2 md:col-span-2">
-                <label class="text-sm font-semibold text-slate-700">Descrição dos Serviços</label>
-                <textarea pInputText formControlName="descricao_servicos" rows="4" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Descreva os serviços que você oferece (ex: Manutenção de ar condicionado, conserto de geladeiras)..."></textarea>
-              </div>
-            }
+              <div class="cfg-grid-2">
+              
+                <div class="cfg-form-group" [class.has-error]="isInvalid('nome_fantasia')">
+                  <label class="cfg-label" for="cfg-nome-fantasia">
+                    Nome Fantasia / Nome do Negócio <span class="cfg-required">*</span>
+                  </label>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-id-card"></i>
+                    <input
+                      id="cfg-nome-fantasia"
+                      formControlName="nome_fantasia"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="Ex: GS Informática & Redes"
+                    />
+                  </div>
+                  @if (isInvalid('nome_fantasia')) {
+                    <span class="cfg-error-text">
+                      <i class="pi pi-exclamation-circle"></i> O Nome Fantasia é obrigatório.
+                    </span>
+                  }
+                </div>
 
-            @if (userRole === 'cliente') {
-              <div class="flex flex-col gap-2">
-                <label class="text-sm font-semibold text-slate-700">Nome Completo</label>
-                <input pInputText formControlName="nome_completo" type="text" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Seu nome completo" />
+                <div class="cfg-form-group" [class.has-error]="isInvalid('cnpj')">
+                  <div class="cfg-label-row">
+                    <label class="cfg-label" for="cfg-cnpj">
+                      CNPJ <span class="cfg-optional">(Opcional)</span>
+                    </label>
+                    @if (buscandoCnpj) {
+                      <span class="cfg-cnpj-loading"><i class="pi pi-spin pi-spinner"></i> Consultando Receita...</span>
+                    }
+                  </div>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-building"></i>
+                    <input
+                      id="cfg-cnpj"
+                      formControlName="cnpj"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="00.000.000/0000-00"
+                      appCnpjMask
+                      (blur)="onCnpjBlur()"
+                      (input)="onCnpjInput($event)"
+                    />
+                  </div>
+                  @if (isInvalid('cnpj')) {
+                    <span class="cfg-error-text">
+                      <i class="pi pi-exclamation-circle"></i> CNPJ inválido ou incompleto.
+                    </span>
+                  }
+                </div>
+
+             
+                <div class="cfg-form-group" [class.has-error]="isInvalid('especialidade')">
+                  <label class="cfg-label" for="cfg-especialidade">
+                    Especialidade Principal <span class="cfg-required">*</span>
+                  </label>
+                  <div class="cfg-select-wrap">
+                    <i class="pi pi-cog cfg-select-left-icon"></i>
+                    <select id="cfg-especialidade" formControlName="especialidade" class="cfg-select">
+                      <option value="Suporte Técnico">Suporte Técnico & Help Desk</option>
+                      <option value="Redes">Redes e Infraestrutura</option>
+                      <option value="Segurança">Segurança da Informação</option>
+                      <option value="Software">Desenvolvimento e Sistemas</option>
+                      <option value="Hardware">Manutenção de Hardware e Servidores</option>
+                      <option value="Outros">Outros Serviços Especializados</option>
+                    </select>
+                    <i class="pi pi-chevron-down cfg-select-arrow"></i>
+                  </div>
+                </div>
+
+              
+                <div class="cfg-form-group" [class.has-error]="isInvalid('local')">
+                  <label class="cfg-label" for="cfg-local">
+                    Cidade / Local de Atuação <span class="cfg-required">*</span>
+                  </label>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-map-marker"></i>
+                    <input
+                      id="cfg-local"
+                      formControlName="local"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="Ex: Blumenau - SC"
+                    />
+                  </div>
+                  @if (isInvalid('local')) {
+                    <span class="cfg-error-text">
+                      <i class="pi pi-exclamation-circle"></i> A localização de atuação é obrigatória.
+                    </span>
+                  }
+                </div>
+
+                
+                <div class="cfg-form-group col-span-2" [class.has-error]="isInvalid('tempoResposta')">
+                  <label class="cfg-label" for="cfg-tempo">
+                    Tempo Médio de Resposta <span class="cfg-required">*</span>
+                  </label>
+                  <div class="cfg-select-wrap">
+                    <i class="pi pi-clock cfg-select-left-icon"></i>
+                    <select id="cfg-tempo" formControlName="tempoResposta" class="cfg-select">
+                      <option value="Em até 15 min">Rápido (Em até 15 minutos)</option>
+                      <option value="Em até 30 min">Express (Em até 30 minutos)</option>
+                      <option value="Em até 1 hora">Padrão (Em até 1 hora)</option>
+                      <option value="Em até 2 horas">Flexível (Em até 2 horas)</option>
+                    </select>
+                    <i class="pi pi-chevron-down cfg-select-arrow"></i>
+                  </div>
+                  <span class="cfg-hint">Essas informações definem sua disponibilidade e facilitam a busca de novos clientes.</span>
+                </div>
+              </div>
+            </section>
+          }
+
+       
+          @if (userRole === 'cliente') {
+            <section class="cfg-section-card">
+              <div class="cfg-section-header">
+                <div class="cfg-section-icon icon-emerald">
+                  <i class="pi pi-user-edit"></i>
+                </div>
+                <div>
+                  <h3 class="cfg-section-title">Dados Pessoais & Localização</h3>
+                  <p class="cfg-section-desc">Mantenha seus dados atualizados para facilitar o atendimento técnico presencial</p>
+                </div>
               </div>
 
-              <div class="flex flex-col gap-2">
-                <label class="text-sm font-semibold text-slate-700">Nome da Empresa (Opcional)</label>
-                <input pInputText formControlName="empresa" type="text" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Nome da empresa (se houver)" />
+              <div class="cfg-grid-2">
+              
+                <div class="cfg-form-group" [class.has-error]="isInvalid('nome_completo')">
+                  <label class="cfg-label" for="cfg-nome-completo">
+                    Nome Completo <span class="cfg-required">*</span>
+                  </label>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-user"></i>
+                    <input
+                      id="cfg-nome-completo"
+                      formControlName="nome_completo"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="Ex: João da Silva"
+                    />
+                  </div>
+                  @if (isInvalid('nome_completo')) {
+                    <span class="cfg-error-text">
+                      <i class="pi pi-exclamation-circle"></i> O Nome Completo é obrigatório.
+                    </span>
+                  }
+                </div>
+
+          
+                <div class="cfg-form-group">
+                  <label class="cfg-label" for="cfg-empresa">
+                    Empresa / Razão Social <span class="cfg-optional">(Opcional)</span>
+                  </label>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-building"></i>
+                    <input
+                      id="cfg-empresa"
+                      formControlName="empresa"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="Ex: Empresa Silva Ltda"
+                    />
+                  </div>
+                </div>
+
+           
+                <div class="cfg-form-group col-span-2">
+                  <label class="cfg-label" for="cfg-endereco">
+                    Endereço Completo / Ponto de Referência
+                  </label>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-map-marker"></i>
+                    <input
+                      id="cfg-endereco"
+                      formControlName="endereco"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="Ex: Rua das Flores, 123 - Centro, Blumenau - SC"
+                    />
+                  </div>
+                  <span class="cfg-hint">Utilizado para localização em chamados e ordens de serviço presenciais.</span>
+                </div>
+              </div>
+            </section>
+          }
+
+          @if (userRole === 'admin') {
+            <section class="cfg-section-card">
+              <div class="cfg-section-header">
+                <div class="cfg-section-icon icon-purple">
+                  <i class="pi pi-shield"></i>
+                </div>
+                <div>
+                  <h3 class="cfg-section-title">Acesso Administrativo</h3>
+                  <p class="cfg-section-desc">Sua conta possui acesso irrestrito para gerenciar técnicos, clientes e configurações da plataforma</p>
+                </div>
               </div>
 
-              <div class="flex flex-col gap-2 md:col-span-2">
-                <label class="text-sm font-semibold text-slate-700">Endereço Completo</label>
-                <input pInputText formControlName="endereco" type="text" class="w-full p-3 border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Rua, Número, Complemento, Bairro, Cidade - UF" />
-              </div>
-            }
-          </div>
+              <div class="cfg-grid-2">
+                <div class="cfg-form-group">
+                  <label class="cfg-label" for="cfg-admin-nome">Nome / Identificação</label>
+                  <div class="cfg-input-icon-wrap">
+                    <i class="pi pi-user"></i>
+                    <input
+                      id="cfg-admin-nome"
+                      formControlName="nome"
+                      type="text"
+                      class="cfg-input"
+                      placeholder="Administrador"
+                    />
+                  </div>
+                </div>
 
-          <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3">
+                <div class="cfg-form-group">
+                  <label class="cfg-label" for="cfg-admin-cargo">Nível de Permissão</label>
+                  <div class="cfg-input-icon-wrap readonly">
+                    <i class="pi pi-verified"></i>
+                    <input
+                      id="cfg-admin-cargo"
+                      formControlName="cargo"
+                      type="text"
+                      class="cfg-input"
+                      readonly
+                    />
+                    <span class="cfg-readonly-badge"><i class="pi pi-lock"></i> Total</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          }
+
+       
+          <div class="cfg-action-bar">
             <button
               type="button"
-              class="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+              class="cfg-btn-secondary"
               (click)="cancelar()"
+              [disabled]="loading"
             >
-              Restaurar
+              <i class="pi pi-times"></i>
+              Cancelar
             </button>
             <button
               type="submit"
-              class="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              class="cfg-btn-primary"
               [disabled]="form.invalid || loading"
             >
-              @if (loading) { <i class="pi pi-spin pi-spinner"></i> }
-              Salvar Alterações
+              @if (loading) {
+                <i class="pi pi-spin pi-spinner"></i>
+                Salvando...
+              } @else {
+                <i class="pi pi-check"></i>
+                Salvar Alterações
+              }
             </button>
           </div>
+
         </form>
-      </div>
+      }
     </div>
-    
-  `
+  `,
+  styles: [`
+    /* ==========================================================================
+       Configurações Page Scoped Styles
+       ========================================================================== */
+    .cfg-page {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    /* Page Header */
+    .cfg-page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .cfg-header-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cfg-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--tcc-text-main, #0f172a);
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .cfg-subtitle {
+      font-size: 15px;
+      color: var(--tcc-text-muted, #64748b);
+      margin: 0;
+    }
+
+    .cfg-role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .badge-admin {
+      background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+      color: #6b21a8;
+      border: 1px solid #e9d5ff;
+    }
+
+    .badge-tecnico {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    .badge-cliente {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    /* Profile Banner */
+    .cfg-profile-banner {
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .cfg-profile-banner:hover {
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+    }
+
+    .cfg-banner-cover {
+      height: 90px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #0ea5e9 100%);
+      position: relative;
+    }
+
+    .cfg-banner-body {
+      padding: 0 28px 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      background: var(--tcc-surface, #ffffff);
+    }
+
+    .cfg-avatar-wrapper {
+      margin-top: -45px;
+      position: relative;
+      flex-shrink: 0;
+      z-index: 2;
+    }
+
+    .cfg-avatar-img,
+    .cfg-avatar-fallback {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      border: 4px solid var(--tcc-surface, #ffffff);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      object-fit: cover;
+    }
+
+    .cfg-avatar-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .avatar-admin {
+      background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
+    }
+
+    .avatar-tecnico {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .avatar-cliente {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .cfg-avatar-status {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #10b981;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      border: 2px solid var(--tcc-surface, #ffffff);
+    }
+
+    .cfg-user-meta {
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .cfg-user-name-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cfg-user-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .cfg-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .cfg-user-email {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Form Container */
+    .cfg-form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Section Cards */
+    .cfg-section-card {
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .cfg-section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--tcc-border, #e2e8f0);
+    }
+
+    .cfg-section-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .icon-blue {
+      background: #eff6ff;
+      color: #3b82f6;
+    }
+
+    .icon-purple {
+      background: #faf5ff;
+      color: #8b5cf6;
+    }
+
+    .icon-emerald {
+      background: #ecfdf5;
+      color: #10b981;
+    }
+
+    .cfg-section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--tcc-text-main, #0f172a);
+      margin: 0 0 2px 0;
+    }
+
+    .cfg-section-desc {
+      font-size: 13px;
+      color: var(--tcc-text-muted, #64748b);
+      margin: 0;
+    }
+
+    /* Grid Form */
+    .cfg-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .col-span-2 {
+      grid-column: span 2;
+    }
+
+    /* Form Group & Inputs */
+    .cfg-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .cfg-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cfg-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tcc-text-main, #334155);
+    }
+
+    .cfg-cnpj-loading {
+      font-size: 11px;
+      color: var(--primary, #3b82f6);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cfg-required {
+      color: #ef4444;
+    }
+
+    .cfg-optional {
+      font-size: 12px;
+      color: var(--tcc-text-muted, #94a3b8);
+      font-weight: normal;
+    }
+
+    .cfg-input-icon-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .cfg-input-icon-wrap > i {
+      position: absolute;
+      left: 14px;
+      color: var(--tcc-text-muted, #94a3b8);
+      font-size: 15px;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    .cfg-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 14px 0 42px;
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      background: var(--tcc-surface, #ffffff);
+      color: var(--tcc-text-main, #0f172a);
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .cfg-input:focus {
+      border-color: var(--tcc-primary, #3b82f6);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .cfg-input:focus + i,
+    .cfg-input-icon-wrap:focus-within > i {
+      color: var(--tcc-primary, #3b82f6);
+    }
+
+    .cfg-input-icon-wrap.readonly .cfg-input {
+      background: var(--tcc-bg, #f8fafc);
+      color: var(--tcc-text-muted, #64748b);
+      border-color: var(--tcc-border, #e2e8f0);
+      cursor: not-allowed;
+      padding-right: 76px;
+    }
+
+    .cfg-readonly-badge {
+      position: absolute;
+      right: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--tcc-text-muted, #64748b);
+      background: var(--tcc-border, #e2e8f0);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* Custom Select Dropdowns */
+    .cfg-select-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .cfg-select-left-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--tcc-text-muted, #94a3b8);
+      font-size: 15px;
+      pointer-events: none;
+      transition: color 0.2s;
+    }
+
+    .cfg-select-arrow {
+      position: absolute;
+      right: 14px;
+      color: var(--tcc-text-muted, #94a3b8);
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .cfg-select {
+      width: 100%;
+      height: 46px;
+      padding: 0 36px 0 42px;
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      background: var(--tcc-surface, #ffffff);
+      color: var(--tcc-text-main, #0f172a);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    .cfg-select:focus {
+      border-color: var(--tcc-primary, #3b82f6);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .cfg-select-wrap:focus-within > .cfg-select-left-icon {
+      color: var(--tcc-primary, #3b82f6);
+    }
+
+    .cfg-hint {
+      font-size: 12px;
+      color: var(--tcc-text-muted, #64748b);
+      line-height: 1.4;
+    }
+
+    .cfg-form-group.has-error .cfg-input,
+    .cfg-form-group.has-error .cfg-select {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .cfg-form-group.has-error .cfg-input:focus,
+    .cfg-form-group.has-error .cfg-select:focus {
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    }
+
+    .cfg-error-text {
+      font-size: 12px;
+      color: #ef4444;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    /* Action Bar */
+    .cfg-action-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 28px;
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .cfg-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      background: var(--tcc-surface, #ffffff);
+      color: var(--tcc-text-main, #475569);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cfg-btn-secondary:hover:not(:disabled) {
+      background: var(--tcc-bg, #f8fafc);
+      border-color: var(--tcc-primary, #3b82f6);
+      color: var(--tcc-primary, #3b82f6);
+    }
+
+    .cfg-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(59, 130, 246, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .cfg-btn-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .cfg-btn-primary:disabled,
+    .cfg-btn-secondary:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Skeleton Loading */
+    .cfg-skeleton-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .cfg-skeleton-banner {
+      height: 180px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    .cfg-skeleton-card {
+      height: 320px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .cfg-grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .col-span-2 {
+        grid-column: span 1;
+      }
+
+      .cfg-banner-body {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .cfg-action-bar {
+        flex-direction: column-reverse;
+      }
+
+      .cfg-btn-primary,
+      .cfg-btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  `]
 })
 export class ConfiguracoesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private profileService = inject(ProfileService);
   private messageService = inject(MessageService);
+  private router = inject(Router);
+  private location = inject(Location);
+  private consultaExternaService = inject(ConsultaExternaService);
 
   form!: FormGroup;
-  userRole: 'cliente' | 'tecnico' = 'cliente';
+  userRole: 'cliente' | 'tecnico' | 'admin' = 'tecnico';
   loading = false;
   isLoadingInitialData = true;
+  buscandoCnpj = false;
+  ultimoCnpjBuscado = '';
+
+  userEmail = '';
+  userPicture = '';
+  private initialFormData: any = {};
 
   private cnpjValidator(control: any): { [key: string]: any } | null {
     const value = control.value;
+    if (!value) return null;
+    const clean = String(value).replace(/\D/g, '');
+    if (clean.length === 0) return null;
+    if (clean.length !== 14) return { 'invalidCNPJLength': true };
+    return validarCNPJ(clean) ? null : { 'invalidCNPJ': true };
+  }
 
-    // Allow empty values (required validator will handle empty case)
-    if (!value) {
-      return null;
+  onCnpjBlur(): void {
+    const cnpj = this.form?.get('cnpj')?.value;
+    if (cnpj) {
+      this.buscarDadosCnpj(cnpj);
     }
+  }
 
-    // Remove all non-digit characters
-    const digitsOnly = value.replace(/\D/g, '');
-
-    // Validate digit count: should be exactly 14 digits
-    if (digitsOnly.length !== 14) {
-      return { 'invalidCNPJLength': true };
+  onCnpjInput(event: any): void {
+    const val = event?.target ? event.target.value : event;
+    const clean = String(val || '').replace(/\D/g, '');
+    if (clean.length === 14 && clean !== this.ultimoCnpjBuscado) {
+      this.buscarDadosCnpj(clean);
     }
+  }
 
-    // Validate first 8 digits (should not be all zeros)
-    if (digitsOnly.substring(0, 8) === '00000000') {
-      return { 'invalidCNPJ': true };
-    }
+  buscarDadosCnpj(cnpj: string): void {
+    const clean = cnpj.replace(/\D/g, '');
+    if (clean.length !== 14) return;
+    if (clean === this.ultimoCnpjBuscado) return;
 
-    // Validate the two check digits
-    let sum = 0;
-    let weight;
+    this.buscandoCnpj = true;
+    this.ultimoCnpjBuscado = clean;
 
-    // Calculate first verification digit
-    weight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    for (let i = 0; i < 12; i++) {
-      sum += parseInt(digitsOnly.charAt(i)) * weight[i];
-    }
-    let remainder = sum % 11;
-    let digit = (remainder < 2) ? 0 : 11 - remainder;
-    if (parseInt(digitsOnly.charAt(12)) !== digit) {
-      return { 'invalidCNPJ': true };
-    }
+    this.consultaExternaService.consultarCnpj(clean).subscribe({
+      next: (data) => {
+        this.buscandoCnpj = false;
+        if (data && (data.razaoSocial || data.nomeFantasia)) {
+          const nomeEmpresa = data.nomeFantasia || data.razaoSocial;
+          const currentNome = this.form.get('nome_fantasia')?.value;
+          const currentLocal = this.form.get('local')?.value;
+          const currentTelefone = this.form.get('telefone')?.value;
 
-    // Calculate second verification digit
-    sum = 0;
-    weight = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    for (let i = 0; i < 13; i++) {
-      sum += parseInt(digitsOnly.charAt(i)) * weight[i];
-    }
-    remainder = sum % 11;
-    digit = (remainder < 2) ? 0 : 11 - remainder;
-    if (parseInt(digitsOnly.charAt(13)) !== digit) {
-      return { 'invalidCNPJ': true };
-    }
+          const patchObj: any = {};
+          if (!currentNome || currentNome.trim().length === 0) {
+            patchObj.nome_fantasia = nomeEmpresa;
+          }
+          if (!currentLocal || currentLocal.trim().length === 0) {
+            patchObj.local = data.uf ? `${data.municipio} - ${data.uf}` : data.municipio;
+          }
+          if (!currentTelefone || currentTelefone.trim().length === 0) {
+            if (data.telefone) {
+              patchObj.telefone = data.telefone;
+            }
+          }
 
-    return null;
+          if (Object.keys(patchObj).length > 0) {
+            this.form.patchValue(patchObj);
+          }
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'CNPJ Localizado (Receita)',
+            detail: `${nomeEmpresa} - ${data.municipio}/${data.uf}`
+          });
+        }
+      },
+      error: () => {
+        this.buscandoCnpj = false;
+      }
+    });
   }
 
   ngOnInit() {
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('/admin')) {
+      this.userRole = 'admin';
+    } else if (currentUrl.includes('/cliente')) {
+      this.userRole = 'cliente';
+    } else {
+      this.userRole = 'tecnico';
+    }
+
+    this.profileService.verificarPerfilExistente().pipe(first()).subscribe(profile => {
+      if (profile && profile.type === 'admin') {
+        this.userRole = 'admin';
+      }
+    });
+
     this.auth.user$.pipe(first()).subscribe(user => {
       if (user) {
-        // Handle the fact that user object might not have strict typing for custom claims
         const roles = (user as any)['https://tcc-ng.com/roles'] || [];
-        this.userRole = Array.isArray(roles) && roles.includes('cliente') ? 'cliente' : 'tecnico';
+        if (Array.isArray(roles) && roles.length > 0) {
+          if (roles.includes('admin')) {
+            this.userRole = 'admin';
+          } else if (roles.includes('cliente')) {
+            this.userRole = 'cliente';
+          } else {
+            this.userRole = 'tecnico';
+          }
+        }
+        this.userEmail = user.email || '';
+        this.userPicture = user.picture || '';
         this.initForm(user.email || '');
+        this.carregarDadosPerfil();
+      } else {
+        this.initForm('');
         this.carregarDadosPerfil();
       }
     });
   }
 
   initForm(email: string) {
-    if (this.userRole === 'tecnico') {
+    if (this.userRole === 'admin') {
       this.form = this.fb.group({
-        email: [{value: email, disabled: true}],
+        email: [{ value: email, disabled: true }],
+        nome: [this.userEmail ? this.userEmail.split('@')[0] : 'Administrador', Validators.required],
+        cargo: [{ value: 'Administrador da Plataforma', disabled: true }]
+      });
+    } else if (this.userRole === 'tecnico') {
+      this.form = this.fb.group({
+        email: [{ value: email, disabled: true }],
         telefone: ['', Validators.required],
         nome_fantasia: ['', Validators.required],
         cnpj: ['', [this.cnpjValidator]],
-        descricao_servicos: ['']
+        especialidade: ['Suporte Técnico', Validators.required],
+        local: ['', Validators.required],
+        tempoResposta: ['Em até 1 hora', Validators.required]
       });
     } else {
       this.form = this.fb.group({
-        email: [{value: email, disabled: true}],
+        email: [{ value: email, disabled: true }],
         telefone: ['', Validators.required],
         nome_completo: ['', Validators.required],
         empresa: [''],
@@ -253,31 +1159,101 @@ export class ConfiguracoesComponent implements OnInit {
     }
   }
 
+  isInvalid(field: string): boolean {
+    const control = this.form?.get(field);
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  getDisplayName(): string {
+    if (!this.form) return '';
+    if (this.userRole === 'admin') {
+      return this.form.get('nome')?.value || this.userEmail.split('@')[0] || 'Administrador';
+    }
+    if (this.userRole === 'tecnico') {
+      return this.form.get('nome_fantasia')?.value || '';
+    }
+    return this.form.get('nome_completo')?.value || '';
+  }
+
+  getUserInitials(): string {
+    const name = this.getDisplayName();
+    if (name) {
+      const parts = name.trim().split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    }
+    if (this.userRole === 'admin') return 'AD';
+    return this.userRole === 'tecnico' ? 'T' : 'C';
+  }
+
+  private parseDescricao(descricao: string | undefined): { especialidade: string; local: string; tempoResposta: string } {
+    if (!descricao) {
+      return { especialidade: 'Suporte Técnico', local: '', tempoResposta: 'Em até 1 hora' };
+    }
+
+    let especialidade = 'Suporte Técnico';
+    let local = '';
+    let tempoResposta = 'Em até 1 hora';
+
+    const parts = descricao.split('|').map(p => p.trim());
+    for (const part of parts) {
+      if (part.toLowerCase().startsWith('especialidade:')) {
+        especialidade = part.replace(/^especialidade:\s*/i, '').trim();
+      } else if (part.toLowerCase().startsWith('local:')) {
+        local = part.replace(/^local:\s*/i, '').trim();
+      } else if (part.toLowerCase().startsWith('tempo de resposta:')) {
+        tempoResposta = part.replace(/^tempo de resposta:\s*/i, '').trim();
+      }
+    }
+
+    return { especialidade, local, tempoResposta };
+  }
+
+  private formatDescricao(especialidade: string, local: string, tempoResposta: string): string {
+    const parts: string[] = [];
+    if (especialidade) parts.push(`Especialidade: ${especialidade}`);
+    if (local) parts.push(`Local: ${local}`);
+    if (tempoResposta) parts.push(`Tempo de resposta: ${tempoResposta}`);
+    return parts.join(' | ');
+  }
+
   carregarDadosPerfil() {
+    if (this.userRole === 'admin') {
+      this.isLoadingInitialData = false;
+      return;
+    }
+
     this.isLoadingInitialData = true;
 
     const getProfile$: Observable<any> = this.userRole === 'tecnico'
       ? this.profileService.obterPerfilTecnico()
       : this.profileService.obterPerfilCliente();
 
-    getProfile$.pipe(
-      first()
-    ).subscribe({
+    getProfile$.pipe(first()).subscribe({
       next: (data: any) => {
         if (this.userRole === 'tecnico') {
-          this.form.patchValue({
+          const parsedDesc = this.parseDescricao(data.descricao_servicos);
+          const patchData = {
             telefone: data.telefone || '',
             nome_fantasia: data.nome_fantasia || '',
             cnpj: data.cnpj || '',
-            descricao_servicos: data.descricao_servicos || ''
-          });
+            especialidade: parsedDesc.especialidade,
+            local: parsedDesc.local,
+            tempoResposta: parsedDesc.tempoResposta
+          };
+          this.form.patchValue(patchData);
+          this.initialFormData = { ...patchData };
         } else {
-          this.form.patchValue({
+          const patchData = {
             telefone: data.telefone || '',
-            nome_completo: data.nome_completo || '',
+            nome_completo: data.nome_completo || data.nomeCompleto || '',
             empresa: data.empresa || '',
-            endereco: data.endereco || ''
-          });
+            endereco: data.endereco || data.local || ''
+          };
+          this.form.patchValue(patchData);
+          this.initialFormData = { ...patchData };
         }
         this.isLoadingInitialData = false;
       },
@@ -293,41 +1269,64 @@ export class ConfiguracoesComponent implements OnInit {
     });
   }
 
-salvarConfiguracoes() {
+  salvarConfiguracoes() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.userRole === 'admin') {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Configurações de administrador salvas com sucesso!',
+        life: 2500
+      });
+      setTimeout(() => {
+        this.voltar();
+      }, 1000);
       return;
     }
 
     this.loading = true;
     const formData = this.form.getRawValue();
 
-    // Adicione a tipagem : Observable<any> aqui
-    const saveProfile$: Observable<any> = this.userRole === 'tecnico'
-      ? this.profileService.atualizarPerfilTecnico({
-          nome: formData.nome_fantasia,
-          telefone: formData.telefone,
-          cnpj: formData.cnpj,
-          descricao_servicos: formData.descricao_servicos
-        } as TecnicoUpdateRequest)
-      : this.profileService.atualizarPerfilCliente({
-          nome: formData.nome_completo,
-          telefone: formData.telefone,
-          empresa: formData.empresa,
-          local: formData.endereco
-        } as ClienteUpdateRequest);
+    let saveProfile$: Observable<any>;
 
-    saveProfile$.pipe(
-      first()
-    ).subscribe({
+    if (this.userRole === 'tecnico') {
+      const descricaoFormatada = this.formatDescricao(
+        formData.especialidade,
+        formData.local,
+        formData.tempoResposta
+      );
+      saveProfile$ = this.profileService.atualizarPerfilTecnico({
+        nome: formData.nome_fantasia,
+        telefone: formData.telefone,
+        cnpj: formData.cnpj,
+        descricao_servicos: descricaoFormatada
+      } as TecnicoUpdateRequest);
+    } else {
+      saveProfile$ = this.profileService.atualizarPerfilCliente({
+        nome: formData.nome_completo,
+        telefone: formData.telefone,
+        empresa: formData.empresa,
+        local: formData.endereco
+      } as ClienteUpdateRequest);
+    }
+
+    saveProfile$.pipe(first()).subscribe({
       next: (_: any) => {
         this.loading = false;
+        this.initialFormData = { ...formData };
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
           detail: 'Configurações atualizadas com sucesso!',
-          life: 3000
+          life: 2500
         });
+        setTimeout(() => {
+          this.voltar();
+        }, 1000);
       },
       error: (error: any) => {
         this.loading = false;
@@ -342,6 +1341,20 @@ salvarConfiguracoes() {
   }
 
   cancelar() {
-    this.form.reset();
+    this.voltar();
+  }
+
+  voltar() {
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      if (this.userRole === 'admin') {
+        this.router.navigate(['/admin/dashboard']);
+      } else if (this.userRole === 'tecnico') {
+        this.router.navigate(['/painel/dashboard']);
+      } else {
+        this.router.navigate(['/cliente/home']);
+      }
+    }
   }
 }

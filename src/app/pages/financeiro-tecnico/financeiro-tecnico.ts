@@ -3,14 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FinanceiroStatsComponent } from './components/financeiro-stats';
 import { FinanceiroTransactionsComponent } from './components/financeiro-transactions';
 import { FinanceiroService } from '../../services/financeiro.service';
-
-interface Transacao {
-  titulo: string;
-  cliente: string;
-  data: string;
-  valor: number;
-  status: 'Pago' | 'Pendente';
-}
+import { Transacao, TransacaoResumo } from '../../models/transacao';
 
 @Component({
   selector: 'app-financeiro-tecnico',
@@ -29,7 +22,7 @@ interface Transacao {
         </div>
       </header>
 
-      <app-financeiro-stats [transacoes]="transacoes"></app-financeiro-stats>
+      <app-financeiro-stats [resumo]="resumo" [transacoes]="transacoes"></app-financeiro-stats>
       <app-financeiro-transactions [transacoes]="transacoes"></app-financeiro-transactions>
     </div>
   `,
@@ -74,8 +67,18 @@ interface Transacao {
 })
 export class FinanceiroTecnico {
   transacoes: Transacao[] = [];
+  resumo?: TransacaoResumo;
 
   constructor(private financeiroService: FinanceiroService) {
+    this.financeiroService.getResumoFinanceiro().subscribe({
+      next: (resumo) => {
+        this.resumo = resumo;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar resumo financeiro', err);
+      }
+    });
+
     this.financeiroService.getTransacoes().subscribe({
       next: (transacoes) => {
         this.transacoes = transacoes;

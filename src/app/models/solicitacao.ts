@@ -5,5 +5,14 @@ export interface Solicitacao {
   categoria_id: number;
   anexo?: string;
   dataCriacao: string;
-  // status is set by default in backend (ABERTO) so not needed in create payload
+  cliente_nome?: string;
+  profissional_nome?: string;
+  status?: string;
+}
+
+export interface SolicitacaoResumo {
+  total: number;
+  andamento: number;
+  concluidos: number;
+  taxa_resolucao: number;
 }

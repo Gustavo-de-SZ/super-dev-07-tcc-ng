@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { ThemeService } from '../../core/services/theme.service';
 // 1. Importamos o AuthService do nosso wrapper local
 import { AuthService } from '../../services/auth.service';
+import { ProfileService } from '../../services/profile.service';
 import { take } from 'rxjs/operators';
 
 @Component({
@@ -64,7 +65,9 @@ export class NavbarComponent implements OnInit {
   theme = inject(ThemeService);
   // 5. Injetamos o serviço do Auth
   auth = inject(AuthService);
-  // 6. Injetamos o Router para navegação programática
+  // 6. Injetamos o ProfileService para roteamento unificado
+  private profileService = inject(ProfileService);
+  // 7. Injetamos o Router para navegação programática
   private router = inject(Router);
 
   ngOnInit(): void {
@@ -105,35 +108,8 @@ export class NavbarComponent implements OnInit {
 
   /**
    * Navega para o painel apropriado baseado no tipo de usuario
-   * Tecnicos vao para /painel/dashboard
-   * Clientes vao para /cliente/inicio
    */
   navigateToPanel(): void {
-    // Pegamos o usuario atual uma vez e depois nos desinscrevemos
-    this.auth.user$.pipe(
-      take(1)
-    ).subscribe(user => {
-      if (user) {
-        // Obtemos as roles do usuario do namespace do Auth0
-        const roles = user['https://tcc-ng.com/roles'] || [];
-
-        // Seguindo a mesma logica do TopbarTecnico:
-        // Se tiver roles, usa a primeira; se nao tiver, assume tecnico
-        const userRole = roles.length > 0 ? roles[0] : 'Tecnico';
-
-        // Redireciona baseado no papel do usuario
-        // Verifica especificamente se e cliente (case insensitive)
-        if (userRole.toLowerCase() === 'cliente') {
-          // Redireciona para o inicio do cliente
-          this.router.navigate(['/cliente/inicio']);
-        } else {
-          // Redireciona para o dashboard do tecnico (padrao para todos os outros casos)
-          this.router.navigate(['/painel/dashboard']);
-        }
-      } else {
-        // Se nao tiver usuario, redireciona para o painel generico (fallback)
-        this.router.navigate(['/painel']);
-      }
-    });
+    this.profileService.redirecionarParaPainelCorrespondente();
   }
 }

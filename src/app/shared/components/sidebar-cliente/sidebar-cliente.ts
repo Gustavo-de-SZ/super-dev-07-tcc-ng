@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '@auth0/auth0-angular';
+import { MeusChamadosService } from '../../../services/meus-chamados.service';
 
 @Component({
   selector: 'app-sidebar-cliente',
@@ -14,7 +16,7 @@ import { RouterModule } from '@angular/router';
         </div>
         <div class="tcc-logo-text">
           <strong>TechConnect</strong>
-          <span>Área do Cliente</span>
+          <span>Portal do Cliente</span>
         </div>
       </div>
 
@@ -23,18 +25,25 @@ import { RouterModule } from '@angular/router';
           <i class="pi pi-home"></i>
           <span>Início</span>
         </a>
+        
         <a routerLink="/cliente/buscar" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-search"></i>
           <span>Buscar Profissionais</span>
         </a>
+
         <a routerLink="/cliente/meus-chamados" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-list"></i>
           <span>Meus Chamados</span>
+          @if (activeChamadosCount > 0) {
+            <span class="tcc-nav-badge">{{ activeChamadosCount }}</span>
+          }
         </a>
+
         <a routerLink="/cliente/agendamentos" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-calendar"></i>
           <span>Meus Agendamentos</span>
         </a>
+
         <a routerLink="/cliente/historico" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-history"></i>
           <span>Histórico</span>
@@ -42,19 +51,22 @@ import { RouterModule } from '@angular/router';
       </nav>
 
       <div class="tcc-sidebar-footer">
-        <a routerLink="/cliente/ajuda" class="tcc-nav-item">
+        <a routerLink="/cliente/ajuda" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-question-circle"></i>
-          <span>Ajuda</span>
+          <span>Ajuda & Suporte</span>
         </a>
-        <a routerLink="/cliente/configuracoes" class="tcc-nav-item">
+
+        <a routerLink="/cliente/configuracoes" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-cog"></i>
           <span>Configurações</span>
         </a>
+
         <div class="tcc-nav-separator"></div>
-        <a routerLink="/login" class="tcc-nav-item tcc-logout">
+
+        <button (click)="logout()" class="tcc-nav-item tcc-logout">
           <i class="pi pi-sign-out"></i>
-          <span>Sair</span>
-        </a>
+          <span>Sair da Conta</span>
+        </button>
       </div>
     </aside>
   `,
@@ -79,21 +91,22 @@ import { RouterModule } from '@angular/router';
     }
 
     .tcc-logo-icon {
-      width: 36px;
-      height: 36px;
-      background-color: var(--tcc-primary, #3b82f6);
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       color: white;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 18px;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
     }
 
     .tcc-logo-text {
       display: flex;
       flex-direction: column;
-      strong { font-size: 16px; color: var(--tcc-text-main, #0f172a); }
+      strong { font-size: 16px; font-weight: 700; color: var(--tcc-text-main, #0f172a); }
       span { font-size: 11px; color: var(--tcc-text-muted, #64748b); font-weight: 500; }
     }
 
@@ -123,16 +136,20 @@ import { RouterModule } from '@angular/router';
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 12px 16px;
-      border-radius: 8px;
+      padding: 11px 16px;
+      border-radius: 10px;
       color: var(--tcc-text-muted, #64748b);
       text-decoration: none;
       font-weight: 500;
       font-size: 14px;
       transition: all 0.2s ease;
       cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
 
-      i { font-size: 16px; }
+      i { font-size: 16px; width: 18px; text-align: center; }
 
       &:hover:not(.active) {
         background-color: var(--tcc-bg, #f8fafc);
@@ -142,13 +159,57 @@ import { RouterModule } from '@angular/router';
       &.active {
         background-color: var(--tcc-primary, #3b82f6);
         color: #ffffff;
+        font-weight: 600;
+        .tcc-nav-badge {
+          background: #ffffff;
+          color: #2563eb;
+        }
       }
     }
 
-    .tcc-logout:hover {
-      color: #ef4444 !important;
-      background-color: rgba(239, 68, 68, 0.1) !important;
+    .tcc-nav-badge {
+      margin-left: auto;
+      background: #eff6ff;
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    .tcc-logout {
+      color: #ef4444;
+      &:hover {
+        color: #dc2626 !important;
+        background-color: #fef2f2 !important;
+      }
     }
   `]
 })
-export class SidebarCliente {}
+export class SidebarCliente implements OnInit {
+  private auth = inject(AuthService);
+  private meusChamadosService = inject(MeusChamadosService);
+
+  activeChamadosCount: number = 0;
+
+  ngOnInit(): void {
+    this.meusChamadosService.getChamados().subscribe({
+      next: (chamados) => {
+        if (chamados) {
+          this.activeChamadosCount = chamados.filter(c => c.status === 'EM_ANDAMENTO' || c.status === 'PENDENTE' || c.status === 'ABERTO').length;
+        }
+      },
+      error: () => {
+        this.activeChamadosCount = 0;
+      }
+    });
+  }
+
+  logout(): void {
+    this.auth.logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  }
+}

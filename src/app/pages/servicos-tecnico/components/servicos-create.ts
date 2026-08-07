@@ -19,6 +19,7 @@ import { ClienteService } from '../../../services/cliente.service';
 import { Equipamento } from '../../../models/equipamento';
 import { EquipamentoService } from '../../../services/equipamento.service';
 import { FinanceiroService } from '../../../services/financeiro.service';
+import { AgendaService } from '../../../services/agenda.service';
 
 @Component({
   selector: 'app-novo-servico',
@@ -28,7 +29,6 @@ import { FinanceiroService } from '../../../services/financeiro.service';
     ReactiveFormsModule,
     RouterModule,
     AutoCompleteModule,
-    DatePickerModule,
     DatePickerModule,
     ToastModule,
     InputNumberModule
@@ -69,7 +69,7 @@ import { FinanceiroService } from '../../../services/financeiro.service';
             <div class="ns-form-group">
               <label>Categoria *</label>
               <div class="ns-category-grid">
-                @for (cat of categorias; track cat.id) {
+                @for (cat of categorias; track (cat.id || cat.label || $index)) {
                   <button
                     type="button"
                     class="ns-category-card"
@@ -84,13 +84,71 @@ import { FinanceiroService } from '../../../services/financeiro.service';
             </div>
 
             <div class="ns-form-group">
-              <label for="descricao">Descrição</label>
+              <label>Modalidade de Atendimento *</label>
+              <div class="ns-modalidade-grid">
+                <button
+                  type="button"
+                  class="ns-modalidade-btn"
+                  [class.ns-active]="form.get('tipo_atendimento')?.value === 'Presencial'"
+                  (click)="form.get('tipo_atendimento')?.setValue('Presencial')"
+                >
+                  <i class="pi pi-map-marker"></i>
+                  <div>
+                    <strong>Presencial (No Local)</strong>
+                    <small>Atendimento físico no local do cliente</small>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  class="ns-modalidade-btn"
+                  [class.ns-active]="form.get('tipo_atendimento')?.value === 'Remoto'"
+                  (click)="form.get('tipo_atendimento')?.setValue('Remoto')"
+                >
+                  <i class="pi pi-globe"></i>
+                  <div>
+                    <strong>Remoto (Online)</strong>
+                    <small>Suporte via acesso ou conexão remota</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="ns-form-group">
+              <label for="descricao">Descrição do Problema / Solicitação</label>
               <textarea
                 id="descricao"
                 formControlName="descricao"
                 class="ns-input ns-textarea"
-                rows="4"
-                placeholder="Descreva o serviço a ser realizado, problema identificado..."
+                rows="3"
+                placeholder="Descreva o serviço a ser realizado, sintomas e problema identificado..."
+              ></textarea>
+            </div>
+          </section>
+
+          <section class="ns-card">
+            <h2 class="ns-card-title">
+              <i class="pi pi-file-check text-primary"></i> Laudo Técnico & Observações
+            </h2>
+
+            <div class="ns-form-group">
+              <label for="laudo_tecnico">Laudo Técnico / Diagnóstico & Solução</label>
+              <textarea
+                id="laudo_tecnico"
+                formControlName="laudo_tecnico"
+                class="ns-input ns-textarea"
+                rows="3"
+                placeholder="Ex: Identificado problema na fonte. Realizada troca, testes de estresse de 30min com 100% de estabilidade."
+              ></textarea>
+            </div>
+
+            <div class="ns-form-group mb-0">
+              <label for="observacoes">Recomendações / Observações Adicionais</label>
+              <textarea
+                id="observacoes"
+                formControlName="observacoes"
+                class="ns-input ns-textarea"
+                rows="2"
+                placeholder="Ex: Recomendado manter equipamento em local ventilado e limpeza periódica a cada 6 meses."
               ></textarea>
             </div>
           </section>
@@ -111,6 +169,7 @@ import { FinanceiroService } from '../../../services/financeiro.service';
                     optionLabel="nome_exibicao"
                     placeholder="Buscar cliente por nome ou empresa..."
                     [forceSelection]="true"
+                    emptyMessage="Nenhum resultado encontrado"
                     appendTo="body"
                     class="ns-autocomplete"
                     inputStyleClass="ns-has-icon-left">
@@ -122,6 +181,9 @@ import { FinanceiroService } from '../../../services/financeiro.service';
                         <span class="cliente-empresa">{{ cliente.empresa || 'Sem empresa' }}</span>
                       </div>
                     </div>
+                  </ng-template>
+                  <ng-template pTemplate="empty">
+                    <div class="p-3 text-sm text-slate-500 text-center">Nenhum resultado encontrado</div>
                   </ng-template>
                 </p-autoComplete>
               </div>
@@ -142,7 +204,7 @@ import { FinanceiroService } from '../../../services/financeiro.service';
                   class="ns-input"
                   style="flex: 1;"
                   >
-                  <option value="">Selecione um equipamento...</option>
+                  <option [ngValue]="null" disabled hidden selected>Selecione um equipamento...</option>
                   @for (eqp of equipamentosDoCliente; track trackByEquipamento($index, eqp)) {
                     <option [value]="eqp.id">
                       {{ eqp.tipo }} - {{ eqp.marca }} {{ eqp.modelo }} (S/N: {{ eqp.numeroSerie || 'N/A' }})
@@ -153,14 +215,14 @@ import { FinanceiroService } from '../../../services/financeiro.service';
                 <button
                   type="button"
                   class="tcc-btn-outline"
-                  [disabled]="!form.get('cliente')?.value"
-                  (click)="mostrandoModalNovoEquipamento = true">
+                  (click)="abrirModalNovoEquipamento()"
+                  style="white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; border-radius: 8px; font-weight: 500; cursor: pointer;">
                   <i class="pi pi-plus"></i> Novo
                 </button>
               </div>
               @if (!form.get('cliente')?.value) {
                 <small style="color: var(--tcc-text-muted, #64748b); margin-top: 4px; display: block;">
-                  Selecione um cliente primeiro para carregar o inventário.
+                  Selecione um cliente primeiro para carregar o inventário, ou clique em "+ Novo" para cadastrar.
                 </small>
               }
             </div>
@@ -168,12 +230,12 @@ import { FinanceiroService } from '../../../services/financeiro.service';
 
           <section class="ns-card">
             <h2 class="ns-card-title">
-              <i class="pi pi-calendar text-primary"></i> Agendamento e Valor
+              <i class="pi pi-calendar text-primary"></i> Agendamento, Valores & Garantia
             </h2>
 
             <div class="ns-form-row">
               <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('data')">
-                <label>Data *</label>
+                <label>Data Prevista *</label>
                 <p-datePicker
                   formControlName="data"
                   dateFormat="dd/mm/yy"
@@ -186,32 +248,39 @@ import { FinanceiroService } from '../../../services/financeiro.service';
               </div>
 
               <div class="ns-form-group">
-                <label for="duracao">Duração estimada (h:m)</label>
+                <label for="duracao">Duração estimada</label>
                 <div class="ns-input-icon-wrapper">
                   <i class="pi pi-clock ns-icon-left"></i>
+                  <input id="duracao" type="text" formControlName="duracao" class="ns-input ns-has-icon-left" placeholder="Ex: 2h" />
+                </div>
+              </div>
+            </div>
+
+            <div class="ns-form-row">
+              <div class="ns-form-group">
+                <label for="valor">Valor do Serviço (R$)</label>
+                <div class="ns-input-icon-wrapper">
+                  <span class="ns-prefix-left">R$</span>
                   <input
-                    id="duracao"
-                    type="time"
-                    formControlName="duracao"
-                    class="ns-input ns-has-icon-left"
-                    placeholder="Ex: 02:30"
-                    
+                    id="valor"
+                    type="text"
+                    formControlName="valor"
+                    class="ns-input ns-has-prefix-left"
+                    placeholder="0,00"
                   />
                 </div>
               </div>
 
               <div class="ns-form-group">
-                <label for="valor">Valor (R$)</label>
-                <div class="ns-input-icon-wrapper">
-                  <input
-                    id="valor"
-                    type="number"
-                    step="0.01"
-                    formControlName="valor"
-                    class="ns-input ns-has-icon-left"
-                    placeholder="0.00"
-                  />
-                </div>
+                <label for="garantia">Prazo de Garantia</label>
+                <select id="garantia" formControlName="garantia" class="ns-input">
+                  <option value="90 dias">90 dias (Padrão Legal CDC)</option>
+                  <option value="30 dias">30 dias</option>
+                  <option value="60 dias">60 dias</option>
+                  <option value="180 dias">180 dias (6 meses)</option>
+                  <option value="1 ano">1 ano (12 meses)</option>
+                  <option value="Sem garantia">Sem garantia</option>
+                </select>
               </div>
             </div>
           </section>
@@ -231,8 +300,15 @@ import { FinanceiroService } from '../../../services/financeiro.service';
                 <span class="value">{{ getCategoriaLabel() }}</span>
               </div>
               <div class="ns-summary-item">
+                <span class="label">Modalidade</span>
+                <span class="value" style="display: inline-flex; align-items: center; gap: 4px;">
+                  <i class="pi" [ngClass]="form.get('tipo_atendimento')?.value === 'Remoto' ? 'pi-globe text-emerald-500' : 'pi-map-marker text-blue-500'"></i>
+                  {{ form.get('tipo_atendimento')?.value || 'Presencial' }}
+                </span>
+              </div>
+              <div class="ns-summary-item">
                 <span class="label">Cliente</span>
-                <span class="value">{{ form.get('cliente')?.value?.nome || '—' }}</span>
+                <span class="value">{{ form.get('cliente')?.value?.nome_exibicao || form.get('cliente')?.value?.nome_completo || form.get('cliente')?.value?.nome || form.get('cliente')?.value || '—' }}</span>
               </div>
               <div class="ns-summary-item">
                 <span class="label">Data</span>
@@ -241,6 +317,10 @@ import { FinanceiroService } from '../../../services/financeiro.service';
               <div class="ns-summary-item">
                 <span class="label">Duração</span>
                 <span class="value">{{ form.get('duracao')?.value || '—' }}</span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Garantia</span>
+                <span class="value">{{ form.get('garantia')?.value || '90 dias' }}</span>
               </div>
               <div class="ns-summary-item">
                 <span class="label">Valor</span>
@@ -253,10 +333,11 @@ import { FinanceiroService } from '../../../services/financeiro.service';
               <span class="ns-badge-pending">Pendente</span>
             </div>
 
-            <button type="button" class="ns-btn-submit" [disabled]="form.invalid" (click)="salvarServico()">
+            <button type="button" class="tcc-btn-main" [disabled]="form.invalid || enviando" (click)="salvarServico()" style="display:flex; align-items:center; gap:8px;">
+                @if(enviando) { <i class="pi pi-spin pi-spinner"></i> }
               Criar Serviço
             </button>
-            <button type="button" routerLink="/painel/servicos" class="ns-btn-cancel">
+            <button type="button" routerLink="/painel/servicos" class="tcc-btn-cancel">
               Cancelar
             </button>
           </div>
@@ -265,54 +346,90 @@ import { FinanceiroService } from '../../../services/financeiro.service';
       </div>
     </div>
 
-    <!-- Modal Novo Equipamento -->
-    <div class="tcc-modal-overlay" *ngIf="mostrandoModalNovoEquipamento" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
-      <div class="tcc-modal" style="background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);" (click)="$event.stopPropagation()">
-        <div class="tcc-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 16px;">
-          <h3 style="margin: 0; font-size: 1.25rem; color: #1e293b; font-weight: 600;"><i class="pi pi-box"></i> Novo Equipamento</h3>
-          <button class="tcc-close-btn" style="background: transparent; border: none; font-size: 1.25rem; cursor: pointer; color: #64748b;" (click)="mostrandoModalNovoEquipamento = false">
-            <i class="pi pi-times"></i>
-          </button>
-        </div>
-        
-        <form [formGroup]="equipamentoForm" (ngSubmit)="salvarNovoEquipamento()">
-          <div class="tcc-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-            <div class="tcc-form-group">
-              <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Tipo de Equipamento</label>
-              <input type="text" formControlName="tipo" class="tcc-input" placeholder="Ex: Ar Condicionado, Computador" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
-            </div>
-            
-            <div class="tcc-form-row" style="display: flex; gap: 16px;">
-              <div class="tcc-form-group" style="flex: 1;">
-                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Marca</label>
-                <input type="text" formControlName="marca" class="tcc-input" placeholder="Ex: Samsung, Dell" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
+  
+    @if (mostrandoModalNovoEquipamento) {
+      <div class="tcc-modal-overlay" (click)="mostrandoModalNovoEquipamento = false" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;">
+        <div class="tcc-modal" style="background: var(--tcc-surface, #ffffff); border-radius: 16px; width: 100%; max-width: 540px; padding: 28px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25); border: 1px solid var(--tcc-border, #e2e8f0);" (click)="$event.stopPropagation()">
+          <div class="tcc-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--tcc-border, #e2e8f0); padding-bottom: 16px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(59, 130, 246, 0.12); color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <i class="pi pi-box"></i>
               </div>
-              <div class="tcc-form-group" style="flex: 1;">
-                <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Modelo</label>
-                <input type="text" formControlName="modelo" class="tcc-input" placeholder="Ex: Split 12000 BTUs" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem; color: var(--tcc-text-main, #0f172a); font-weight: 700;">Novo Equipamento</h3>
+                <p style="margin: 0; font-size: 0.825rem; color: var(--tcc-text-muted, #64748b);">Cadastre e vincule um equipamento para este serviço</p>
               </div>
             </div>
-            
-            <div class="tcc-form-group">
-              <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Número de Série</label>
-              <input type="text" formControlName="numeroSerie" class="tcc-input" placeholder="Ex: SN123456789" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;" />
-            </div>
-            
-            <div class="tcc-form-group">
-              <label style="display: block; font-size: 0.875rem; font-weight: 500; color: #475569; margin-bottom: 4px;">Observações</label>
-              <textarea formControlName="observacoes" class="tcc-input" rows="3" placeholder="Detalhes adicionais do equipamento" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;"></textarea>
-            </div>
-          </div>
-          
-          <div class="tcc-modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
-            <button type="button" class="tcc-btn-secondary" style="padding: 8px 16px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer;" (click)="mostrandoModalNovoEquipamento = false">Cancelar</button>
-            <button type="submit" class="tcc-btn-primary" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;" [disabled]="equipamentoForm.invalid">
-              <i class="pi pi-save"></i> Salvar
+            <button type="button" class="tcc-close-btn" style="background: transparent; border: none; font-size: 1.1rem; cursor: pointer; color: var(--tcc-text-muted, #94a3b8); padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center;" (click)="mostrandoModalNovoEquipamento = false">
+              <i class="pi pi-times"></i>
             </button>
           </div>
-        </form>
+          
+          <form [formGroup]="equipamentoForm" (ngSubmit)="salvarNovoEquipamento()">
+            <div class="tcc-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+              
+              <div class="tcc-form-group">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--tcc-text-main, #334155); margin-bottom: 6px;">Cliente Vinculado</label>
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 10px;">
+                  <div style="width: 36px; height: 36px; border-radius: 8px; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
+                    <i class="pi pi-user"></i>
+                  </div>
+                  <div style="display: flex; flex-direction: column; overflow: hidden;">
+                    <span style="font-weight: 700; color: var(--tcc-text-main, #0f172a); font-size: 0.95rem;">{{ getSelectedClientName() }}</span>
+                    <span style="font-size: 0.775rem; color: var(--tcc-text-muted, #64748b);">Equipamento será vinculado automaticamente a este cliente</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tcc-form-group">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--tcc-text-main, #334155); margin-bottom: 6px;">Tipo de Equipamento *</label>
+                <select formControlName="tipo" class="ns-input" style="width: 100%;">
+                  <option value="Notebook">Notebook</option>
+                  <option value="Desktop">Desktop / Computador</option>
+                  <option value="Impressora">Impressora</option>
+                  <option value="Servidor">Servidor</option>
+                  <option value="Rede">Rede / Roteador / Switch</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+              
+              <div class="ns-form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="tcc-form-group">
+                  <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--tcc-text-main, #334155); margin-bottom: 6px;">Marca *</label>
+                  <input type="text" formControlName="marca" class="ns-input" placeholder="Ex: Dell, Samsung, Lenovo" style="width: 100%;" />
+                </div>
+                <div class="tcc-form-group">
+                  <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--tcc-text-main, #334155); margin-bottom: 6px;">Modelo *</label>
+                  <input type="text" formControlName="modelo" class="ns-input" placeholder="Ex: Inspiron 15, ThinkPad" style="width: 100%;" />
+                </div>
+              </div>
+              
+              <div class="tcc-form-group">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--tcc-text-main, #334155); margin-bottom: 6px;">Número de Série (opcional)</label>
+                <input type="text" formControlName="numeroSerie" class="ns-input" placeholder="Ex: SN123456789" style="width: 100%;" />
+              </div>
+              
+              <div class="tcc-form-group">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: var(--tcc-text-main, #334155); margin-bottom: 6px;">Observações (opcional)</label>
+                <textarea formControlName="observacoes" class="ns-input" rows="2" placeholder="Detalhes ou estado do equipamento..." style="width: 100%;"></textarea>
+              </div>
+            </div>
+            
+            <div class="tcc-modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--tcc-border, #e2e8f0);">
+              <button type="button" class="tcc-btn-cancel" style="width: auto; padding: 8px 16px;" (click)="mostrandoModalNovoEquipamento = false">Cancelar</button>
+              <button type="submit" class="tcc-btn-main" style="width: auto; margin-bottom: 0; padding: 8px 20px; display: inline-flex; align-items: center; gap: 6px;" [disabled]="equipamentoForm.invalid || salvandoEquipamento">
+                @if (!salvandoEquipamento) {
+                  <i class="pi pi-check"></i>
+                } @else {
+                  <i class="pi pi-spin pi-spinner"></i>
+                }
+                {{ salvandoEquipamento ? 'Salvando...' : 'Salvar Equipamento' }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    }
   `,
   styles: [`
 
@@ -512,6 +629,65 @@ import { FinanceiroService } from '../../../services/financeiro.service';
       color: var(--tcc-text-muted) !important;
     }
 
+    .ns-modalidade-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .ns-modalidade-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      background: var(--tcc-surface, #ffffff);
+      color: var(--tcc-text-main, #334155);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .ns-modalidade-btn i {
+      font-size: 1.2rem;
+      color: var(--tcc-text-muted, #64748b);
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(148, 163, 184, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ns-modalidade-btn strong {
+      display: block;
+      font-size: 0.875rem;
+      color: var(--tcc-text-main, #0f172a);
+    }
+
+    .ns-modalidade-btn small {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--tcc-text-muted, #64748b);
+      line-height: 1.2;
+    }
+
+    .ns-modalidade-btn:hover {
+      background: var(--tcc-surface-hover, #f8fafc);
+      border-color: #3b82f6;
+    }
+
+    .ns-modalidade-btn.ns-active {
+      border-color: #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.08) !important;
+    }
+
+    .ns-modalidade-btn.ns-active i {
+      color: #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.18) !important;
+    }
+
     .ns-category-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -587,14 +763,14 @@ import { FinanceiroService } from '../../../services/financeiro.service';
       font-weight: 600;
     }
 
-    .ns-btn-submit {
+    .tcc-btn-main {
       width: 100%; background: #3b82f6; color: #ffffff; border: none; padding: 12px;
       border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-bottom: 12px;
     }
-    .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
-    .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-    .ns-btn-cancel { width: 100%; background: transparent; border: none; color: var(--tcc-text-muted, #64748b); font-size: 13px; cursor: pointer; text-align: center; }
-    .ns-btn-cancel:hover { color: var(--tcc-text-main, #0f172a); }
+    .tcc-btn-main:hover:not(:disabled) { background: #2563eb; }
+    .tcc-btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tcc-btn-cancel { width: 100%; background: transparent; border: none; color: var(--tcc-text-muted, #64748b); font-size: 13px; cursor: pointer; text-align: center; }
+    .tcc-btn-cancel:hover { color: var(--tcc-text-main, #0f172a); }
 
 
     .ns-is-invalid label { color: #ef4444 !important; }
@@ -678,15 +854,20 @@ export class NovoServico implements OnInit {
   private router = inject(Router);
   private equipamentoService = inject(EquipamentoService);
   private financeiroService = inject(FinanceiroService);
+  private agendaService = inject(AgendaService);
   private route = inject(ActivatedRoute);
 
+  private fromAgendamentoId: string | number | null = null;
+
   form!: FormGroup;
+  enviando = false;
   clientes: Cliente[] = [];
   clientesFiltrados: any[] = [];
 
   // Equipamento properties
   equipamentosDoCliente: Equipamento[] = [];
   mostrandoModalNovoEquipamento = false;
+  salvandoEquipamento = false;
   equipamentoForm!: FormGroup;
 
   categorias = [
@@ -732,12 +913,29 @@ export class NovoServico implements OnInit {
     this.form = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(4)]],
       categoria: ['redes', Validators.required],
+      tipo_atendimento: ['Presencial', Validators.required],
+      garantia: ['90 dias', Validators.required],
       descricao: [''],
+      laudo_tecnico: [''],
+      observacoes: [''],
       cliente: [null, Validators.required],
       data: [new Date(), Validators.required],
       duracao: [''],
       valor: [''],
       equipamentoId: [null]
+    });
+
+    this.form.get('cliente')?.valueChanges.subscribe(val => {
+      if (val && typeof val === 'object' && val.id) {
+        this.equipamentoService.getEquipamentosPorCliente(String(val.id)).subscribe({
+          next: (equipamentos) => {
+            this.equipamentosDoCliente = equipamentos;
+            if (equipamentos && equipamentos.length > 0 && !this.form.get('equipamentoId')?.value) {
+              this.form.get('equipamentoId')?.setValue(equipamentos[0].id);
+            }
+          }
+        });
+      }
     });
   }
 
@@ -754,6 +952,7 @@ export class NovoServico implements OnInit {
   private handleQueryParams(): void {
     this.route.queryParams.pipe(take(1)).subscribe(params => {
       if (params['fromAgendamento']) {
+        this.fromAgendamentoId = params['fromAgendamento'];
         this.messageService.add({
           severity: 'info',
           summary: 'Agendamento Convertido',
@@ -762,67 +961,161 @@ export class NovoServico implements OnInit {
 
         this.form.patchValue({
           titulo: params['titulo'] || '',
+          duracao: params['duracao'] || this.form.get('duracao')?.value || '',
+          status: 'Concluído'
         });
 
-        if (params['cliente'] && this.clientes.length > 0) {
-          const clientName = params['cliente'];
-          const foundClient = this.clientes.find(c => c.nome === clientName);
+        if (params['tipo']) {
+          const tipoNorm = String(params['tipo']).toLowerCase().includes('remoto') ? 'Remoto' : 'Presencial';
+          this.form.patchValue({ tipo_atendimento: tipoNorm });
+        }
+
+        if (params['cliente']) {
+          const clientParam = String(params['cliente']).trim();
+          const clientNorm = this.normalizeText(clientParam);
+
+          const foundClient = this.clientes.find(c => {
+            const nomeExib = this.normalizeText((c as any).nome_exibicao || '');
+            const nomeComp = this.normalizeText((c as any).nome_completo || '');
+            const nomeSimples = this.normalizeText(c.nome || '');
+            return (
+              (nomeExib && (nomeExib === clientNorm || nomeExib.includes(clientNorm) || clientNorm.includes(nomeExib))) ||
+              (nomeComp && (nomeComp === clientNorm || nomeComp.includes(clientNorm) || clientNorm.includes(nomeComp))) ||
+              (nomeSimples && (nomeSimples === clientNorm || nomeSimples.includes(clientNorm) || clientNorm.includes(nomeSimples)))
+            );
+          });
+
           if (foundClient) {
             this.form.patchValue({
               cliente: foundClient
             });
             // Trigger the client selection to load equipment
             this.aoSelecionarCliente({ value: foundClient });
+          } else {
+            const fallbackClient = {
+              nome: clientParam,
+              nome_completo: clientParam,
+              nome_exibicao: clientParam
+            };
+            this.form.patchValue({
+              cliente: fallbackClient
+            });
           }
         }
       }
     });
   }
 
-  // Rest of the methods remain the same...
+  getClienteAtivo(): Cliente | null {
+    const val = this.form.get('cliente')?.value;
+    if (!val) return null;
+    if (typeof val === 'object' && val.id) return val;
+
+    const nameStr = typeof val === 'string' ? val : (val.nome_exibicao || val.nome_completo || val.nome || '');
+    if (!nameStr) return null;
+
+    const norm = this.normalizeText(nameStr);
+    const found = this.clientes.find(c => {
+      const nExib = this.normalizeText((c as any).nome_exibicao || '');
+      const nComp = this.normalizeText((c as any).nome_completo || '');
+      const nNome = this.normalizeText(c.nome || '');
+      return (
+        (nExib && (nExib === norm || nExib.includes(norm) || norm.includes(nExib))) ||
+        (nComp && (nComp === norm || nComp.includes(norm) || norm.includes(nComp))) ||
+        (nNome && (nNome === norm || nNome.includes(norm) || norm.includes(nNome)))
+      );
+    });
+
+    if (found) {
+      this.form.patchValue({ cliente: found }, { emitEvent: false });
+      return found;
+    }
+    return null;
+  }
+
+  private normalizeText(str: string): string {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() : '';
+  }
+
+  abrirModalNovoEquipamento(): void {
+    const clienteAtivo = this.getClienteAtivo();
+    if (!clienteAtivo || !clienteAtivo.id) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Selecione um Cliente',
+        detail: 'Por favor, selecione um cliente no formulário antes de cadastrar um novo equipamento.'
+      });
+      this.form.get('cliente')?.markAsTouched();
+      return;
+    }
+
+    this.equipamentoForm.reset({
+      tipo: 'Notebook',
+      marca: '',
+      modelo: '',
+      numeroSerie: '',
+      observacoes: ''
+    });
+    this.mostrandoModalNovoEquipamento = true;
+  }
+
+  getSelectedClientName(): string {
+    const c = this.getClienteAtivo() || this.form.get('cliente')?.value;
+    if (!c) return 'Nenhum cliente selecionado';
+    return c.nome_exibicao || c.nome_completo || c.nome || 'Cliente selecionado';
+  }
+
   salvarNovoEquipamento(): void {
+    if (this.salvandoEquipamento) return;
+
     if (this.equipamentoForm.valid) {
-      const clienteId = this.form.get('cliente')?.value?.id;
+      const cliente = this.getClienteAtivo();
+      const clienteId = cliente?.id ? String(cliente.id) : '';
+
       if (!clienteId) {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Selecione um cliente antes de cadastrar um equipamento.'
+          detail: 'Selecione um cliente no formulário antes de cadastrar o equipamento.'
         });
         return;
       }
 
+      this.salvandoEquipamento = true;
       const equipamento: Equipamento = {
         clienteId: clienteId,
-        tipo: this.equipamentoForm.get('tipo')?.value,
-        marca: this.equipamentoForm.get('marca')?.value,
-        modelo: this.equipamentoForm.get('modelo')?.value,
-        numeroSerie: this.equipamentoForm.get('numeroSerie')?.value,
-        observacoes: this.equipamentoForm.get('observacoes')?.value
+        tipo: this.equipamentoForm.get('tipo')?.value || 'Outro',
+        marca: this.equipamentoForm.get('marca')?.value || '',
+        modelo: this.equipamentoForm.get('modelo')?.value || '',
+        numeroSerie: this.equipamentoForm.get('numeroSerie')?.value || '',
+        observacoes: this.equipamentoForm.get('observacoes')?.value || ''
       };
 
       this.equipamentoService.addEquipamento(equipamento, clienteId).subscribe({
-        next: (response) => {
+        next: (response: any) => {
+          this.salvandoEquipamento = false;
           this.messageService.add({
             severity: 'success',
             summary: 'Sucesso',
-            detail: 'Equipamento cadastrado com sucesso!'
+            detail: 'Equipamento cadastrado e vinculado com sucesso!'
           });
           this.mostrandoModalNovoEquipamento = false;
-          this.equipamentoForm.reset({
-            tipo: 'Notebook'
-          });
 
-          // Reload equipment list for the selected client
-          if (clienteId) {
-            this.equipamentoService.getEquipamentosPorCliente(clienteId)
-              .subscribe({
-                next: (equipamentos) => this.equipamentosDoCliente = equipamentos,
-                error: (err) => console.error('Erro ao recarregar equipamentos', err)
-              });
-          }
+          // Reload equipment list for the client and select the newly created one
+          this.equipamentoService.getEquipamentosPorCliente(clienteId).subscribe({
+            next: (equipamentos) => {
+              this.equipamentosDoCliente = equipamentos;
+              if (response && response.id) {
+                this.form.get('equipamentoId')?.setValue(response.id);
+              } else if (equipamentos.length > 0) {
+                this.form.get('equipamentoId')?.setValue(equipamentos[equipamentos.length - 1].id);
+              }
+            },
+            error: (err) => console.error('Erro ao recarregar equipamentos', err)
+          });
         },
         error: (err) => {
+          this.salvandoEquipamento = false;
           console.error('Erro ao salvar equipamento', err);
           this.messageService.add({
             severity: 'error',
@@ -836,7 +1129,7 @@ export class NovoServico implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Erro de Validação',
-        detail: 'Por favor, preencha todos os campos obrigatórios corretamente'
+        detail: 'Por favor, preencha todos os campos obrigatórios (Marca e Modelo).'
       });
     }
   }
@@ -927,19 +1220,11 @@ export class NovoServico implements OnInit {
     );
   }
 
-  formatarDuracao(event: any): void {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.slice(0, 4);
-
-    if (value.length >= 3) {
-      value = value.replace(/(\d{2})(\d{1,2})/, '$1:$2');
-    }
-
-    event.target.value = value;
-    this.form.get('duracao')?.setValue(value);
-  }
+  
 
   salvarServico(): void {
+    if (this.enviando) return;
+    this.enviando = true;
     if (this.form.valid) {
       // Map form values to Servico interface
       const formValue = this.form.value;
@@ -966,45 +1251,65 @@ export class NovoServico implements OnInit {
 
       // Format date as YYYY-MM-DD (ISO format) for the API
       const dataSelecionada = formValue.data;
-      const dataFormatada = dataSelecionada instanceof Date
-        ? dataSelecionada.toISOString().split('T')[0]
-        : String(dataSelecionada);
+      let dataFormatada = '';
+      if (dataSelecionada instanceof Date) {
+        const y = dataSelecionada.getFullYear();
+        const m = (dataSelecionada.getMonth() + 1).toString().padStart(2, '0');
+        const d = dataSelecionada.getDate().toString().padStart(2, '0');
+        dataFormatada = `${y}-${m}-${d}`;
+      } else {
+        dataFormatada = String(dataSelecionada || '');
+      }
 
-      const categoriaValue = categoriaMap[formValue.categoria as keyof typeof categoriaMap];
+      const categoriaValue = categoriaMap[formValue.categoria as keyof typeof categoriaMap] || 'Redes';
 
-      // Include equipment ID if selected
-      const equipamentoId = formValue.equipamentoId || null;
+      // Safe extraction of client name whether it's an object or string
+      const clienteVal = formValue.cliente;
+      let clienteNome = '';
+      if (clienteVal && typeof clienteVal === 'object') {
+        clienteNome = clienteVal.nome_exibicao || clienteVal.nome_completo || clienteVal.nome || '';
+      } else if (clienteVal) {
+        clienteNome = String(clienteVal);
+      }
+
+      // Parse valor into number supporting formats like "1.500,00", "1500,00", "1500"
+      let rawValorNum = 0;
+      if (formValue.valor !== null && formValue.valor !== undefined && formValue.valor !== '') {
+        if (typeof formValue.valor === 'number') {
+          rawValorNum = isNaN(formValue.valor) ? 0 : formValue.valor;
+        } else {
+          let str = String(formValue.valor).trim();
+          if (str.includes(',') && str.includes('.')) {
+            str = str.replace(/\./g, '').replace(',', '.');
+          } else if (str.includes(',')) {
+            str = str.replace(',', '.');
+          }
+          const cleaned = str.replace(/[^\d.-]/g, '');
+          rawValorNum = parseFloat(cleaned) || 0;
+        }
+      }
 
       const servico: Servico = {
-        icone: iconeMap[formValue.categoria as keyof typeof iconeMap] || 'pi pi-wrench', // Map to icon
-        categoria: categoriaValue, // Properly typed
-        titulo: formValue.titulo,
-        status: 'Pendente', // Default status for new services
-        cliente: formValue.cliente?.nome || '', // Safe access to client name
-        data: dataFormatada,
-        duracao: formValue.duracao || '',
-        valor: formValue.valor || '',
+        icone: iconeMap[formValue.categoria as keyof typeof iconeMap] || 'pi pi-wrench',
+        categoria: categoriaValue,
+        titulo: formValue.titulo || '',
+        status: formValue.status || 'Pendente',
+        cliente: clienteNome,
+        data: dataFormatada || new Date().toISOString().split('T')[0],
+        duracao: formValue.duracao || '1h',
+        valor: rawValorNum as any,
         descricao: formValue.descricao || '',
-        // Include equipment ID if selected
-        equipamentoId: formValue.equipamentoId || undefined
+        tipo_atendimento: formValue.tipo_atendimento || 'Presencial',
+        garantia: formValue.garantia || '90 dias',
+        laudo_tecnico: formValue.laudo_tecnico || '',
+        observacoes: formValue.observacoes || '',
+        equipamento_id: formValue.equipamentoId ? String(formValue.equipamentoId) : undefined,
+        origem_agendamento_id: this.fromAgendamentoId ? this.fromAgendamentoId : undefined
       };
 
-      // Call the service to save the service
+      // Call the service to save (backend orchestrates financeiro, agendamento and notifications atomically)
       this.servicoService.addServico(servico).subscribe({
         next: (response) => {
-          // Add transaction to financeiro
-          const transacao = {
-            titulo: `Pagamento: ${servico.titulo}`,
-            cliente: servico.cliente,
-            data: servico.data,
-            valor: parseFloat(servico.valor.toString()) || 0,
-            status: servico.status === 'Concluído' ? 'Pago' as const : 'Pendente' as const
-          };
-          this.financeiroService.addTransacao(transacao).subscribe({
-            next: () => console.log('Transação registrada no financeiro'),
-            error: (err) => console.error('Erro ao registrar transação', err)
-          });
-
           // Show success message
           this.messageService.add({
             severity: 'success',
@@ -1013,22 +1318,20 @@ export class NovoServico implements OnInit {
           });
           // Reset form
           this.form.reset();
-          // Set default values if needed (like category and date)
-          this.form.patchValue({
-            categoria: 'redes',
-            data: new Date()
-          });
+          this.enviando = false;
           // Navigate to services list page
           setTimeout(() => this.router.navigate(['/painel/servicos']), 1000);
         },
         error: (err) => {
-          // Log error for debugging (acceptable use of console.error)
+          this.enviando = false;
           console.error('Erro ao salvar serviço', err);
-          // Show error message to user
+          const detailMsg = typeof err?.error?.detail === 'string'
+            ? err.error.detail
+            : (Array.isArray(err?.error?.detail) ? err.error.detail.map((d: any) => d.msg || d.message).join(', ') : 'Ocorreu um erro ao cadastrar o serviço. Por favor, tente novamente.');
           this.messageService.add({
             severity: 'error',
-            summary: 'Erro',
-            detail: 'Ocorreu um erro ao cadastrar o serviço. Por favor, tente novamente.'
+            summary: 'Erro ao Salvar',
+            detail: detailMsg
           });
         }
       });
@@ -1059,11 +1362,23 @@ export class NovoServico implements OnInit {
     if (clienteSelecionado && clienteSelecionado.id) {
       this.equipamentoService.getEquipamentosPorCliente(clienteSelecionado.id)
         .subscribe({
-          next: (equipamentos) => this.equipamentosDoCliente = equipamentos,
-          error: (err) => console.error('Erro ao buscar equipamentos', err)
+          next: (equipamentos) => {
+            this.equipamentosDoCliente = equipamentos;
+            if (equipamentos && equipamentos.length > 0) {
+              this.form.get('equipamentoId')?.setValue(equipamentos[0].id);
+            } else {
+              this.form.get('equipamentoId')?.setValue(null);
+            }
+          },
+          error: (err) => {
+            console.error('Erro ao buscar equipamentos', err);
+            this.equipamentosDoCliente = [];
+            this.form.get('equipamentoId')?.setValue(null);
+          }
         });
     } else {
       this.equipamentosDoCliente = [];
+      this.form.get('equipamentoId')?.setValue(null);
     }
   }
 

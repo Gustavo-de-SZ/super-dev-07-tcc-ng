@@ -33,7 +33,7 @@ import { ClienteService } from '../../services/cliente.service';
 
       <app-clientes-stats></app-clientes-stats>
       <app-clientes-search (search)="onSearch($event)"></app-clientes-search>
-      <app-clientes-list [clientes]="filteredClientes"></app-clientes-list>
+      <app-clientes-list [clientes]="filteredClientes" (clienteDesvinculado)="carregarClientes()"></app-clientes-list>
 
     </div>
   `,
@@ -65,12 +65,17 @@ import { ClienteService } from '../../services/cliente.service';
 export class ClientesTecnico {
   clientes: Cliente[] = [];
   filteredClientes: Cliente[] = [];
+  searchTerm: string = '';
 
   constructor(private clienteService: ClienteService) {
+    this.carregarClientes();
+  }
+
+  carregarClientes() {
     this.clienteService.getClientes().subscribe({
       next: (clientes) => {
         this.clientes = clientes;
-        this.filteredClientes = clientes;
+        this.applySearch();
       },
       error: (err) => {
         console.error('Erro ao carregar clientes', err);
@@ -81,16 +86,22 @@ export class ClientesTecnico {
   }
 
   onSearch(term: string) {
-    if (!term) {
+    this.searchTerm = term;
+    this.applySearch();
+  }
+
+  private applySearch() {
+    if (!this.searchTerm) {
       this.filteredClientes = this.clientes;
       return;
     }
-    const lowerTerm = term.toLowerCase();
+    const lowerTerm = this.searchTerm.toLowerCase();
     this.filteredClientes = this.clientes.filter(cliente =>
       (cliente.nome?.toLowerCase().includes(lowerTerm)) ||
       (cliente.nome_completo?.toLowerCase().includes(lowerTerm)) ||
       (cliente.email?.toLowerCase().includes(lowerTerm)) ||
-      (cliente.empresa?.toLowerCase().includes(lowerTerm))
+      (cliente.empresa?.toLowerCase().includes(lowerTerm)) ||
+      (cliente.telefone?.toLowerCase().includes(lowerTerm))
     );
   }
 }

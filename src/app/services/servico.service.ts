@@ -49,7 +49,7 @@ export class ServicoService {
     );
   }
 
-  getServicoByTitle(titulo: string): Observable<Servico> {
+  getServicoByTitle(titulo: string | number): Observable<Servico> {
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -57,7 +57,7 @@ export class ServicoService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.get<Servico>(`${this.configService.getApiUrl()}/servicos/${titulo}`, {
+        return this.http.get<Servico>(`${this.configService.getApiUrl()}/servicos/${encodeURIComponent(String(titulo))}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -66,6 +66,10 @@ export class ServicoService {
         });
       })
     );
+  }
+
+  getServicoById(id: string | number): Observable<Servico> {
+    return this.getServicoByTitle(id);
   }
 
   addServico(servico: Servico): Observable<Servico> {
@@ -87,7 +91,8 @@ export class ServicoService {
     );
   }
 
-  updateServico(servico: Servico): Observable<Servico> {
+  updateServico(servico: Servico, identificador?: string | number): Observable<Servico> {
+    const idParam = encodeURIComponent(String(identificador ?? servico.id ?? servico.titulo));
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -95,7 +100,7 @@ export class ServicoService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.put<Servico>(`${this.configService.getApiUrl()}/servicos/${servico.titulo}`, servico, {
+        return this.http.put<Servico>(`${this.configService.getApiUrl()}/servicos/${idParam}`, servico, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -106,7 +111,7 @@ export class ServicoService {
     );
   }
 
-  deleteServico(titulo: string): Observable<void> {
+  deleteServico(titulo: string | number): Observable<void> {
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -114,7 +119,7 @@ export class ServicoService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.delete<void>(`${this.configService.getApiUrl()}/servicos/${titulo}`, {
+        return this.http.delete<void>(`${this.configService.getApiUrl()}/servicos/${encodeURIComponent(String(titulo))}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

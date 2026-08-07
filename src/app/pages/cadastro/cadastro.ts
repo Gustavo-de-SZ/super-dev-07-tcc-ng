@@ -15,6 +15,8 @@ import { PhoneMaskDirective } from '../../shared/directives/phone-mask.directive
 import { CnpjMaskDirective } from '../../shared/directives/cnpj-mask.directive';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { HttpClient } from '@angular/common/http';
+import { ConsultaExternaService } from '../../services/consulta-externa.service';
+import { validarCNPJ } from '../../shared/validators/documento.validator';
 
 @Component({
   selector: 'app-cadastro',
@@ -158,13 +160,8 @@ import { HttpClient } from '@angular/common/http';
                   type="text"
                   placeholder="Ex: Minha Empresa S/A"
                   class="ns-input"
-                  [class.ns-input-error]="isFieldInvalid('cliente', 'empresa')"
+                  
                 />
-                @if (isFieldInvalid('cliente', 'empresa')) {
-                  <span class="cd-error">
-                    <i class="pi pi-info-circle"></i> Nome da empresa é obrigatório
-                  </span>
-                }
               </div>
 
               <div class="cd-field">
@@ -207,6 +204,7 @@ import { HttpClient } from '@angular/common/http';
                   (completeMethod)="filterCidades($event)"
                   field="label"
                   placeholder="Ex: São Paulo - SP"
+                  emptyMessage="Nenhum resultado encontrado"
                   inputStyleClass="ns-input"
                   [styleClass]="isFieldInvalid('cliente', 'local') ? 'ns-input-error' : ''"
                   autocomplete="off"
@@ -300,7 +298,12 @@ import { HttpClient } from '@angular/common/http';
               </div>
 
               <div class="cd-field">
-                <label for="tecCnpj" class="cd-label">CNPJ</label>
+                <div class="cd-label-row">
+                  <label for="tecCnpj" class="cd-label">CNPJ</label>
+                  @if (buscandoCnpj) {
+                    <span class="cd-cnpj-loading"><i class="pi pi-spin pi-spinner"></i> Consultando Receita...</span>
+                  }
+                </div>
                 <input
                   id="tecCnpj"
                   formControlName="cnpj"
@@ -309,6 +312,8 @@ import { HttpClient } from '@angular/common/http';
                   class="ns-input"
                   [class.ns-input-error]="isFieldInvalid('tecnico', 'cnpj')"
                   appCnpjMask
+                  (blur)="onCnpjBlur()"
+                  (input)="onCnpjInput($event)"
                 />
                 @if (isFieldInvalid('tecnico', 'cnpj')) {
                   <span class="cd-error">
@@ -366,6 +371,7 @@ import { HttpClient } from '@angular/common/http';
                   (completeMethod)="filterCidades($event)"
                   field="label"
                   placeholder="Ex: São Paulo - SP"
+                  emptyMessage="Nenhum resultado encontrado"
                   inputStyleClass="ns-input"
                   [styleClass]="isFieldInvalid('tecnico', 'local') ? 'ns-input-error' : ''"
                   autocomplete="off"
@@ -598,6 +604,23 @@ import { HttpClient } from '@angular/common/http';
       display: flex;
       flex-direction: column;
     }
+    .cd-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .cd-label-row .cd-label {
+      margin-bottom: 0;
+    }
+    .cd-cnpj-loading {
+      font-size: 11px;
+      color: var(--primary, #3b82f6);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
     .cd-error {
       color: #ef4444;
       font-size: 12px;
@@ -682,10 +705,13 @@ export class Cadastro implements OnInit {
   fb = inject(FormBuilder);
   messageService = inject(MessageService);
   http = inject(HttpClient);
+  consultaExternaService = inject(ConsultaExternaService);
 
   user: any = null;
   selectedRole: 'cliente' | 'tecnico' | null = null;
   loading = false;
+  buscandoCnpj = false;
+  ultimoCnpjBuscado = '';
   hasRoleInToken = false;
 
   // For city autocomplete
@@ -722,7 +748,7 @@ export class Cadastro implements OnInit {
     this.clienteForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]], // Changed to blank initially
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
-      empresa: ['', [Validators.required, Validators.minLength(2)]],
+      empresa: [''],
       telefone: ['', [Validators.required, this.phoneNumberValidator]],
       local: ['', [Validators.required, Validators.minLength(3)]],
       tipoCliente: ['PME', [Validators.required]]
@@ -764,58 +790,17 @@ export class Cadastro implements OnInit {
   }
 
   loadCidades(): void {
-    this.http.get<any[]>('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
-      .pipe(
-        timeout(20000) // Increased timeout to 20 seconds for IBGE API
-      )
-      .subscribe({
-        next: (data) => {
-          // Transform IBGE data to format suitable for autocomplete
-          this.cidades = data
-            .filter(municipio => municipio.microrregiao) // Filter out null microrregiao
-            .map(municipio => {
-              // Safely access nested properties with fallback
-              const estadoSigla = municipio.microrregiao?.mesorregiao?.UF?.sigla ?? '';
-              const label = estadoSigla
-                ? `${municipio.nome} - ${estadoSigla}`
-                : municipio.nome;
-              return { label, value: label };
-            });
-
-          // Initially, show all cities (or empty, depending on preference)
-          this.filteredCidades = this.cidades.slice(0, 20); // Show first 20 as placeholder
-        },
-        error: (err) => {
-          if (err instanceof TimeoutError) {
-            console.error('Timeout ao carregar cidades do IBGE (20s exceeded)');
-          } else {
-            console.error('Erro ao carregar cidades do IBGE:', err);
-          }
-          // Fallback to some major cities if API fails
-          this.cidades = [
-            { label: 'São Paulo - SP', value: 'São Paulo - SP' },
-            { label: 'Rio de Janeiro - RJ', value: 'Rio de Janeiro - RJ' },
-            { label: 'Belo Horizonte - MG', value: 'Belo Horizonte - MG' },
-            { label: 'Brasília - DF', value: 'Brasília - DF' },
-            { label: 'Salvador - BA', value: 'Salvador - BA' },
-            { label: 'Fortaleza - CE', value: 'Fortaleza - CE' },
-            { label: 'Belo Horizonte - MG', value: 'Belo Horizonte - MG' },
-            { label: 'Manaus - AM', value: 'Manaus - AM' },
-            { label: 'Curitiba - PR', value: 'Curitiba - PR' },
-            { label: 'Porto Alegre - RS', value: 'Porto Alegre - RS' },
-            { label: 'Goiânia - GO', value: 'Goiânia - GO' },
-            { label: 'Belém - PA', value: 'Belém - PA' },
-            { label: 'São Luís - MA', value: 'São Luís - MA' },
-            { label: 'Maceió - AL', value: 'Maceió - AL' },
-            { label: 'Natal - RN', value: 'Natal - RN' },
-            { label: 'Campinas - SP', value: 'Campinas - SP' },
-            { label: 'São Bernardo do Campo - SP', value: 'São Bernardo do Campo - SP' },
-            { label: 'Santo André - SP', value: 'Santo André - SP' },
-            { label: 'Osasco - SP', value: 'Osasco - SP' }
-          ];
-          this.filteredCidades = this.cidades.slice();
+    this.consultaExternaService.consultarMunicipios().subscribe({
+      next: (municipios) => {
+        if (municipios && municipios.length > 0) {
+          this.cidades = municipios.map(m => ({ label: m.formatado, value: m.formatado }));
+          this.filteredCidades = this.cidades.slice(0, 20);
         }
-      });
+      },
+      error: (err) => {
+        console.error('Erro ao carregar cidades:', err);
+      }
+    });
   }
 
   filterCidades(event: any): void {
@@ -887,53 +872,73 @@ export class Cadastro implements OnInit {
 
   private cnpjValidator(control: any): { [key: string]: any } | null {
     const value = control.value;
+    if (!value) return null;
+    const clean = String(value).replace(/\D/g, '');
+    if (clean.length === 0) return null;
+    if (clean.length !== 14) return { 'invalidCNPJLength': true };
+    return validarCNPJ(clean) ? null : { 'invalidCNPJ': true };
+  }
 
-    // Allow empty values (required validator will handle empty case)
-    if (!value) {
-      return null;
+  onCnpjBlur(): void {
+    const cnpj = this.tecnicoForm.get('cnpj')?.value;
+    if (cnpj) {
+      this.buscarDadosCnpj(cnpj);
     }
+  }
 
-    // Remove all non-digit characters
-    const digitsOnly = value.replace(/\D/g, '');
-
-    // Validate digit count: should be exactly 14 digits
-    if (digitsOnly.length !== 14) {
-      return { 'invalidCNPJLength': true };
+  onCnpjInput(event: any): void {
+    const val = event?.target ? event.target.value : event;
+    const clean = String(val || '').replace(/\D/g, '');
+    if (clean.length === 14 && clean !== this.ultimoCnpjBuscado) {
+      this.buscarDadosCnpj(clean);
     }
+  }
 
-    // Validate first 8 digits (should not be all zeros)
-    if (digitsOnly.substring(0, 8) === '00000000') {
-      return { 'invalidCNPJ': true };
-    }
+  buscarDadosCnpj(cnpj: string): void {
+    const clean = cnpj.replace(/\D/g, '');
+    if (clean.length !== 14) return;
+    if (clean === this.ultimoCnpjBuscado) return;
 
-    // Validate the two check digits
-    let sum = 0;
-    let weight;
+    this.buscandoCnpj = true;
+    this.ultimoCnpjBuscado = clean;
 
-    // Calculate first verification digit
-    weight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    for (let i = 0; i < 12; i++) {
-      sum += parseInt(digitsOnly.charAt(i)) * weight[i];
-    }
-    let remainder = sum % 11;
-    let digit = (remainder < 2) ? 0 : 11 - remainder;
-    if (parseInt(digitsOnly.charAt(12)) !== digit) {
-      return { 'invalidCNPJ': true };
-    }
+    this.consultaExternaService.consultarCnpj(clean).subscribe({
+      next: (data) => {
+        this.buscandoCnpj = false;
+        if (data && (data.razaoSocial || data.nomeFantasia)) {
+          const nomeEmpresa = data.nomeFantasia || data.razaoSocial;
+          const currentNome = this.tecnicoForm.get('nome')?.value;
+          const currentLocal = this.tecnicoForm.get('local')?.value;
+          const currentTelefone = this.tecnicoForm.get('telefone')?.value;
 
-    // Calculate second verification digit
-    sum = 0;
-    weight = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
-    for (let i = 0; i < 13; i++) {
-      sum += parseInt(digitsOnly.charAt(i)) * weight[i];
-    }
-    remainder = sum % 11;
-    digit = (remainder < 2) ? 0 : 11 - remainder;
-    if (parseInt(digitsOnly.charAt(13)) !== digit) {
-      return { 'invalidCNPJ': true };
-    }
+          const patchObj: any = {};
+          if (!currentNome || currentNome.trim().length === 0) {
+            patchObj.nome = nomeEmpresa;
+          }
+          if (!currentLocal || currentLocal.trim().length === 0) {
+            patchObj.local = data.uf ? `${data.municipio} - ${data.uf}` : data.municipio;
+          }
+          if (!currentTelefone || currentTelefone.trim().length === 0) {
+            if (data.telefone) {
+              patchObj.telefone = data.telefone;
+            }
+          }
 
-    return null;
+          if (Object.keys(patchObj).length > 0) {
+            this.tecnicoForm.patchValue(patchObj);
+          }
+
+          this.messageService.add({
+            severity: 'success',
+            summary: 'CNPJ Localizado (Receita)',
+            detail: `${nomeEmpresa} - ${data.municipio}/${data.uf}`
+          });
+        }
+      },
+      error: () => {
+        this.buscandoCnpj = false;
+      }
+    });
   }
 
   private checkProfileExistsAndRedirect(): Observable<boolean> {
@@ -941,12 +946,7 @@ export class Cadastro implements OnInit {
     return this.profileService.verificarPerfilExistente().pipe(
       tap((result: { exists: boolean; type: 'cliente' | 'tecnico' | 'admin' | null }) => {
         if (result.exists) {
-          // Profile already exists, redirect to appropriate dashboard
-          if (result.type === 'cliente') {
-            this.router.navigate(['/cliente/inicio']);
-          } else if (result.type === 'tecnico' || result.type === 'admin') {
-            this.router.navigate(['/painel/dashboard']);
-          }
+          this.profileService.redirecionarParaPainelCorrespondente(result);
         }
       }),
       map((result: { exists: boolean; type: 'cliente' | 'tecnico' | 'admin' | null }) => result.exists)

@@ -1,16 +1,20 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
+import { PrimeNG } from 'primeng/config';
 import { ProfileService } from './services/profile.service';
 import { AuthService } from './services/auth.service';
 import { filter, switchMap, take } from 'rxjs/operators';
+import { PRIME_NG_PT_BR } from './shared/i18n/primeng-pt-br';
 
 @Component({
   standalone: true,
   selector: 'app-root',
   imports: [RouterOutlet, ToastModule],
-  templateUrl: './app.html',
-  styleUrl: './app.scss'
+  template: `
+    <router-outlet></router-outlet>
+    <p-toast></p-toast>
+  `
 })
 export class App {
   protected readonly title = signal('tcc-ng');
@@ -18,8 +22,10 @@ export class App {
   constructor(
     private profileService: ProfileService,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private primeng: PrimeNG
   ) {
+    this.primeng.setTranslation(PRIME_NG_PT_BR);
     this.verificarECriarPerfilSeNecessario();
   }
 
@@ -34,7 +40,10 @@ export class App {
       next: (user) => {
         this.profileService.verificarPerfilExistente().subscribe({
           next: (response) => {
-            if (!response.exists) {
+            const currentUrl = this.router.url.split('?')[0];
+            if (currentUrl === '/' || currentUrl === '') {
+              this.profileService.redirecionarParaPainelCorrespondente(response);
+            } else if (!response.exists && !currentUrl.includes('/completar-cadastro')) {
               // Redireciona para completar o cadastro se o perfil não existe
               this.router.navigate(['/completar-cadastro']);
             }

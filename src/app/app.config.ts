@@ -5,31 +5,32 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { errorInterceptor } from './interceptors/error.interceptor';
 import { provideAuth0, authHttpInterceptorFn, AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { provideAnimations } from '@angular/platform-browser/animations';
-// Configuração do PrimeNG v18
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
+import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 import { AuthService as CustomAuthService, REAL_AUTH0_TOKEN } from './services/auth.service';
+import { PRIME_NG_PT_BR } from './shared/i18n/primeng-pt-br';
 
 const auth0Config = provideAuth0({
-  domain: 'dev-fzslqbhihrhb8va0.us.auth0.com',
-  clientId: '0ack0PPx1NHjUHy5ym4R3rsmBjjnzBwN',
+  domain: environment.auth0.domain,
+  clientId: environment.auth0.clientId,
   
-  // A MÁGICA ACONTECE AQUI: Salva o token fisicamente no navegador
+  // Salva o token fisicamente no navegador
   cacheLocation: 'localstorage', 
   
   authorizationParams: {
-    redirect_uri: window.location.origin + '/painel',
-    audience: 'https://api.tcc-ng.com',
+    redirect_uri: environment.auth0.authorizationParams.redirect_uri,
+    audience: environment.auth0.authorizationParams.audience,
   },
   httpInterceptor: {
     allowedList: [
       {
-        uri: 'http://localhost:8000/*', 
+        uri: `${environment.api.serverUrl}/*`, 
         tokenOptions: {
           authorizationParams: {
-            audience: 'https://api.tcc-ng.com'
+            audience: environment.auth0.authorizationParams.audience
           }
         }
       }
@@ -63,17 +64,7 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: '.tp-dark-theme' // Força o tema claro conforme o seu design
         }
       },
-      translation: {
-        dayNames: ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
-        dayNamesShort: ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"],
-        dayNamesMin: ["D", "S", "T", "Q", "Q", "S", "S"],
-        monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
-        monthNamesShort: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
-        today: 'Hoje',
-        clear: 'Limpar',
-        dateFormat: 'dd/mm/yy',
-        firstDayOfWeek: 0
-      }
+      translation: PRIME_NG_PT_BR
     }),
     
     processedAuth0Providers

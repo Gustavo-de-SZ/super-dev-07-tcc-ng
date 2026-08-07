@@ -49,6 +49,25 @@ export class AgendaService {
     );
   }
 
+  getAgendamentoById(id: string | number): Observable<Agendamento> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        this.logTokenPayload(token);
+        return this.http.get<Agendamento>(`${this.configService.getApiUrl()}/agendamentos/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
   addAgendamento(agendamento: Agendamento): Observable<Agendamento> {
     return this.auth.getAccessTokenSilently({
       authorizationParams: {

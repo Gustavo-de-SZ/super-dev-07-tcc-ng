@@ -88,6 +88,7 @@ interface TipoAtendimentoCard {
                     optionLabel="nome_exibicao"
                     placeholder="Buscar cliente por nome..."
                     [forceSelection]="true"
+                    emptyMessage="Nenhum resultado encontrado"
                     appendTo="body"
                     class="ns-autocomplete"
                     inputStyleClass="ns-has-icon-left"> 
@@ -99,6 +100,9 @@ interface TipoAtendimentoCard {
                             <span class="ns-cliente-empresa">{{ cliente.empresa || 'Sem empresa' }}</span>
                           </div>
                         </div>
+                      </ng-template>
+                      <ng-template pTemplate="empty">
+                        <div class="p-3 text-sm text-slate-500 text-center">Nenhum resultado encontrado</div>
                       </ng-template>
                   </p-autoComplete>
                 </div>
@@ -143,17 +147,10 @@ interface TipoAtendimentoCard {
                 </div>
 
                 <div class="ns-form-group mb-0" [class.ns-is-invalid]="isInvalid('duracao')">
-                  <label for="duracao">Duração Estimada (h:m) *</label>
+                  <label for="duracao">Duração Estimada *</label>
                   <div class="ns-input-icon-wrapper">
                     <i class="pi pi-clock ns-icon-left"></i>
-                    <input 
-                      id="duracao" 
-                      type="text" 
-                      formControlName="duracao" 
-                      class="ns-input ns-has-icon-left" 
-                      placeholder="Ex: 01:30" 
-                      (input)="formatarDuracao($event)"
-                    />
+                    <input id="duracao" type="text" formControlName="duracao" class="ns-input ns-has-icon-left" placeholder="Ex: 2h">
                   </div>
                   @if (hasError('duracao', 'required')) {
                     <span class="ns-error-text"><i class="pi pi-info-circle"></i> Obrigatório</span>
@@ -167,36 +164,47 @@ interface TipoAtendimentoCard {
                 <i class="pi pi-briefcase text-primary"></i> Detalhes do Atendimento
               </h2>
               
-              <div class="ns-form-row-2">
-                <div class="ns-form-group mb-0">
-                  <label>Tipo de Atendimento *</label>
-                  <div class="ns-category-grid">
-                    @for (tipo of tiposAtendimento; track tipo.value) {
-                      <button 
-                        type="button" 
-                        class="ns-category-card" 
-                        [class.ns-active]="agendamentoForm.get('tipoAtendimento')?.value === tipo.value"
-                        (click)="selecionarTipo(tipo.value)"
-                      >
-                        <i [class]="tipo.icon"></i>
-                        <span>{{ tipo.label }}</span>
-                      </button>
-                    }
-                  </div>
+              <div class="ns-form-group">
+                <label>Modalidade de Atendimento *</label>
+                <div class="ns-modalidade-grid">
+                  <button
+                    type="button"
+                    class="ns-modalidade-btn"
+                    [class.ns-active]="agendamentoForm.get('tipoAtendimento')?.value === 'Presencial'"
+                    (click)="selecionarTipo('Presencial')"
+                  >
+                    <i class="pi pi-map-marker"></i>
+                    <div>
+                      <strong>Presencial (No Local)</strong>
+                      <small>Atendimento físico no local do cliente</small>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    class="ns-modalidade-btn"
+                    [class.ns-active]="agendamentoForm.get('tipoAtendimento')?.value === 'Remoto'"
+                    (click)="selecionarTipo('Remoto')"
+                  >
+                    <i class="pi pi-globe"></i>
+                    <div>
+                      <strong>Remoto (Online)</strong>
+                      <small>Suporte via acesso ou conexão remota</small>
+                    </div>
+                  </button>
                 </div>
+              </div>
 
-                <div class="ns-form-group mb-0">
-                  <label>Status inicial *</label>
-                  <p-select 
-                    formControlName="statusInicial"
-                    [options]="statusInicialOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Selecione..."
-                    appendTo="body"
-                    class="ns-select w-full"
-                  ></p-select>
-                </div>
+              <div class="ns-form-group mb-0" style="margin-top: 16px;">
+                <label>Status inicial *</label>
+                <p-select 
+                  formControlName="statusInicial"
+                  [options]="statusInicialOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Selecione..."
+                  appendTo="body"
+                  class="ns-select w-full"
+                ></p-select>
               </div>
             </section>
 
@@ -248,8 +256,11 @@ interface TipoAtendimentoCard {
                 <span class="value">{{ agendamentoForm.get('duracao')?.value || '—' }}</span>
               </div>
               <div class="ns-summary-item">
-                <span class="label">Tipo</span>
-                <span class="value">{{ agendamentoForm.get('tipoAtendimento')?.value || '—' }}</span>
+                <span class="label">Modalidade</span>
+                <span class="value" style="display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
+                  <i class="pi" [ngClass]="agendamentoForm.get('tipoAtendimento')?.value === 'Remoto' ? 'pi-globe text-emerald-500' : 'pi-map-marker text-blue-500'"></i>
+                  {{ agendamentoForm.get('tipoAtendimento')?.value || 'Presencial' }}
+                </span>
               </div>
             </div>
 
@@ -265,10 +276,11 @@ interface TipoAtendimentoCard {
             </div>
 
             <div class="ns-summary-actions">
-              <button type="button" class="ns-btn-submit" [disabled]="agendamentoForm.invalid" (click)="salvar()">
+              <button type="button" class="tcc-btn-main" [disabled]="agendamentoForm.invalid || enviando" (click)="salvar()" style="display:flex; align-items:center; gap:8px;">
+                @if(enviando) { <i class="pi pi-spin pi-spinner"></i> }
                 Salvar Agendamento
               </button>
-              <button type="button" class="ns-btn-cancel" (click)="cancelar()">
+              <button type="button" class="tcc-btn-cancel" (click)="cancelar()">
                 Cancelar
               </button>
             </div>
@@ -417,31 +429,64 @@ interface TipoAtendimentoCard {
       box-shadow: none !important;
     }
 
-    .ns-category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100%; }
-    .ns-category-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-input);
+    .ns-modalidade-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .ns-modalidade-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-input, #e2e8f0);
+      background: var(--bg-card, #ffffff);
+      color: var(--text-main, #334155);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .ns-modalidade-btn i {
+      font-size: 1.2rem;
+      color: var(--text-muted, #64748b);
+      padding: 8px;
       border-radius: 8px;
-      padding: 12px 16px;
+      background: rgba(148, 163, 184, 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      cursor: pointer;
-      color: var(--text-muted);
-      transition: all 0.2s;
-      font-family: inherit;
     }
-    .ns-category-card i { font-size: 1.2rem; }
-    .ns-category-card span { font-size: 14px; font-weight: 500; }
-    .ns-category-card:hover {
-      background: var(--bg-main);
-      border-color: var(--text-muted);
+
+    .ns-modalidade-btn strong {
+      display: block;
+      font-size: 0.875rem;
+      color: var(--text-main, #0f172a);
     }
-    .ns-category-card.ns-active {
-      background: var(--primary-bg) !important;
-      border-color: var(--primary) !important;
-      color: var(--primary) !important;
+
+    .ns-modalidade-btn small {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted, #64748b);
+      line-height: 1.2;
+    }
+
+    .ns-modalidade-btn:hover {
+      background: var(--bg-main, #f8fafc);
+      border-color: #3b82f6;
+    }
+
+    .ns-modalidade-btn.ns-active {
+      border-color: #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.08) !important;
+    }
+
+    .ns-modalidade-btn.ns-active i {
+      color: #3b82f6 !important;
+      background: rgba(59, 130, 246, 0.18) !important;
     }
 
     .ns-error-text { color: var(--error); font-size: 12px; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
@@ -519,15 +564,15 @@ interface TipoAtendimentoCard {
     .ns-badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
 
     .ns-summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
-    .ns-btn-submit {
+    .tcc-btn-main {
       width: 100%; background: var(--primary); color: #ffffff; border: none; padding: 12px;
       border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
-    .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
-    .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tcc-btn-main:hover:not(:disabled) { background: #2563eb; }
+    .tcc-btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
     
-    .ns-btn-cancel { width: 100%; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; transition: color 0.2s; }
-    .ns-btn-cancel:hover { color: var(--text-main); text-decoration: underline; }
+    .tcc-btn-cancel { width: 100%; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; transition: color 0.2s; }
+    .tcc-btn-cancel:hover { color: var(--text-main); text-decoration: underline; }
 
   
     ::ng-deep body.tp-dark-theme .p-autocomplete-panel,
@@ -560,6 +605,7 @@ interface TipoAtendimentoCard {
   `]
 })
 export class NovoAgendamento implements OnInit {
+  enviando = false;
   private readonly formBuilder = inject(FormBuilder);
   private readonly messageService = inject(MessageService);
   private readonly clienteService = inject(ClienteService);
@@ -643,17 +689,7 @@ export class NovoAgendamento implements OnInit {
     this.agendamentoForm.get('hora')?.setValue(value);
   }
 
-  formatarDuracao(event: any): void {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value.length > 4) value = value.slice(0, 4);
-    
-    if (value.length >= 3) {
-      value = value.replace(/(\d{2})(\d{1,2})/, '$1:$2');
-    }
-    
-    event.target.value = value;
-    this.agendamentoForm.get('duracao')?.setValue(value);
-  }
+  
 
   selecionarTipo(valor: string) {
     this.agendamentoForm.get('tipoAtendimento')?.setValue(valor);
@@ -688,13 +724,20 @@ export class NovoAgendamento implements OnInit {
   }
 
   salvar() {
+    if (this.enviando) return;
+    this.enviando = true;
     if (this.agendamentoForm.valid) {
       const formData = this.agendamentoForm.getRawValue();
 
-      // Extrai apenas o nome seguro vindo do Autocomplete (caso seja objeto)
-      const nomeDoClienteStr = typeof formData.cliente === 'object' 
-        ? (formData.cliente as any).nome 
-        : formData.cliente;
+      const clienteVal: any = formData.cliente;
+      let nomeDoClienteStr = '';
+      let empresaDoClienteStr = '';
+      if (clienteVal && typeof clienteVal === 'object') {
+        nomeDoClienteStr = clienteVal.nome_exibicao || clienteVal.nome_completo || clienteVal.nome || '';
+        empresaDoClienteStr = clienteVal.empresa || '';
+      } else if (clienteVal) {
+        nomeDoClienteStr = String(clienteVal);
+      }
 
       // Extract month and day from the selected date field
       const dataSelecionada = formData.data;
@@ -729,6 +772,7 @@ export class NovoAgendamento implements OnInit {
         hora: formData.hora!,
         titulo: formData.titulo!,
         cliente: nomeDoClienteStr,
+        empresa: empresaDoClienteStr,
         duracao: formData.duracao!,
         tipo: formData.tipoAtendimento as ('Presencial' | 'Remoto'),
         status: formData.statusInicial as ('Confirmado' | 'Pendente' | 'Concluído' | 'Cancelado')
@@ -739,16 +783,19 @@ export class NovoAgendamento implements OnInit {
           this.messageService.add({ severity: 'success', summary: 'Show de bola!', detail: 'Agendamento cadastrado com sucesso' });
           this.agendamentoForm.reset();
           
+          this.enviando = false;
           setTimeout(() => this.router.navigate(['/painel/agenda']), 1000);
         },
         error: (err) => {
           console.error('Erro ao salvar agendamento', err);
           this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao cadastrar o agendamento' });
+          this.enviando = false;
         }
       });
     } else {
       this.agendamentoForm.markAllAsTouched();
       this.messageService.add({ severity: 'error', summary: 'Aviso', detail: 'Preencha todos os campos obrigatórios corretamente' });
+      this.enviando = false;
     }
   }
 

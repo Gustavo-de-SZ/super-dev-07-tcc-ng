@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-servicos-search',
@@ -52,7 +53,10 @@ export class ServicosSearchComponent {
   @Output() categoryChange = new EventEmitter<string>();
 
   constructor() {
-    this.searchControl.valueChanges.subscribe(value => this.searchChange.emit(value || ''));
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(value => this.searchChange.emit(value || ''));
     this.categoryControl.valueChanges.subscribe(value => this.categoryChange.emit(value || ''));
   }
 }

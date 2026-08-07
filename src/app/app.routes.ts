@@ -9,6 +9,7 @@ canActivate: [appAuthGuardFn, profileGuardFn],
   loadComponent: () => import('./core/painel-layout/painel-layout').then(m => m.PainelLayout),
     children: [
       {path: 'dashboard', loadComponent: () => import('./pages/dashboard-tecnico/dashboard-tecnico').then(m => m.DashboardTecnico)},
+      {path: 'chamados', loadComponent: () => import('./pages/chamados-tecnico/chamados-tecnico').then(m => m.ChamadosTecnico)},
       {path: 'agenda', loadComponent: () => import('./pages/agenda-tecnico/agenda-tecnico').then(m => m.AgendaTecnico)},
       {path: 'servicos', loadComponent: () => import('./pages/servicos-tecnico/servicos-tecnico').then(m => m.ServicosTecnico)},
       {path: 'financeiro', loadComponent: () => import('./pages/financeiro-tecnico/financeiro-tecnico').then(m => m.FinanceiroTecnico)},
@@ -18,6 +19,7 @@ canActivate: [appAuthGuardFn, profileGuardFn],
       {path: 'servicos/novo', loadComponent: () => import('./pages/servicos-tecnico/components/servicos-create').then(m => m.NovoServico)},
       {path: 'servicos/:id/edit', loadComponent: () => import('./pages/servicos-tecnico/components/servicos-edit').then(m => m.EditarServico)},
       {path: 'clientes/novo', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-tecnico-create').then(m => m.NovoCliente)},
+      {path: 'clientes/:id/edit', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-edit').then(m => m.EditarCliente)},
       {path: 'clientes/:email/edit', loadComponent: () => import('./pages/clientes-tecnico/components/cliente-edit').then(m => m.EditarCliente)},
       {path: 'configuracoes', loadComponent: () => import('./pages/configuracoes/configuracoes').then(m => m.ConfiguracoesComponent)},
       {path: 'chat/:id', loadComponent: () => import('./pages/chat/chat').then(m => m.ChatComponent)}
@@ -29,7 +31,8 @@ canActivate: [appAuthGuardFn, profileGuardFn],
     canActivate: [appAuthGuardFn, profileGuardFn],
     loadComponent: () => import('./core/painel-layout/layout-cliente/layout-cliente').then(m => m.PainelClienteLayout),
     children: [
-      { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicioComponent) },
+      { path: 'inicio', loadComponent: () => import('./pages/home-cliente/home-cliente').then(m => m.ClienteInicio) },
+      { path: 'buscar', loadComponent: () => import('./pages/buscar-profissionais/buscar-profissionais').then(m => m.BuscarProfissionais) },
       { path: 'solicitacao', loadComponent: () => import('./pages/nova-solicitacao/nova-solicitacao-create').then(m => m.NovaSolicitacao) },
       { path: 'meus-chamados', loadComponent: () => import('./pages/meus-chamados/meus-chamados').then(m => m.MeusChamados) },
       { path: 'configuracoes', loadComponent: () => import('./pages/configuracoes/configuracoes').then(m => m.ConfiguracoesComponent) },
@@ -41,7 +44,9 @@ canActivate: [appAuthGuardFn, profileGuardFn],
     loadComponent: () => import('./core/painel-layout/layout-admin/layout-admin').then(m => m.PainelAdminLayout),
     children: [
       { path: 'dashboard', loadComponent: () => import('./pages/admin/dashboard/dashboard-admin').then(m => m.DashboardAdmin) },
-      { path: 'tecnicos', loadComponent: () => import('./pages/admin/tecnicos/tecnicos-admin').then(m => m.TecnicosAdmin) }
+      { path: 'tecnicos', loadComponent: () => import('./pages/admin/tecnicos/tecnicos-admin').then(m => m.TecnicosAdmin) },
+      { path: 'clientes', loadComponent: () => import('./pages/admin/clientes/clientes-admin').then(m => m.ClientesAdmin) },
+      { path: 'configuracoes', loadComponent: () => import('./pages/configuracoes/configuracoes').then(m => m.ConfiguracoesComponent) }
     ]
   },
   {

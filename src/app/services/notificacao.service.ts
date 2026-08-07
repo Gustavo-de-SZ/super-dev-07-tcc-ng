@@ -10,6 +10,7 @@ export interface Notificacao {
   titulo: string;
   mensagem: string;
   tipo: string;
+  link?: string;
   lida: boolean;
   criado_em: string;
 }
@@ -25,9 +26,7 @@ export class NotificacaoService {
       switchMap(token =>
         this.http.get<Notificacao[]>(`${this.config.getApiUrl()}/notificacoes`, {
           headers: { Authorization: `Bearer ${token}` }
-        }).pipe(
-          timeout(15000)
-        )
+        })
       ),
       catchError(() => of<Notificacao[]>([]))
     );
@@ -38,9 +37,40 @@ export class NotificacaoService {
       switchMap(token =>
         this.http.put(`${this.config.getApiUrl()}/notificacoes/ler`, {}, {
           headers: { Authorization: `Bearer ${token}` }
-        }).pipe(
-          timeout(15000)
-        )
+        })
+      ),
+      catchError(() => of({}))
+    );
+  }
+
+  marcarLida(id: number): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token =>
+        this.http.put(`${this.config.getApiUrl()}/notificacoes/${id}/ler`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ),
+      catchError(() => of({}))
+    );
+  }
+
+  excluirNotificacao(id: number): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token =>
+        this.http.delete(`${this.config.getApiUrl()}/notificacoes/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ),
+      catchError(() => of({}))
+    );
+  }
+
+  limparLidas(): Observable<any> {
+    return this.auth.getToken().pipe(
+      switchMap(token =>
+        this.http.delete(`${this.config.getApiUrl()}/notificacoes`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
       ),
       catchError(() => of({}))
     );

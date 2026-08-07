@@ -2,14 +2,73 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { Solicitacao } from '../models/solicitacao';
+import { Solicitacao, SolicitacaoResumo } from '../models/solicitacao';
 import { ConfigService } from './config.service';
-import { AuthService } from '@auth0/auth0-angular';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SolicitacaoService {
+  getResumoSemanal(): Observable<SolicitacaoResumo> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.get<SolicitacaoResumo>(
+        `${this.configService.getApiUrl()}/solicitacoes/resumo-semanal`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ))
+    );
+  }
+
+  getMinhas(): Observable<any[]> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.get<any[]>(
+        `${this.configService.getApiUrl()}/solicitacoes`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ))
+    );
+  }
+
+  getAbertas(): Observable<any[]> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.get<any[]>(
+        `${this.configService.getApiUrl()}/solicitacoes/abertas/disponiveis`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ))
+    );
+  }
+
+  aceitar(id: string): Observable<Solicitacao> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.post<Solicitacao>(
+        `${this.configService.getApiUrl()}/solicitacoes/${id}/aceitar`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ))
+    );
+  }
+
+  concluir(id: string): Observable<Solicitacao> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.post<Solicitacao>(
+        `${this.configService.getApiUrl()}/solicitacoes/${id}/concluir`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ))
+    );
+  }
+
+  abandonar(id: string): Observable<Solicitacao> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.post<Solicitacao>(
+        `${this.configService.getApiUrl()}/solicitacoes/${id}/abandonar`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      ))
+    );
+  }
   constructor(
     private http: HttpClient,
     private configService: ConfigService,

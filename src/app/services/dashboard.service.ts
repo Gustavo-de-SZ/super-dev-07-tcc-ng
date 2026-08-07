@@ -79,23 +79,32 @@ export class DashboardService {
               {
                 titulo: 'Total de Clientes',
                 valor: String(res.total || 0),
-                descricao: 'Clientes cadastrados',
+                descricao: 'Total na carteira',
                 icone: 'pi pi-users',
                 corClasse: 'tcc-icon-blue'
               },
               {
                 titulo: 'Clientes Ativos',
                 valor: String(res.ativos || 0),
-                descricao: 'Com serviços recentes',
+                descricao: 'Cadastros ativos',
                 icone: 'pi pi-check-circle',
                 corClasse: 'tcc-icon-green'
               },
               {
                 titulo: 'Clientes Inativos',
                 valor: String(res.inativos || 0),
-                descricao: 'Sem serviços há 30 dias',
+                descricao: 'Cadastros inativos',
                 icone: 'pi pi-clock',
                 corClasse: 'tcc-icon-orange'
+              },
+              {
+                titulo: 'Avaliação Geral',
+                valor: res.avaliacao_media != null ? `★ ${res.avaliacao_media}` : '★ —',
+                descricao: res.total_avaliacoes
+                  ? `Baseado em ${res.total_avaliacoes} avaliação${res.total_avaliacoes > 1 ? 'ões' : ''}`
+                  : 'Nenhuma avaliação recebida ainda',
+                icone: 'pi pi-star',
+                corClasse: 'tcc-icon-yellow'
               }
             ];
           })

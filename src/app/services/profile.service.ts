@@ -1,12 +1,13 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { switchMap, tap, timeout, catchError } from 'rxjs/operators';
+import { switchMap, tap, timeout, catchError, take } from 'rxjs/operators';
 import { Cliente } from '../models/cliente';
 import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
 
-interface Tecnico {
+export interface Tecnico {
   id: number;
   usuario_id: number;
   nome_fantasia: string;
@@ -18,10 +19,12 @@ interface Tecnico {
   email: string;
 }
 
-interface ProfileResponse {
+export interface ProfileResponse {
   exists: boolean;
   type: 'cliente' | 'tecnico' | 'admin' | null;
-  aprovado?: boolean; // <-- Adicionado
+  aprovado?: boolean;
+  nome?: string;
+  cargo?: string;
 }
 
 @Injectable({
@@ -29,6 +32,7 @@ interface ProfileResponse {
 })
 export class ProfileService {
   private profileState$ = new BehaviorSubject<{checked: boolean, exists: boolean, type: 'cliente' | 'tecnico' | 'admin' | null, aprovado?: boolean}>({ checked: false, exists: false, type: null });
+  private router = inject(Router);
 
   constructor(
     private http: HttpClient,
@@ -65,38 +69,50 @@ export class ProfileService {
       });
     }
 
-    return this.auth.getToken().pipe(
-      timeout(10000), // Increased timeout for token retrieval
-      switchMap(token => {
-        return this.http.get<ProfileResponse>(`${this.configService.getApiUrl()}/usuarios/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        }).pipe(
-          timeout(15000), // Increased timeout for HTTP request
-          tap(res => {
-            // 3. Salvar no estado
-            this.profileState$.next({
-              checked: true,
-              exists: res.exists,
-              type: res.type,
-              aprovado: res.aprovado
-            });
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap(user => {
+        return this.auth.getToken().pipe(
+          switchMap(token => {
+            let params = new HttpParams();
+            if (user?.email) {
+              params = params.set('email', user.email);
+            }
+            if (user?.name) {
+              params = params.set('nome', user.name);
+            }
+
+            return this.http.get<ProfileResponse>(`${this.configService.getApiUrl()}/usuarios/me`, {
+              params,
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            }).pipe(
+              tap(res => {
+                // 3. Salvar no estado
+                this.profileState$.next({
+                  checked: true,
+                  exists: res.exists,
+                  type: res.type,
+                  aprovado: res.aprovado
+                });
+              }),
+              catchError(err => {
+                console.error('Erro ao buscar perfil do usuário:', err);
+                // On error, return last known state to prevent incorrect redirects
+                // This avoids sending users to completion page on temporary failures
+                return of(this.profileState$.value);
+              })
+            );
           }),
           catchError(err => {
-            console.error('Erro ao buscar perfil do usuário:', err);
-            // On error, return last known state to prevent incorrect redirects
-            // This avoids sending users to completion page on temporary failures
-            return of(this.profileState$.value);
+            console.error('Erro ao obter token de autenticação:', err);
+            // If we can't get a token, assume no profile exists to block false redirects
+            return of({ exists: false, type: null as 'cliente' | 'tecnico' | 'admin' | null, aprovado: false });
           })
         );
-      }),
-      catchError(err => {
-        console.error('Erro ao obter token de autenticação:', err);
-        // If we can't get a token, assume no profile exists to block false redirects
-        return of({ exists: false, type: null as 'cliente' | 'tecnico' | 'admin' | null, aprovado: false });
       })
     );
   }
@@ -111,7 +127,6 @@ export class ProfileService {
 
   criarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
     return this.auth.getToken().pipe(
-      timeout(10000),
       switchMap(token => {
         // Decode token to get email and auth0_id
         const payloadBase64 = token.split('.')[1];
@@ -136,7 +151,6 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(15000)
         );
       })
     );
@@ -144,7 +158,6 @@ export class ProfileService {
 
   criarPerfilTecnico(tecnicoData: Partial<Tecnico>): Observable<Tecnico> {
     return this.auth.getToken().pipe(
-      timeout(10000),
       switchMap(token => {
         // Decode token to get email and auth0_id
         const payloadBase64 = token.split('.')[1];
@@ -169,7 +182,6 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(15000)
         );
       })
     );
@@ -178,7 +190,6 @@ export class ProfileService {
   // NEW METHODS FOR SETTINGS PAGE
   obterPerfilTecnico(): Observable<Tecnico> {
     return this.auth.getToken().pipe(
-      timeout(10000),
       switchMap(token => {
         this.logTokenPayload(token);
         return this.http.get<Tecnico>(`${this.configService.getApiUrl()}/tecnicos/me`, {
@@ -188,7 +199,6 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(15000)
         );
       })
     );
@@ -196,7 +206,6 @@ export class ProfileService {
 
   atualizarPerfilTecnico(tecnicoData: Partial<Tecnico>): Observable<Tecnico> {
     return this.auth.getToken().pipe(
-      timeout(10000),
       switchMap(token => {
         // Decode token to get auth0_id
         const payloadBase64 = token.split('.')[1];
@@ -217,7 +226,6 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(15000)
         );
       })
     );
@@ -225,7 +233,6 @@ export class ProfileService {
 
   obterPerfilCliente(): Observable<Cliente> {
     return this.auth.getToken().pipe(
-      timeout(10000),
       switchMap(token => {
         this.logTokenPayload(token);
         return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/me`, {
@@ -235,7 +242,6 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(15000)
         );
       })
     );
@@ -243,7 +249,6 @@ export class ProfileService {
 
   atualizarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
     return this.auth.getToken().pipe(
-      timeout(10000),
       switchMap(token => {
         // Decode token to get auth0_id
         const payloadBase64 = token.split('.')[1];
@@ -264,9 +269,46 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
-          timeout(15000)
         );
       })
     );
+  }
+
+  /**
+   * Redireciona o usuário autenticado para o seu devido painel de acordo com o tipo e status de aprovação.
+   */
+  redirecionarParaPainelCorrespondente(res?: ProfileResponse): void {
+    const navegar = (p: ProfileResponse) => {
+      if (!p || !p.exists) {
+        this.router.navigate(['/completar-cadastro']);
+        return;
+      }
+      if (p.type === 'admin') {
+        this.router.navigate(['/admin/dashboard']);
+        return;
+      }
+      if (p.type === 'tecnico') {
+        if (p.aprovado === false) {
+          this.router.navigate(['/pendente-aprovacao']);
+        } else {
+          this.router.navigate(['/painel/dashboard']);
+        }
+        return;
+      }
+      if (p.type === 'cliente') {
+        this.router.navigate(['/cliente/inicio']);
+        return;
+      }
+      this.router.navigate(['/painel/dashboard']);
+    };
+
+    if (res) {
+      navegar(res);
+    } else {
+      this.verificarPerfilExistente().subscribe({
+        next: (profile) => navegar(profile),
+        error: () => this.router.navigate(['/painel/dashboard'])
+      });
+    }
   }
 }

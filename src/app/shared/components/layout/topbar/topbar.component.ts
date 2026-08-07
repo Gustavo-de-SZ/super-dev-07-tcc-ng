@@ -14,14 +14,20 @@ import { CommonModule } from '@angular/common';
           <i [class]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'"></i>
         </button>
         
-        <button *ngIf="showMessages" class="tcc-icon-btn">
-          <i class="pi pi-comments"></i>
-        </button>
+        @if (showMessages) {
+          <button class="tcc-icon-btn">
+            <i class="pi pi-comments"></i>
+          </button>
+        }
         
-        <button *ngIf="showNotifications" class="tcc-icon-btn tcc-notification-btn">
-          <i class="pi pi-bell"></i>
-          <span class="tcc-badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
-        </button>
+        @if (showNotifications) {
+          <button class="tcc-icon-btn tcc-notification-btn">
+            <i class="pi pi-bell"></i>
+            @if (notificationCount > 0) {
+              <span class="tcc-badge">{{ notificationCount }}</span>
+            }
+          </button>
+        }
         
         <div class="tcc-divider"></div>
         
@@ -31,10 +37,11 @@ import { CommonModule } from '@angular/common';
             <span class="tcc-profile-role">{{ userRole }}</span>
           </div>
           <div class="tcc-profile-avatar">
-            <img *ngIf="userAvatar; else defaultAvatar" [src]="userAvatar" alt="Avatar" class="avatar-img" referrerpolicy="no-referrer">
-            <ng-template #defaultAvatar>
+            @if (userAvatar) {
+              <img [src]="userAvatar" alt="Avatar" class="avatar-img" referrerpolicy="no-referrer">
+            } @else {
               <i class="pi pi-user"></i>
-            </ng-template>
+            }
           </div>
           <i class="pi pi-chevron-down tcc-profile-arrow"></i>
         </div>

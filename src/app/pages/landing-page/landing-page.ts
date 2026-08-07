@@ -1,9 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { NavbarComponent } from '../../shared/components/navbar.components';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ProfileService } from '../../services/profile.service';
+import { filter, switchMap, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-landing',
@@ -33,7 +35,7 @@ import { AuthService } from '../../services/auth.service';
 
     <div class="tcc-features-layout">
         
-        @for (f of infoItems; track f.title) {
+        @for (f of infoItems; track (f.title || $index)) {
           <div class="tcc-info-card">
             <div class="tcc-icon-container">
               <i class="pi" [ngClass]="f.icon"></i>
@@ -46,17 +48,31 @@ import { AuthService } from '../../services/auth.service';
       </div>
       
     </main>
+
   `
 })
-export class LandingPage {
+export class LandingPage implements OnInit {
   auth = inject(AuthService);
   router = inject(Router);
+  profileService = inject(ProfileService);
 
   infoItems = [
     { icon: 'pi-users', title: '2.500+ Profissionais', description: 'Rede qualificada e verificada para atender sua demanda.' },
     { icon: 'pi-shield', title: '100% Seguro', description: 'Pagamentos protegidos e garantia de entrega do serviço.' },
     { icon: 'pi-bolt', title: 'Resposta Rápida', description: 'Atendimento técnico especializado em até 2 horas.' }
   ];
+
+  ngOnInit(): void {
+    // Redireciona automaticamente o usuário autenticado para seu devido painel
+    this.auth.isAuthenticated$.pipe(
+      filter(authenticated => !!authenticated),
+      switchMap(() => this.auth.user$),
+      filter(user => !!user),
+      take(1)
+    ).subscribe(() => {
+      this.profileService.redirecionarParaPainelCorrespondente();
+    });
+  }
 
   login() {
     this.auth.login();

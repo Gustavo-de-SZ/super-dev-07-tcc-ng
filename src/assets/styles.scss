@@ -1,4 +1,5 @@
 @use "./shared-styles.scss" as *;
+@import "tailwindcss";
 @import "primeicons/primeicons.css";
 
 
@@ -169,7 +170,11 @@ body {
 // btns
 
 // btn azul primario
-.tcc-btn-main { 
+.tcc-btn-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; 
   background: var(--tcc-primary) !important; 
   color: #ffffff !important;
   border: none !important; 
@@ -185,6 +190,10 @@ body {
 
 //profissa btn
 .tcc-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: var(--tcc-surface) !important;
   color: var(--tcc-text-main) !important;
   border: 1px solid var(--tcc-border) !important;
@@ -209,6 +218,10 @@ body {
 }
 
 .tcc-btn-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: transparent !important;
   border: 1px solid var(--tcc-border) !important;
   color: var(--tcc-text-main) !important;
@@ -225,17 +238,29 @@ body {
 }
 
 .tcc-btn-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   height: 44px;
   padding: 12px 24px;
   line-height: 1.5;
 }
 .tcc-btn-outline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   height: 44px;
   padding: 12px 24px;
   line-height: 1.5;
 }
 
 .tcc-btn-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   height: 44px;
   padding: 12px 24px;
   line-height: 1.5;
@@ -343,23 +368,793 @@ body.tp-dark-theme {
   }
 }
 
-/* Print styles - Hide UI elements when printing */
-@media print {
-  /* Hide the sidebar, topnav, and action buttons */
-  .tcc-sidebar, .tcc-navbar, .tcc-btn-outline, .icon-btn, p-toast {
-    display: none !important;
+/* ==========================================================================
+   Print styles & Ordem de Serviço (OS) Document Styles
+   ========================================================================== */
+
+/* On screen preview modal & document wrapper */
+.os-preview-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.os-preview-modal-box {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35);
+  border: 1px solid #cbd5e1;
+  overflow: hidden;
+}
+
+.os-preview-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 22px;
+  background: #0f172a;
+  color: #ffffff;
+  border-bottom: 1px solid #1e293b;
+  flex-shrink: 0;
+}
+
+.os-preview-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  i {
+    font-size: 24px;
+    color: #38bdf8;
   }
 
-  /* Ensure the main content takes up the full page */
-  .ns-page-container {
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  span {
+    font-size: 11.5px;
+    color: #94a3b8;
+  }
+}
+
+.os-preview-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .tcc-btn-outline {
+    background: transparent;
+    border: 1px solid #475569;
+    color: #f1f5f9;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #1e293b;
+      border-color: #64748b;
+      color: #ffffff;
+    }
+  }
+
+  .tcc-btn-main {
+    background: #2563eb;
+    border: 1px solid #3b82f6;
+    color: #ffffff;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+  }
+}
+
+.os-preview-modal-body {
+  padding: 24px;
+  background: #f1f5f9;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+
+  .tcc-os-print-document {
+    width: 100%;
+    max-width: 800px;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+  }
+}
+
+/* Core Ordem de Serviço document layout (Both Screen Preview & Print) */
+.tcc-os-print-document {
+  display: block;
+  width: 100%;
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.4;
+
+  .os-doc-page {
+    position: relative;
+    padding: 26px 30px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+  }
+
+  .os-doc-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #38bdf8 100%);
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .os-doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: 4px;
+    margin-bottom: 12px;
+  }
+
+  .os-brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .os-logo-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #1e3a8a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    flex-shrink: 0;
+  }
+
+  .os-brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .os-company-name {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .os-company-sub {
+    margin: 0;
+    font-size: 11px;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .os-company-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9.5px;
+    color: #64748b;
+    margin-top: 2px;
+
+    .dot {
+      color: #cbd5e1;
+    }
+  }
+
+  .os-doc-badge-box {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+  }
+
+  .os-doc-type-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .os-doc-number {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .os-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .os-status-concluido { background: #dcfce7 !important; color: #166534 !important; border: 1px solid #86efac; }
+  .os-status-andamento { background: #dbeafe !important; color: #1e40af !important; border: 1px solid #93c5fd; }
+  .os-status-pendente  { background: #fef9c3 !important; color: #854d0e !important; border: 1px solid #fde047; }
+  .os-status-cancelado { background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fca5a5; }
+
+  .os-doc-date-meta {
+    font-size: 9.5px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  .os-divider {
+    height: 1px;
+    background: #cbd5e1;
+    margin: 10px 0 14px 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 2-Columns Parties info */
+  .os-parties-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .os-party-card {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .os-party-header {
+    background: #e2e8f0;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #cbd5e1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    i {
+      font-size: 11px;
+      color: #2563eb;
+    }
+  }
+
+  .os-party-body {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .os-party-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10.5px;
+
+    .lbl {
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .val {
+      color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .val.bold {
+      font-weight: 700;
+      color: #0f172a;
+    }
+  }
+
+  /* Equipamento */
+  .os-equip-box {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    margin-bottom: 12px;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .os-equip-header {
+    background: #e2e8f0;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #cbd5e1;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    i {
+      font-size: 11px;
+      color: #2563eb;
+    }
+  }
+
+  .os-equip-details {
+    padding: 8px 10px;
+    display: flex;
+    gap: 24px;
+    font-size: 10.5px;
+  }
+
+  .os-equip-item {
+    display: flex;
+    gap: 6px;
+
+    .lbl {
+      color: #64748b;
+    }
+
+    .val {
+      color: #0f172a;
+    }
+  }
+
+  /* Sections */
+  .os-section {
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+
+  .os-section-header {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1.5px solid #cbd5e1;
+    padding-bottom: 3px;
+
+    i {
+      font-size: 11px;
+      color: #2563eb;
+    }
+  }
+
+  .os-service-details-box {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: #ffffff;
+  }
+
+  .os-service-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .os-service-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .os-category-tag {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .os-desc-content {
+    font-size: 10.5px;
+    color: #334155;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  /* Pricing Table */
+  .os-pricing-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    font-size: 10.5px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+
+    thead th {
+      background: #1e293b;
+      color: #ffffff;
+      padding: 6px 10px;
+      font-weight: 600;
+      text-align: left;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    tbody td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #1e293b;
+      vertical-align: middle;
+    }
+
+    .col-desc {
+      width: 45%;
+
+      strong {
+        color: #0f172a;
+      }
+
+      small {
+        color: #64748b;
+        font-size: 9.5px;
+        margin-top: 2px;
+      }
+    }
+
+    .col-cat { width: 15%; }
+    .col-qty { width: 12%; text-align: center; }
+    .col-unit { width: 14%; text-align: right; }
+    .col-total { width: 14%; text-align: right; font-weight: 700; color: #0f172a; }
+  }
+
+  .os-financial-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    .os-summary-left {
+      font-size: 9.5px;
+      color: #475569;
+      font-weight: 500;
+
+      i {
+        color: #16a34a;
+        margin-right: 4px;
+      }
+    }
+
+    .os-summary-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .os-subtotal-row {
+      font-size: 10.5px;
+      color: #64748b;
+      display: flex;
+      gap: 6px;
+    }
+
+    .os-total-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 4px 10px;
+      border-radius: 6px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+
+      .total-label {
+        font-size: 10.5px;
+        font-weight: 800;
+        color: #1e40af;
+      }
+
+      .total-amount {
+        font-size: 14px;
+        font-weight: 800;
+        color: #1e3a8a;
+      }
+    }
+  }
+
+  /* Warranty */
+  .os-warranty-section {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    padding: 7px 10px;
+    background: #f1f5f9;
+    border-left: 3px solid #2563eb;
+    border-radius: 0 4px 4px 0;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    .os-warranty-header {
+      font-size: 9px;
+      font-weight: 700;
+      color: #1e3a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      i {
+        font-size: 9.5px;
+      }
+    }
+
+    .os-warranty-text {
+      font-size: 8.5px;
+      color: #475569;
+      line-height: 1.4;
+      margin: 0;
+    }
+  }
+
+  /* Signatures */
+  .os-signatures-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 36px;
+    margin-top: 24px;
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+
+    .os-signature-block {
+      flex: 1;
+      text-align: center;
+    }
+
+    .os-sign-line {
+      border-top: 1px solid #475569;
+      margin-bottom: 4px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .os-sign-person {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .os-sign-sub {
+      font-size: 9px;
+      color: #64748b;
+    }
+
+    .os-sign-date {
+      font-size: 8.5px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+  }
+
+  /* Document Footer */
+  .os-document-footer {
+    margin-top: 10px;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 6px;
+    page-break-inside: avoid;
+
+    .os-footer-content {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8.5px;
+      color: #94a3b8;
+    }
+  }
+}
+
+/* ==========================================================================
+   PRINT MEDIA RULES (Physical Printer & PDF Export)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 12mm;
+  }
+
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  }
+
+  /* Hide UI elements, navigation, modal header, actions and filters */
+  app-sidebar,
+  app-topbar,
+  .tcc-sidebar,
+  .tcc-navbar,
+  .tcc-topbar-container,
+  .tcc-page-header,
+  .tcc-header-section,
+  .tcc-header-title-group,
+  .tcc-filter-card,
+  app-servicos-filters,
+  app-servicos-search,
+  .tcc-services-list,
+  .tcc-paginator-container,
+  .os-preview-modal-header,
+  .tcc-modal-header,
+  .tcc-modal-footer,
+  .tcc-modal-close,
+  .tcc-btn-main,
+  .tcc-btn-outline,
+  .tcc-btn-cancel,
+  p-menu,
+  p-toast,
+  p-dialog-mask,
+  .tcc-empty-state,
+  .tcc-no-print,
+  .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Reset layout wrappers to avoid page break clipping */
+  .tcc-layout-container,
+  .tcc-main-wrapper,
+  .tcc-content-area,
+  .tcc-page-wrapper,
+  app-shared-layout,
+  app-servicos-tecnico,
+  app-servicos-list,
+  .os-preview-backdrop,
+  .os-preview-modal-box,
+  .os-preview-modal-body,
+  .tcc-fade-in {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    position: static !important;
     padding: 0 !important;
     margin: 0 !important;
-    background: white !important;
-  }
-
-  /* Expand cards to look like a document */
-  .ns-card {
+    background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
+
+  /* Force Ordem de Serviço document visible and clean */
+  .tcc-os-print-document {
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+
+    .os-doc-page {
+      border: 1.5px solid #0f172a !important;
+      border-radius: 6px !important;
+      padding: 20px 24px !important;
+      background: #ffffff !important;
+      box-sizing: border-box !important;
+    }
+  }
+}
+.tcc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: var(--tcc-surface);
+  border: 1px dashed var(--tcc-border);
+  border-radius: 12px;
+  color: var(--tcc-text-muted);
+  gap: 12px;
+}
+.tcc-empty-state i {
+  font-size: 32px;
+  opacity: 0.5;
+}
+.tcc-empty-state p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
 }

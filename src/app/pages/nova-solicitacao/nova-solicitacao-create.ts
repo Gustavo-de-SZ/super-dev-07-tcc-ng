@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
@@ -152,10 +153,10 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
             </div>
 
             <div class="ns-summary-actions">
-              <button type="button" class="ns-btn-submit" [disabled]="solicitacaoForm.invalid" (click)="criarSolicitacao()">
+              <button type="button" class="tcc-btn-main" [disabled]="solicitacaoForm.invalid" (click)="criarSolicitacao()">
                 Criar Solicitação
               </button>
-              <button type="button" class="ns-btn-cancel" (click)="cancelar()">
+              <button type="button" class="tcc-btn-cancel" (click)="cancelar()">
                 Cancelar
               </button>
             </div>
@@ -321,15 +322,15 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
 
     .ns-summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
 
-    .ns-btn-submit {
+    .tcc-btn-main {
       width: 100%; background: var(--primary); color: #ffffff; border: none; padding: 12px;
       border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
-    .ns-btn-submit:hover:not(:disabled) { background: #2563eb; }
-    .ns-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tcc-btn-main:hover:not(:disabled) { background: #2563eb; }
+    .tcc-btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .ns-btn-cancel { width: 100%; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; }
-    .ns-btn-cancel:hover { color: var(--text-main); text-decoration: underline; }
+    .tcc-btn-cancel { width: 100%; background: transparent; border: none; color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; }
+    .tcc-btn-cancel:hover { color: var(--text-main); text-decoration: underline; }
     .ns-upload-box {
       border: 2px dashed var(--border-input);
       border-radius: 8px;
@@ -367,8 +368,10 @@ export class NovaSolicitacao implements OnInit {
   private solicitacaoService = inject(SolicitacaoService);
   private messageService = inject(MessageService);
   private router = inject(Router);
+  route = inject(ActivatedRoute);
 
   solicitacaoForm!: FormGroup;
+  enviando = false;
 
   // Hardcoded categories - adjust based on actual categories in your system
   categoriasOptions = [
@@ -387,6 +390,22 @@ export class NovaSolicitacao implements OnInit {
       categoriaId: ['', Validators.required],
       anexo: [null],
       dataCriacao: [new Date(), Validators.required]
+    });
+
+    // Pré-preenchimento vindo de atalhos rápidos da home
+    this.route.queryParams.subscribe(params => {
+      if (params['titulo']) {
+        this.solicitacaoForm.patchValue({ titulo: params['titulo'] });
+      }
+      if (params['descricao']) {
+        this.solicitacaoForm.patchValue({ descricao: params['descricao'] });
+      }
+      if (params['catId']) {
+        const catNum = Number(params['catId']);
+        if (!isNaN(catNum)) {
+          this.solicitacaoForm.patchValue({ categoriaId: catNum });
+        }
+      }
     });
   }
 
@@ -493,6 +512,7 @@ export class NovaSolicitacao implements OnInit {
             dataCriacao: new Date() // reset date to today as Date object
           });
           // Redireciona para a lista de solicitações após 1 segundo
+          this.enviando = false;
           setTimeout(() => this.router.navigate(['/cliente/meus-chamados']), 1000);
         },
         error: (err) => {
@@ -502,6 +522,7 @@ export class NovaSolicitacao implements OnInit {
             summary: 'Erro',
             detail: 'Ocorreu um erro ao criar a solicitação. Tente novamente.'
           });
+          this.enviando = false;
         }
       });
     } else {
@@ -511,6 +532,7 @@ export class NovaSolicitacao implements OnInit {
         summary: 'Erro de Validação',
         detail: 'Por favor, preencha todos os campos obrigatórios corretamente.'
       });
+      this.enviando = false;
     }
   }
 

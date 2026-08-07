@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Transacao } from '../../../models/transacao';
+import { Transacao, TransacaoResumo } from '../../../models/transacao';
 
 @Component({
   selector: 'app-financeiro-stats',
@@ -16,7 +16,7 @@ import { Transacao } from '../../../models/transacao';
           <span class="tcc-stat-title">Receita Total</span>
         </div>
         <div class="tcc-stat-value success-text">R$ {{ totalReceita | number:'1.0-0' }}</div>
-        <div class="tcc-stat-desc success-text"><i class="pi pi-arrow-up-right"></i> +12% este mês</div>
+        <div class="tcc-stat-desc success-text"><i class="pi pi-arrow-up-right"></i></div>
       </div>
 
       <div class="tcc-stat-card">
@@ -91,25 +91,37 @@ import { Transacao } from '../../../models/transacao';
 })
 export class FinanceiroStatsComponent {
   @Input() transacoes: Transacao[] = [];
+  @Input() resumo?: TransacaoResumo;
+
+  private numVal(v: any): number {
+    if (v === null || v === undefined) return 0;
+    if (typeof v === 'number') return isNaN(v) ? 0 : v;
+    const clean = String(v).replace(/[^\d.,-]/g, '').replace(',', '.');
+    return parseFloat(clean) || 0;
+  }
 
   get totalReceita(): number {
+    if (this.resumo) return this.resumo.total_receita;
     return this.transacoes
       .filter(t => t.status === 'Pago')
-      .reduce((sum, t) => sum + t.valor, 0);
+      .reduce((sum, t) => sum + this.numVal(t.valor), 0);
   }
 
   get aReceber(): number {
+    if (this.resumo) return this.resumo.a_receber;
     return this.transacoes
       .filter(t => t.status === 'Pendente')
-      .reduce((sum, t) => sum + t.valor, 0);
+      .reduce((sum, t) => sum + this.numVal(t.valor), 0);
   }
 
   get ticketMedio(): number {
+    if (this.resumo) return this.resumo.ticket_medio;
     if (this.transacoes.length === 0) return 0;
-    return this.transacoes.reduce((sum, t) => sum + t.valor, 0) / this.transacoes.length;
+    return this.transacoes.reduce((sum, t) => sum + this.numVal(t.valor), 0) / this.transacoes.length;
   }
 
   get pendenteCount(): number {
+    if (this.resumo) return this.resumo.pendentes_count;
     return this.transacoes.filter(t => t.status === 'Pendente').length;
   }
 }

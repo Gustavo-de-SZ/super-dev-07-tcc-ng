@@ -124,7 +124,7 @@
 // GRIDS
 .tcc-grid-auto {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 24px;
 }
 
@@ -421,4 +421,97 @@
   &:last-child {
     border-bottom: none;
   }
+}
+
+/* ==== Added for home-cliente and buscar-profissionais ==== */
+.tcc-client-home {
+  /* optional: ensure full height container if needed */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.tcc-search-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.tcc-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.tcc-header-title-group {
+  display: flex;
+  flex-direction: column;
+}
+.tcc-title-lg {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--tcc-text-main, #0f172a);
+  margin: 0 0 6px 0;
+}
+.tcc-subtitle {
+  color: var(--tcc-text-muted, #64748b);
+  font-size: 16px;
+  margin: 0;
+}
+.tcc-search-controls {
+  background-color: var(--tcc-surface);
+  border: 1px solid var(--tcc-border);
+  border-radius: var(--tcc-radius);
+  padding: 16px;
+  box-shadow: var(--tcc-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (min-width: 768px) {
+  .tcc-search-controls {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+.tcc-input-group {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  position: relative;
+}
+.tcc-input-group i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--tcc-text-muted);
+  font-size: 1rem;
+}
+.tcc-input-group input {
+  width: 100%;
+  padding: 0 12px 0 36px; /* space for icon */
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+}
+.tcc-prof-card {
+  background-color: var(--tcc-surface);
+  border: 1px solid var(--tcc-border);
+  border-radius: var(--tcc-radius);
+  padding: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tcc-prof-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--tcc-shadow);
+  border-color: var(--tcc-primary);
+}
+
+/* Additional utility classes if needed */
+.tcc-fade-in {
+  animation: fadeIn 0.4s ease-out;
 }

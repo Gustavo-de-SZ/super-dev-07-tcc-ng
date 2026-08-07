@@ -14,28 +14,38 @@ export interface NavItem {
   imports: [CommonModule, RouterModule],
   template: `
     <aside class="tcc-sidebar">
-      <div class="tcc-sidebar-brand" *ngIf="brandTitle">
-        <div class="tcc-logo-icon" *ngIf="brandIcon">
-          <i class="pi" [ngClass]="brandIcon"></i>
+      @if (brandTitle) {
+        <div class="tcc-sidebar-brand">
+          @if (brandIcon) {
+            <div class="tcc-logo-icon">
+              <i class="pi" [ngClass]="brandIcon"></i>
+            </div>
+          }
+          <div class="tcc-logo-text">
+            <strong>{{ brandTitle }}</strong>
+            @if (brandSubtitle) {
+              <span>{{ brandSubtitle }}</span>
+            }
+          </div>
         </div>
-        <div class="tcc-logo-text">
-          <strong>{{ brandTitle }}</strong>
-          <span *ngIf="brandSubtitle">{{ brandSubtitle }}</span>
-        </div>
-      </div>
+      }
       
       <nav class="tcc-sidebar-nav">
-        <a *ngFor="let item of navItems" [routerLink]="item.route" routerLinkActive="active" class="tcc-nav-item">
-          <i class="pi" [ngClass]="item.icon"></i>
-          <span>{{ item.label }}</span>
-        </a>
+        @for (item of navItems; track (item.route || item.label || $index)) {
+          <a [routerLink]="item.route" routerLinkActive="active" class="tcc-nav-item">
+            <i class="pi" [ngClass]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
       </nav>
       
       <div class="tcc-sidebar-footer">
-        <a *ngFor="let item of footerItems" [routerLink]="item.route" class="tcc-nav-item">
-          <i class="pi" [ngClass]="item.icon"></i>
-          <span>{{ item.label }}</span>
-        </a>
+        @for (item of footerItems; track (item.route || item.label || $index)) {
+          <a [routerLink]="item.route" class="tcc-nav-item">
+            <i class="pi" [ngClass]="item.icon"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        }
         <div class="tcc-nav-separator"></div>
         <a (click)="onLogout()" class="tcc-nav-item tcc-logout" style="cursor: pointer;">
           <i class="pi pi-sign-out"></i>

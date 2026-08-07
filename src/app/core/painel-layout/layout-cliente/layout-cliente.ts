@@ -44,13 +44,12 @@ import { TopbarCliente } from '../../../shared/components/topbar/topbar-cliente'
       padding: 0 32px;
       background-color: var(--tcc-surface, #ffffff); 
       border-bottom: 1px solid var(--tcc-border, #e2e8f0);
-      z-index: 10;
     }
 
     .tcc-content-area {
       flex: 1;
       padding: 32px;
-      overflow-y: auto; 
+      overflow-y: auto;
       
       &::-webkit-scrollbar { width: 8px; }
       &::-webkit-scrollbar-track { background: transparent; }

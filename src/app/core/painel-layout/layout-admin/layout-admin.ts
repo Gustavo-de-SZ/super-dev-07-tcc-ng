@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router'; 
 import { SidebarAdmin } from '../../../shared/components/sidebar-admin/sidebar-admin';
-import { TopbarTecnico } from '../../../shared/components/topbar/topbar'; // Reusing Topbar
+import { TopbarAdmin } from '../../../shared/components/topbar/topbar-admin';
 
 @Component({
   selector: 'app-painel-admin-layout',
@@ -11,21 +11,15 @@ import { TopbarTecnico } from '../../../shared/components/topbar/topbar'; // Reu
     CommonModule, 
     RouterModule, 
     SidebarAdmin, 
-    TopbarTecnico
+    TopbarAdmin
   ],
   template: `
     <div class="tcc-layout-container">
-      
-      <div class="tcc-sidebar">
-        <div class="tcc-sidebar-brand">
-          <h2>Admin Painel</h2>
-        </div>
-        <app-sidebar-admin></app-sidebar-admin>
-      </div>
+      <app-sidebar-admin></app-sidebar-admin>
 
       <div class="tcc-main-wrapper">
         <div class="tcc-topbar-container">
-          <app-topbar-tecnico></app-topbar-tecnico>
+          <app-topbar-admin></app-topbar-admin>
         </div>
         <main class="tcc-content-area">
           <router-outlet></router-outlet>
@@ -39,31 +33,7 @@ import { TopbarTecnico } from '../../../shared/components/topbar/topbar'; // Reu
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background-color: var(--tcc-bg); 
-    }
-    
-    .tcc-sidebar {
-      width: 260px;
-      height: 100vh;
-      background-color: var(--tcc-surface);
-      border-right: 1px solid var(--tcc-border);
-      display: flex;
-      flex-direction: column;
-      transition: background-color 0.2s ease, border-color 0.2s ease;
-    }
-
-    .tcc-sidebar-brand {
-      height: 80px;
-      display: flex;
-      align-items: center;
-      padding: 0 32px;
-      
-      h2 {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--tcc-text-main);
-        margin: 0;
-      }
+      background-color: var(--tcc-bg, #f8fafc); 
     }
 
     .tcc-main-wrapper {
@@ -73,12 +43,13 @@ import { TopbarTecnico } from '../../../shared/components/topbar/topbar'; // Reu
       height: 100vh;
       overflow: hidden;
     }
+
     .tcc-topbar-container {
       padding: 0 32px;
-      background-color: var(--tcc-surface); 
-      border-bottom: 1px solid var(--tcc-border);
-      z-index: 10;
+      background-color: var(--tcc-surface, #ffffff); 
+      border-bottom: 1px solid var(--tcc-border, #e2e8f0);
     }
+
     .tcc-content-area {
       flex: 1;
       padding: 32px;
@@ -91,7 +62,7 @@ import { TopbarTecnico } from '../../../shared/components/topbar/topbar'; // Reu
         background: transparent;
       }
       &::-webkit-scrollbar-thumb {
-        background-color: var(--tcc-border);
+        background-color: var(--tcc-border, #e2e8f0);
         border-radius: 4px;
       }
     }

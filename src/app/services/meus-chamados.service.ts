@@ -48,4 +48,83 @@ export class MeusChamadosService {
       })
     );
   }
+
+  getChamadoPorId(id: number | string): Observable<Chamado> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        return this.http.get<Chamado>(`${this.configService.getApiUrl()}/solicitacoes/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  cancelarChamado(id: number | string): Observable<Chamado> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        return this.http.put<Chamado>(`${this.configService.getApiUrl()}/solicitacoes/${id}`, {
+          status: 'CANCELADO'
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  excluirChamado(id: number | string): Observable<void> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        this.logTokenPayload(token);
+        return this.http.delete<void>(`${this.configService.getApiUrl()}/solicitacoes/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  avaliarChamado(id: number | string, nota: number, comentario?: string): Observable<Chamado> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        return this.http.post<Chamado>(
+          `${this.configService.getApiUrl()}/solicitacoes/${id}/avaliar`,
+          { nota, comentario: comentario || null },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          }
+        );
+      })
+    );
+  }
 }

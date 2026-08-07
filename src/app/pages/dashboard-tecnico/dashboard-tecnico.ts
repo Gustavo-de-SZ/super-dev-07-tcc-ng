@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { StatsGridComponent } from './components/stats-grid';
 import { AppointmentsPanelComponent } from './components/appointments-panel';
 import { WeeklySummaryComponent } from './components/weekly-summary';
+import { RecentChamadosPanelComponent } from './components/recent-chamados-panel';
 import { StatCard, Agendamento } from '../../shared/models';
 import { DashboardService } from '../../services/dashboard.service';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-tecnico',
@@ -13,7 +15,9 @@ import { DashboardService } from '../../services/dashboard.service';
     CommonModule,
     StatsGridComponent,
     AppointmentsPanelComponent,
-    WeeklySummaryComponent
+    WeeklySummaryComponent,
+    RecentChamadosPanelComponent,
+    RouterModule
   ],
   template: `
     <div class="tcc-fade-in tcc-p-lg">
@@ -25,24 +29,34 @@ import { DashboardService } from '../../services/dashboard.service';
       </section>
 
       <app-stats-grid [stats]="stats"></app-stats-grid>
-
       <app-weekly-summary></app-weekly-summary>
-
-      <div class="tcc-grid-1">
+      
+      <div class="tcc-dashboard-panels">
         <app-appointments-panel [agendamentos]="agendamentos"></app-appointments-panel>
-
+        <app-recent-chamados-panel></app-recent-chamados-panel>
       </div>
     </div>
   `,
-  styles: []
+  styles: [`
+    .tcc-dashboard-panels {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+    @media (min-width: 1024px) {
+      .tcc-dashboard-panels {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  `]
 })
 export class DashboardTecnico {
   nomeUsuario = '';
   stats: StatCard[] = [];
   agendamentos: Agendamento[] = [];
 
-  constructor(private dashboardService: DashboardService) {
-    // Load stats
+  constructor(private dashboardService: DashboardService, private router: Router) {
     this.dashboardService.getStats().subscribe({
       next: (stats) => {
         this.stats = stats;
@@ -52,8 +66,7 @@ export class DashboardTecnico {
         this.stats = [];
       }
     });
-
-    // Load agendamentos
+    
     this.dashboardService.getAgendamentos().subscribe({
       next: (agendamentos) => {
         this.agendamentos = agendamentos;

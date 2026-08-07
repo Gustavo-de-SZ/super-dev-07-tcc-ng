@@ -55,7 +55,7 @@ export class ClienteService {
     );
   }
 
-  getClienteByEmail(email: string): Observable<Cliente> {
+  getClienteByEmail(emailOrId: string | number): Observable<Cliente> {
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -63,7 +63,7 @@ export class ClienteService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/email/${email}`, {
+        return this.http.get<Cliente>(`${this.configService.getApiUrl()}/clientes/email/${emailOrId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -72,6 +72,10 @@ export class ClienteService {
         });
       })
     );
+  }
+
+  getClienteById(id: string | number): Observable<Cliente> {
+    return this.getClienteByEmail(id);
   }
 
   getClientesStats(): Observable<ClientesStats> {
@@ -131,8 +135,8 @@ export class ClienteService {
     );
   }
 
-  updateCliente(cliente: Cliente, originalId?: string): Observable<Cliente> {
-    const id = originalId || cliente.email || cliente.id || cliente.nome;
+  updateCliente(cliente: Cliente, originalId?: string | number): Observable<Cliente> {
+    const id = originalId !== undefined && originalId !== null ? originalId : (cliente.id || cliente.email || cliente.nome);
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -160,6 +164,61 @@ export class ClienteService {
       switchMap(token => {
         this.logTokenPayload(token);
         return this.http.delete<void>(`${this.configService.getApiUrl()}/clientes/email/${email}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  pesquisarUsuariosReais(termo: string = ''): Observable<Cliente[]> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        const url = `${this.configService.getApiUrl()}/clientes/pesquisa-usuarios-reais?q=${encodeURIComponent(termo)}`;
+        return this.http.get<Cliente[]>(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  vincularClienteTecnico(clienteId: number): Observable<Cliente> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        return this.http.post<Cliente>(`${this.configService.getApiUrl()}/clientes/${clienteId}/vincular-tecnico`, {}, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
+  }
+
+  desvincularClienteTecnico(clienteId: number): Observable<any> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        return this.http.delete<any>(`${this.configService.getApiUrl()}/clientes/${clienteId}/desvincular-tecnico`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

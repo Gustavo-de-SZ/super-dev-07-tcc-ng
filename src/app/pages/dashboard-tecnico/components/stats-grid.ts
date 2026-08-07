@@ -8,7 +8,7 @@ import { StatCard } from '../../../shared/models';
   imports: [CommonModule],
   template: `
     <section class="tcc-grid-auto">
-      @for (stat of stats; track stat.titulo) {
+      @for (stat of stats; track (stat.titulo || $index)) {
         <div class="tcc-card-base">
           <div class="tcc-stat-header">
             <div class="tcc-stat-icon-wrapper" [ngClass]="stat.corClasse">

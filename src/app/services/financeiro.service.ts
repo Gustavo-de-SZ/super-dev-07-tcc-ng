@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { Transacao } from '../models/transacao';
+import { Transacao, TransacaoResumo } from '../models/transacao';
 import { ConfigService } from './config.service';
 import { AuthService } from '@auth0/auth0-angular';
 
@@ -28,6 +28,25 @@ export class FinanceiroService {
     } catch (e) {
       console.error('Failed to decode token payload', e);
     }
+  }
+
+  getResumoFinanceiro(): Observable<TransacaoResumo> {
+    return this.auth.getAccessTokenSilently({
+      authorizationParams: {
+        audience: 'https://api.tcc-ng.com'
+      }
+    }).pipe(
+      switchMap(token => {
+        this.logTokenPayload(token);
+        return this.http.get<TransacaoResumo>(`${this.configService.getApiUrl()}/transacoes/resumo`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      })
+    );
   }
 
   getTransacoes(): Observable<Transacao[]> {
@@ -69,6 +88,7 @@ export class FinanceiroService {
   }
 
   updateTransacao(transacao: Transacao): Observable<Transacao> {
+    const identifier = transacao.id ? String(transacao.id) : transacao.titulo;
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -76,7 +96,7 @@ export class FinanceiroService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.put<Transacao>(`${this.configService.getApiUrl()}/transacoes/${transacao.titulo}`, transacao, {
+        return this.http.put<Transacao>(`${this.configService.getApiUrl()}/transacoes/${encodeURIComponent(identifier)}`, transacao, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -87,7 +107,7 @@ export class FinanceiroService {
     );
   }
 
-  deleteTransacao(titulo: string): Observable<void> {
+  deleteTransacao(identificador: string | number): Observable<void> {
     return this.auth.getAccessTokenSilently({
       authorizationParams: {
         audience: 'https://api.tcc-ng.com'
@@ -95,7 +115,7 @@ export class FinanceiroService {
     }).pipe(
       switchMap(token => {
         this.logTokenPayload(token);
-        return this.http.delete<void>(`${this.configService.getApiUrl()}/transacoes/${titulo}`, {
+        return this.http.delete<void>(`${this.configService.getApiUrl()}/transacoes/${encodeURIComponent(String(identificador))}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

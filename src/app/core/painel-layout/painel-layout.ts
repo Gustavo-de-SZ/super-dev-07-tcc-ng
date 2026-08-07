@@ -54,13 +54,12 @@ import { TopbarTecnico } from '../../shared/components/topbar/topbar';
       padding: 0 32px;
       background-color: var(--tcc-surface); 
       border-bottom: 1px solid var(--tcc-border);
-      z-index: 10;
     }
 
     .tcc-content-area {
       flex: 1;
       padding: 32px;
-      overflow-y: auto; 
+      overflow-y: auto;
       
       &::-webkit-scrollbar {
         width: 8px;

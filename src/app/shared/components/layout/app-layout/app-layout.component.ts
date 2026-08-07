@@ -63,7 +63,6 @@ import { filter } from 'rxjs/operators';
       padding: 0 32px;
       background-color: var(--tcc-surface, #ffffff); 
       border-bottom: 1px solid var(--tcc-border, #e2e8f0);
-      z-index: 10;
     }
     .tcc-content-area {
       flex: 1;
@@ -109,7 +108,7 @@ export class AppLayoutComponent implements OnInit {
     
     this.authService.user$.subscribe(user => {
       if (user) {
-        this.userName = user.name || user.given_name || 'Usuário';
+        this.userName = (user.name && !user.name.includes('@')) ? user.name : (user.given_name || user.nickname || 'Usuário');
         this.userAvatar = user.picture;
         
         const roles = user['https://tcc-ng.com/roles'] || [];
@@ -150,7 +149,7 @@ export class AppLayoutComponent implements OnInit {
         { route: '/admin/tecnicos', icon: 'pi-users', label: 'Aprovar Técnicos' }
       ];
       this.footerItems = [
-        { route: '/cliente/configuracoes', icon: 'pi-cog', label: 'Configurações' }
+        { route: '/painel/configuracoes', icon: 'pi-cog', label: 'Configurações' }
       ];
     } else if (role === 'cliente') {
       this.brandSubtitle = 'Área do Cliente';
@@ -161,12 +160,11 @@ export class AppLayoutComponent implements OnInit {
         { route: '/cliente/inicio', icon: 'pi-home', label: 'Início' },
         { route: '/cliente/buscar', icon: 'pi-search', label: 'Buscar Profissionais' },
         { route: '/cliente/meus-chamados', icon: 'pi-list', label: 'Meus Chamados' },
-        { route: '/cliente/agendamentos', icon: 'pi-calendar', label: 'Meus Agendamentos' },
-        { route: '/cliente/historico', icon: 'pi-history', label: 'Histórico' }
+        
       ];
       this.footerItems = [
         { route: '/cliente/ajuda', icon: 'pi-question-circle', label: 'Ajuda' },
-        { route: '/cliente/configuracoes', icon: 'pi-cog', label: 'Configurações' }
+        { route: '/painel/configuracoes', icon: 'pi-cog', label: 'Configurações' }
       ];
     } else {
       // Default to tecnico
@@ -183,7 +181,7 @@ export class AppLayoutComponent implements OnInit {
       ];
       this.footerItems = [
         { route: '/cliente/ajuda', icon: 'pi-question-circle', label: 'Ajuda' },
-        { route: '/cliente/configuracoes', icon: 'pi-cog', label: 'Configurações' }
+        { route: '/painel/configuracoes', icon: 'pi-cog', label: 'Configurações' }
       ];
     }
   }
