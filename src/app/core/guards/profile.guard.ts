@@ -15,6 +15,17 @@ export const profileGuardFn: CanActivateFn = (route, state) => {
            router.navigate(['/admin/dashboard']);
            return false;
         }
+        // Regra 1.5: Cliente na Landing Page (ajuste a string '/' se a sua home for diferente)
+        if (res.type === 'cliente' && (state.url === '/' || state.url === '/home' || state.url === '/index.html')) {
+           router.navigate(['/cliente/inicio']);
+           return false;
+        }
+
+        // Regra 1.6: Técnico na Landing Page (só redireciona se já estiver aprovado)
+        if (res.type === 'tecnico' && res.aprovado === true && (state.url === '/' || state.url === '/home' || state.url === '/index.html')) {
+           router.navigate(['/painel/dashboard']); // Ajuste para a rota principal do técnico
+           return false;
+        }
 
         // Regra 2: Usuário comum tentando acessar admin
         if (res.type !== 'admin' && state.url.includes('/admin')) {
