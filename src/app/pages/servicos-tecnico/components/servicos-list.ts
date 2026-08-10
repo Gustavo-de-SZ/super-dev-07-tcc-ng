@@ -525,17 +525,25 @@ import { AuthService } from '@auth0/auth0-angular';
     .tcc-services-list { display: flex; flex-direction: column; gap: 12px; }
 
     .tcc-service-card {
-      background-color: var(--tcc-surface, #ffffff); border: 1px solid var(--tcc-border, #e2e8f0);
-      border-radius: 12px; padding: 16px 24px;
-      display: flex; align-items: center; gap: 24px; transition: box-shadow 0.2s, border-color 0.2s;
+      background-color: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .tcc-service-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+    .tcc-service-card:hover {
+      border-color: var(--tcc-primary, #3b82f6);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+    }
 
     .tcc-service-icon-box {
       width: 56px;
       height: 56px;
       border-radius: 10px;
-      background-color: #eff6ff;
+      background-color: rgba(59, 130, 246, 0.15);
       color: var(--tcc-primary, #3b82f6);
       display: flex;
       align-items: center;
@@ -576,10 +584,10 @@ import { AuthService } from '@auth0/auth0-angular';
     }
     .tcc-status-badge i { font-size: 10px; }
 
-    .status-concluido { color: #10b981; border-color: #10b981; background-color: #ecfdf5; }
-    .status-andamento { color: #3b82f6; border-color: #3b82f6; background-color: #eff6ff; }
-    .status-pendente { color: #f59e0b; border-color: #f59e0b; background-color: #fffbeb; }
-    .status-cancelado { color: #ef4444; border-color: #ef4444; background-color: #fef2f2; }
+    .status-concluido { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background-color: rgba(16, 185, 129, 0.12); }
+    .status-andamento { color: #3b82f6; border-color: rgba(59, 130, 246, 0.3); background-color: rgba(59, 130, 246, 0.12); }
+    .status-pendente { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background-color: rgba(245, 158, 11, 0.12); }
+    .status-cancelado { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.12); }
 
     .tcc-modalidade-badge {
       display: inline-flex;
@@ -590,8 +598,8 @@ import { AuthService } from '@auth0/auth0-angular';
       font-size: 11px;
       font-weight: 500;
     }
-    .modalidade-presencial { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-    .modalidade-remoto { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .modalidade-presencial { background: var(--tcc-bg, #f1f5f9); color: var(--tcc-text-muted, #475569); border: 1px solid var(--tcc-border, #cbd5e1); }
+    .modalidade-remoto { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
 
     .tcc-service-details {
       display: flex;
@@ -629,7 +637,7 @@ import { AuthService } from '@auth0/auth0-angular';
       gap: 6px;
       transition: background-color 0.2s;
     }
-    .tcc-btn-outline.small:hover { background-color: var(--tcc-bg, #f8fafc); }
+    .tcc-btn-outline.small:hover { background-color: var(--tcc-surface-hover, #f8fafc); }
 
     /* Modal Styles */
     .tcc-modal-backdrop {
@@ -638,7 +646,7 @@ import { AuthService } from '@auth0/auth0-angular';
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: rgba(15, 23, 42, 0.6);
+      background-color: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
@@ -674,7 +682,7 @@ import { AuthService } from '@auth0/auth0-angular';
       width: 44px;
       height: 44px;
       border-radius: 10px;
-      background-color: #eff6ff;
+      background-color: rgba(59, 130, 246, 0.15);
       color: var(--tcc-primary, #3b82f6);
       display: flex;
       align-items: center;
@@ -700,7 +708,7 @@ import { AuthService } from '@auth0/auth0-angular';
       justify-content: center;
       transition: background 0.2s;
     }
-    .tcc-modal-close:hover { background-color: var(--tcc-bg, #f8fafc); color: var(--tcc-text-main, #0f172a); }
+    .tcc-modal-close:hover { background-color: var(--tcc-surface-hover, #f8fafc); color: var(--tcc-text-main, #0f172a); }
 
     .tcc-modal-body {
       padding: 20px 24px;
@@ -773,7 +781,7 @@ import { AuthService } from '@auth0/auth0-angular';
     }
     .tcc-modal-desc-box.laudo-box {
       border-left: 3px solid #3b82f6;
-      background: rgba(59, 130, 246, 0.04);
+      background: rgba(59, 130, 246, 0.06);
     }
     .tcc-modal-desc-box label {
       font-size: 11px;
@@ -806,7 +814,7 @@ import { AuthService } from '@auth0/auth0-angular';
       display: flex;
       align-items: center;
     }
-    .tcc-btn-outline:hover { background-color: #f1f5f9; }
+    .tcc-btn-outline:hover { background-color: var(--tcc-surface-hover, #f1f5f9); }
 
     .tcc-btn-main {
       background-color: var(--tcc-primary, #3b82f6);
@@ -837,7 +845,7 @@ import { AuthService } from '@auth0/auth0-angular';
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 12px;
       padding: 6px 12px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      box-shadow: var(--tcc-shadow, 0 1px 2px rgba(0, 0, 0, 0.02));
     }
 
     /* ==========================================================================
@@ -853,7 +861,8 @@ import { AuthService } from '@auth0/auth0-angular';
     }
 
     .os-preview-modal-box {
-      background: #f1f5f9;
+      background: var(--tcc-bg, #0f172a);
+      border: 1px solid var(--tcc-border, #334155);
       border-radius: 14px;
       width: 100%;
       max-width: 860px;
@@ -865,12 +874,12 @@ import { AuthService } from '@auth0/auth0-angular';
     }
 
     .os-preview-modal-header {
-      background: #ffffff;
+      background: var(--tcc-surface, #ffffff);
       padding: 14px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--tcc-border, #e2e8f0);
       flex-shrink: 0;
     }
 
@@ -881,17 +890,17 @@ import { AuthService } from '@auth0/auth0-angular';
     }
     .os-preview-header-title i {
       font-size: 24px;
-      color: #3b82f6;
+      color: var(--tcc-primary, #3b82f6);
     }
     .os-preview-header-title h3 {
       margin: 0;
       font-size: 16px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--tcc-text-main, #0f172a);
     }
     .os-preview-header-title span {
       font-size: 12px;
-      color: #64748b;
+      color: var(--tcc-text-muted, #64748b);
     }
 
     .os-preview-header-actions {

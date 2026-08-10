@@ -50,7 +50,8 @@ import { MenuItem, MessageService } from 'primeng/api';
           (click)="activeTab = 'ativos'"
         >
           <i class="pi pi-bolt"></i>
-          Meus Chamados
+          Meus chamados
+         
           @if (meusChamados.length > 0) {
             <span class="ch-tab-badge">{{ meusChamados.length }}</span>
           }
@@ -307,7 +308,6 @@ import { MenuItem, MessageService } from 'primeng/api';
             </div>
 
             <div class="tcc-modal-body">
-               Destaque de Status e Data 
               <div class="tcc-modal-highlight">
                 <div class="highlight-item">
                   <label>Status</label>
@@ -378,14 +378,13 @@ import { MenuItem, MessageService } from 'primeng/api';
             <div class="tcc-modal-footer">
               <button type="button" class="tcc-btn-outline" (click)="fecharDetalhes()">Fechar</button>
 
-               Ações para Chamados Disponíveis 
               @if (!chamadoDetalhes.profissional_id && activeTab === 'disponiveis') {
                 <button type="button" class="tcc-btn-primary" (click)="aceitarChamado(chamadoDetalhes.id)">
                   <i class="pi pi-check-circle"></i> Aceitar Chamado
                 </button>
               }
 
-               Ações para Meus Chamados 
+          
               @if (chamadoDetalhes.profissional_id || activeTab === 'ativos') {
                 @if (chamadoDetalhes.status !== 'CONCLUIDO') {
                   <button type="button" class="tcc-btn-danger-outline" (click)="confirmarAbandonar(chamadoDetalhes.id)">
@@ -432,7 +431,7 @@ import { MenuItem, MessageService } from 'primeng/api';
             </div>
 
             <div class="tcc-modal-body">
-              <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.6;">
+              <p style="margin: 0; color: var(--tcc-text-secondary, #475569); font-size: 14px; line-height: 1.6;">
                 Ao abandonar este chamado, ele será liberado imediatamente de volta para a fila aberta e outro técnico poderá assumi-lo. Deseja continuar?
               </p>
             </div>
@@ -513,22 +512,22 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-stat-pill.active {
-      background: #eff6ff;
-      border-color: #bfdbfe;
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.3);
     }
-    .ch-stat-pill.active i { color: #2563eb; }
+    .ch-stat-pill.active i { color: #3b82f6; }
 
     .ch-stat-pill.completed {
-      background: #f0fdf4;
-      border-color: #bbf7d0;
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
     }
-    .ch-stat-pill.completed i { color: #16a34a; }
+    .ch-stat-pill.completed i { color: #10b981; }
 
     .ch-stat-pill.pending {
-      background: #fffbeb;
-      border-color: #fde68a;
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.3);
     }
-    .ch-stat-pill.pending i { color: #d97706; }
+    .ch-stat-pill.pending i { color: #f59e0b; }
 
     .ch-stat-count {
       font-weight: 700;
@@ -571,7 +570,7 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-filter-chip:hover {
-      border-color: #cbd5e1;
+      border-color: var(--tcc-text-muted);
       background: var(--tcc-surface-hover, #f8fafc);
     }
 
@@ -628,8 +627,8 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-tab-badge.available {
-      background-color: #fef3c7;
-      color: #d97706;
+      background-color: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
     }
 
     /* ===== Content ===== */
@@ -713,14 +712,13 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-card-interactive:hover {
-      border-color: #cbd5e1;
+      border-color: var(--tcc-primary, #3b82f6);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
       transform: translateY(-1px);
     }
 
     .ch-card-concluido {
       opacity: 0.85;
-      background: #f8fafc;
     }
 
     .ch-card-accent {
@@ -729,9 +727,9 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .accent-active { background-color: var(--tcc-primary, #3b82f6); }
-    .accent-concluido { background-color: var(--tcc-success, #22c55e); }
-    .accent-cancelado { background-color: var(--tcc-danger, #ef4444); }
-    .accent-pending { background-color: var(--tcc-warning, #f59e0b); }
+    .accent-concluido { background-color: #10b981; }
+    .accent-cancelado { background-color: #ef4444; }
+    .accent-pending { background-color: #f59e0b; }
 
     .ch-card-body {
       flex: 1;
@@ -766,10 +764,10 @@ import { MenuItem, MessageService } from 'primeng/api';
       flex-shrink: 0;
     }
 
-    .icon-bg-active { background-color: #dbeafe; color: #2563eb; }
-    .icon-bg-concluido { background-color: #dcfce7; color: #16a34a; }
-    .icon-bg-cancelado { background-color: #fee2e2; color: #dc2626; }
-    .icon-bg-pending { background-color: #fef3c7; color: #d97706; }
+    .icon-bg-active { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .icon-bg-concluido { background-color: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .icon-bg-cancelado { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .icon-bg-pending { background-color: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 
     .ch-card-text { display: flex; flex-direction: column; gap: 4px; }
 
@@ -817,10 +815,10 @@ import { MenuItem, MessageService } from 'primeng/api';
       font-weight: 600;
     }
 
-    .status-active { background-color: #dbeafe; color: #1d4ed8; }
-    .status-concluido { background-color: #dcfce7; color: #15803d; }
-    .status-cancelado { background-color: #fee2e2; color: #b91c1c; }
-    .status-pending { background-color: #fef3c7; color: #b45309; }
+    .status-active { background-color: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-concluido { background-color: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-cancelado { background-color: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status-pending { background-color: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
 
     /* ===== Action Buttons ===== */
     .ch-action-btn {
@@ -831,7 +829,7 @@ import { MenuItem, MessageService } from 'primeng/api';
       font-size: 13px;
       font-weight: 500;
       color: var(--tcc-text-secondary, #475569);
-      background-color: var(--tcc-surface-hover, #f8fafc);
+      background-color: var(--tcc-surface, #f8fafc);
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 8px;
       cursor: pointer;
@@ -839,7 +837,7 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-action-btn:hover {
-      background-color: #e2e8f0;
+      background-color: var(--tcc-surface-hover, #e2e8f0);
       color: var(--tcc-text-main, #0f172a);
     }
 
@@ -871,7 +869,7 @@ import { MenuItem, MessageService } from 'primeng/api';
       font-size: 13px;
       font-weight: 600;
       color: var(--tcc-text-secondary, #475569);
-      background-color: var(--tcc-surface-hover, #f8fafc);
+      background-color: var(--tcc-surface, #f8fafc);
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 8px;
       cursor: pointer;
@@ -879,7 +877,7 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-btn-view:hover {
-      background-color: #e2e8f0;
+      background-color: var(--tcc-surface-hover, #e2e8f0);
       color: var(--tcc-text-main, #0f172a);
     }
 
@@ -899,7 +897,7 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-btn-accept:hover {
-      background-color: var(--tcc-primary-dark, #2563eb);
+      background-color: var(--tcc-primary-hover, #2563eb);
       transform: translateY(-1px);
     }
 
@@ -930,8 +928,8 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-empty-icon.success {
-      background-color: #dcfce7;
-      color: #16a34a;
+      background-color: rgba(16, 185, 129, 0.15);
+      color: #10b981;
     }
 
     .ch-empty h3 {
@@ -965,7 +963,7 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .ch-btn-primary:hover {
-      background-color: var(--tcc-primary-dark, #2563eb);
+      background-color: var(--tcc-primary-hover, #2563eb);
     }
 
     /* ===== Modals (Standard Glassmorphism / Polish) ===== */
@@ -975,7 +973,7 @@ import { MenuItem, MessageService } from 'primeng/api';
       left: 0;
       width: 100vw;
       height: 100vh;
-      background: rgba(15, 23, 42, 0.45);
+      background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(4px);
       z-index: 9999;
       display: flex;
@@ -985,7 +983,7 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .tcc-modal-content {
-      background: #ffffff;
+      background: var(--tcc-surface, #ffffff);
       border-radius: 16px;
       width: 100%;
       max-width: 580px;
@@ -994,7 +992,8 @@ import { MenuItem, MessageService } from 'primeng/api';
       flex-direction: column;
       max-height: 90vh;
       overflow: hidden;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      color: var(--tcc-text-main, #0f172a);
     }
 
     .tcc-confirm-modal {
@@ -1003,7 +1002,7 @@ import { MenuItem, MessageService } from 'primeng/api';
 
     .tcc-modal-header {
       padding: 20px 24px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--tcc-border, #e2e8f0);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1028,20 +1027,20 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .tcc-modal-icon-box.danger-icon {
-      background: #fee2e2;
+      background: rgba(239, 68, 68, 0.15);
       color: #ef4444;
     }
 
     .tcc-modal-title {
       font-size: 18px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--tcc-text-main, #0f172a);
       margin: 0;
     }
 
     .tcc-modal-subtitle {
       font-size: 13px;
-      color: #64748b;
+      color: var(--tcc-text-muted, #64748b);
     }
 
     .tcc-modal-close {
@@ -1053,14 +1052,14 @@ import { MenuItem, MessageService } from 'primeng/api';
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #94a3b8;
+      color: var(--tcc-text-muted, #94a3b8);
       cursor: pointer;
       transition: all 0.2s;
     }
 
     .tcc-modal-close:hover {
-      background-color: #f1f5f9;
-      color: #0f172a;
+      background-color: var(--tcc-surface-hover, #f1f5f9);
+      color: var(--tcc-text-main, #0f172a);
     }
 
     .tcc-modal-body {
@@ -1072,8 +1071,8 @@ import { MenuItem, MessageService } from 'primeng/api';
     }
 
     .tcc-modal-highlight {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background: var(--tcc-bg, #f8fafc);
+      border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 12px;
       padding: 16px;
       display: flex;
@@ -1092,14 +1091,14 @@ import { MenuItem, MessageService } from 'primeng/api';
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 700;
-      color: #64748b;
+      color: var(--tcc-text-muted, #64748b);
       letter-spacing: 0.5px;
     }
 
     .highlight-type {
       font-size: 13px;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--tcc-text-main, #0f172a);
       display: flex;
       align-items: center;
       gap: 6px;
@@ -1125,8 +1124,8 @@ import { MenuItem, MessageService } from 'primeng/api';
       width: 36px;
       height: 36px;
       border-radius: 8px;
-      background: #f1f5f9;
-      color: #475569;
+      background: var(--tcc-bg, #f1f5f9);
+      color: var(--tcc-text-secondary, #475569);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1143,13 +1142,13 @@ import { MenuItem, MessageService } from 'primeng/api';
 
     .info-content label {
       font-size: 12px;
-      color: #64748b;
+      color: var(--tcc-text-muted, #64748b);
       font-weight: 500;
     }
 
     .info-content span {
       font-size: 14px;
-      color: #0f172a;
+      color: var(--tcc-text-main, #0f172a);
       font-weight: 600;
     }
 
@@ -1157,18 +1156,18 @@ import { MenuItem, MessageService } from 'primeng/api';
       margin: 4px 0 0 0;
       font-size: 13px;
       line-height: 1.6;
-      color: #334155;
-      background: #f8fafc;
+      color: var(--tcc-text-secondary, #334155);
+      background: var(--tcc-bg, #f8fafc);
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--tcc-border, #e2e8f0);
       white-space: pre-wrap;
     }
 
     .tcc-modal-footer {
       padding: 16px 24px;
-      border-top: 1px solid #e2e8f0;
-      background: #fafafa;
+      border-top: 1px solid var(--tcc-border, #e2e8f0);
+      background: var(--tcc-surface, #fafafa);
       display: flex;
       justify-content: flex-end;
       align-items: center;
@@ -1180,25 +1179,25 @@ import { MenuItem, MessageService } from 'primeng/api';
       padding: 9px 16px;
       font-size: 13px;
       font-weight: 600;
-      color: #475569;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
+      color: var(--tcc-text-secondary, #475569);
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #cbd5e1);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
     }
     .tcc-btn-outline:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+      background: var(--tcc-surface-hover, #f1f5f9);
+      color: var(--tcc-text-main, #0f172a);
     }
 
     .tcc-btn-danger-outline {
       padding: 9px 16px;
       font-size: 13px;
       font-weight: 600;
-      color: #dc2626;
-      background: #ffffff;
-      border: 1px solid #fecaca;
+      color: #ef4444;
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid rgba(239, 68, 68, 0.3);
       border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
@@ -1207,8 +1206,8 @@ import { MenuItem, MessageService } from 'primeng/api';
       transition: all 0.2s;
     }
     .tcc-btn-danger-outline:hover {
-      background: #fee2e2;
-      border-color: #f87171;
+      background: rgba(239, 68, 68, 0.12);
+      border-color: #ef4444;
     }
 
     .tcc-btn-danger {
@@ -1233,9 +1232,9 @@ import { MenuItem, MessageService } from 'primeng/api';
       padding: 9px 16px;
       font-size: 13px;
       font-weight: 600;
-      color: #0f766e;
-      background: #ccfbf1;
-      border: 1px solid #99f6e4;
+      color: #14b8a6;
+      background: rgba(20, 184, 166, 0.15);
+      border: 1px solid rgba(20, 184, 166, 0.3);
       border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
@@ -1244,16 +1243,16 @@ import { MenuItem, MessageService } from 'primeng/api';
       transition: all 0.2s;
     }
     .tcc-btn-service:hover {
-      background: #99f6e4;
+      background: rgba(20, 184, 166, 0.25);
     }
 
     .tcc-btn-chat {
       padding: 9px 16px;
       font-size: 13px;
       font-weight: 600;
-      color: #4338ca;
-      background: #e0e7ff;
-      border: 1px solid #c7d2fe;
+      color: #6366f1;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
       border-radius: 8px;
       cursor: pointer;
       display: inline-flex;
@@ -1262,7 +1261,7 @@ import { MenuItem, MessageService } from 'primeng/api';
       transition: all 0.2s;
     }
     .tcc-btn-chat:hover {
-      background: #c7d2fe;
+      background: rgba(99, 102, 241, 0.25);
     }
 
     .tcc-paginator-container {

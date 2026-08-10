@@ -36,12 +36,22 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
         </a>
         <div class="ns-header-title-box">
           <h1>Adicionar Cliente</h1>
-          <p>Vincule um usuário real do aplicativo ou realize um cadastro manual</p>
+          <p>Realize um cadastro manual ou vincule um usuário cadastrado na plataforma</p>
         </div>
       </header>
 
-   
+      <!-- SELETOR DE ABAS -->
       <div class="ns-tab-bar">
+        <button 
+          type="button" 
+          class="ns-tab-btn" 
+          [class.active]="modoAba === 'manual'"
+          (click)="setAba('manual')"
+        >
+          <i class="pi pi-user-edit"></i>
+          <span>Cadastrar Manualmente</span>
+        </button>
+
         <button 
           type="button" 
           class="ns-tab-btn" 
@@ -50,17 +60,6 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
         >
           <i class="pi pi-search"></i>
           <span>Buscar Usuário da Plataforma</span>
-          <span class="ns-tab-badge">Recomendado</span>
-        </button>
-
-        <button 
-          type="button" 
-          class="ns-tab-btn" 
-          [class.active]="modoAba === 'manual'"
-          (click)="setAba('manual')"
-        >
-          <i class="pi pi-user-edit"></i>
-          <span>Cadastrar Manualmente (Sem App)</span>
         </button>
       </div>
 
@@ -884,7 +883,7 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
   `]
 })
 export class NovoCliente implements OnInit, OnDestroy {
-  modoAba: 'busca' | 'manual' = 'busca';
+  modoAba: 'busca' | 'manual' = 'manual';
 
   // Estados da Busca
   termoBusca = '';
@@ -925,8 +924,6 @@ export class NovoCliente implements OnInit, OnDestroy {
   ngOnInit() {
     this.carregarCidades();
     this.setupSearch();
-    // Inicia buscando clientes da plataforma
-    this.buscarUsuarios('');
   }
 
   ngOnDestroy() {
@@ -935,6 +932,9 @@ export class NovoCliente implements OnInit, OnDestroy {
 
   setAba(aba: 'busca' | 'manual') {
     this.modoAba = aba;
+    if (aba === 'busca' && this.usuariosEncontrados.length === 0 && !this.buscandoUsuarios) {
+      this.buscarUsuarios(this.termoBusca || '');
+    }
   }
 
   // --- LÓGICA DE BUSCA & VÍNCULO ---

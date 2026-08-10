@@ -58,8 +58,8 @@ import { isAgendamentoAtrasado } from '../../../shared/utils/agendamento-utils';
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        background-color: var(--tcc-bg, #f8fafc);
-        border-color: #cbd5e1;
+        background-color: var(--tcc-surface-hover, #f8fafc);
+        border-color: var(--tcc-text-muted, #cbd5e1);
       }
 
       &.active {
@@ -70,13 +70,13 @@ import { isAgendamentoAtrasado } from '../../../shared/utils/agendamento-utils';
 
       &.pill-atrasado {
         i {
-          color: #d97706;
+          color: var(--tcc-warning, #f59e0b);
           font-size: 12px;
         }
 
         &.active {
-          background-color: #d97706;
-          border-color: #d97706;
+          background-color: var(--tcc-warning, #f59e0b);
+          border-color: var(--tcc-warning, #f59e0b);
           color: white;
 
           i {

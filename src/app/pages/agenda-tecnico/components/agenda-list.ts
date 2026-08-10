@@ -218,12 +218,12 @@ import { AgendaService } from '../../../services/agenda.service';
       transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s ease;
 
       &.card-atrasado {
-        border-left: 4px solid #f59e0b;
-        background: #fffdfa;
+        border-left: 4px solid var(--tcc-warning, #f59e0b);
+        background: rgba(245, 158, 11, 0.05);
       }
     }
     .tcc-agenda-card:hover {
-      border-color: #cbd5e1;
+      border-color: var(--tcc-primary, #3b82f6);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
       transform: translateY(-1px);
     }
@@ -236,14 +236,14 @@ import { AgendaService } from '../../../services/agenda.service';
       gap: 2px;
       width: 64px;
       height: 64px;
-      background-color: #eff6ff;
+      background-color: rgba(59, 130, 246, 0.12);
       border-radius: 10px;
       color: var(--tcc-primary, #3b82f6);
       flex-shrink: 0;
 
       &.col-atrasado {
-        background-color: #fef3c7;
-        color: #b45309;
+        background-color: rgba(245, 158, 11, 0.15);
+        color: var(--tcc-warning, #f59e0b);
       }
     }
 
@@ -267,11 +267,11 @@ import { AgendaService } from '../../../services/agenda.service';
     }
     .tcc-status-badge i { font-size: 10px; }
 
-    .badge-confirmado { color: #10b981; border-color: #10b981; background-color: #ecfdf5; }
-    .badge-concluido { color: #3b82f6; border-color: #3b82f6; background-color: #eff6ff; }
-    .badge-pendente { color: #f59e0b; border-color: #f59e0b; background-color: #fffbeb; }
-    .badge-cancelado { color: #ef4444; border-color: #ef4444; background-color: #fef2f2; }
-    .badge-atrasado { color: #b45309; border-color: #f59e0b; background-color: #fef3c7; }
+    .badge-confirmado { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background-color: rgba(16, 185, 129, 0.12); }
+    .badge-concluido { color: #3b82f6; border-color: rgba(59, 130, 246, 0.3); background-color: rgba(59, 130, 246, 0.12); }
+    .badge-pendente { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background-color: rgba(245, 158, 11, 0.12); }
+    .badge-cancelado { color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.12); }
+    .badge-atrasado { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background-color: rgba(245, 158, 11, 0.12); }
 
     .tcc-agenda-meta {
       display: flex;
@@ -286,9 +286,9 @@ import { AgendaService } from '../../../services/agenda.service';
     .tcc-agenda-actions { display: flex; align-items: center; gap: 8px; }
 
     .tcc-btn-outline.small {
-      background-color: transparent;
+      background-color: var(--tcc-surface, #ffffff);
       border: 1px solid var(--tcc-border, #e2e8f0);
-      color: var(--tcc-text-main, #475569);
+      color: var(--tcc-text-secondary, #475569);
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 12px;
@@ -299,7 +299,7 @@ import { AgendaService } from '../../../services/agenda.service';
       gap: 6px;
       transition: background-color 0.2s;
     }
-    .tcc-btn-outline.small:hover { background-color: var(--tcc-bg, #f8fafc); }
+    .tcc-btn-outline.small:hover { background-color: var(--tcc-surface-hover, #f8fafc); }
 
     /* Modal Backdrop and Container */
     .tcc-modal-backdrop {
@@ -343,7 +343,7 @@ import { AgendaService } from '../../../services/agenda.service';
       width: 44px;
       height: 44px;
       border-radius: 10px;
-      background: #eff6ff;
+      background: rgba(59, 130, 246, 0.15);
       color: #3b82f6;
       display: flex;
       align-items: center;
@@ -352,8 +352,8 @@ import { AgendaService } from '../../../services/agenda.service';
       flex-shrink: 0;
 
       &.icon-atrasado {
-        background: #fef3c7;
-        color: #d97706;
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
       }
     }
 
@@ -449,7 +449,7 @@ import { AgendaService } from '../../../services/agenda.service';
       height: 32px;
       border-radius: 8px;
       background: var(--tcc-bg, #f1f5f9);
-      color: var(--tcc-text-muted, #64748b);
+      color: var(--tcc-text-secondary, #64748b);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -485,7 +485,7 @@ import { AgendaService } from '../../../services/agenda.service';
       gap: 12px;
       padding: 16px 24px;
       border-top: 1px solid var(--tcc-border, #e2e8f0);
-      background: var(--tcc-bg, #f8fafc);
+      background: var(--tcc-surface, #f8fafc);
     }
 
     .tcc-btn-primary {
@@ -503,13 +503,13 @@ import { AgendaService } from '../../../services/agenda.service';
       transition: background-color 0.2s;
     }
     .tcc-btn-primary:hover {
-      background: #2563eb;
+      background: var(--tcc-primary-hover, #2563eb);
     }
 
     .tcc-btn-outline {
-      background: #ffffff;
+      background: var(--tcc-surface, #ffffff);
       border: 1px solid var(--tcc-border, #cbd5e1);
-      color: var(--tcc-text-main, #334155);
+      color: var(--tcc-text-secondary, #334155);
       padding: 8px 16px;
       border-radius: 8px;
       font-size: 13px;
@@ -518,7 +518,8 @@ import { AgendaService } from '../../../services/agenda.service';
       transition: all 0.2s;
     }
     .tcc-btn-outline:hover {
-      background: #f1f5f9;
+      background: var(--tcc-surface-hover, #f1f5f9);
+      color: var(--tcc-text-main, #0f172a);
     }
 
     @keyframes tccFadeIn {

@@ -136,7 +136,7 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(16, 185, 129, 0.15);
       color: #10b981;
       display: flex;
       align-items: center;
@@ -168,21 +168,21 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
       border-radius: 10px;
       padding: 10px 14px;
       margin-bottom: 14px;
       text-decoration: none;
-      color: #92400e;
+      color: var(--tcc-text-main, #92400e);
       font-size: 12.5px;
       transition: all 0.2s ease;
 
       &:hover {
-        background: #fef3c7;
-        border-color: #fcd34d;
+        background: rgba(245, 158, 11, 0.18);
+        border-color: #f59e0b;
         transform: translateY(-1px);
-        box-shadow: 0 2px 6px rgba(217, 119, 6, 0.1);
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
       }
 
       .alert-content {
@@ -192,14 +192,14 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
       }
 
       .alert-icon {
-        color: #d97706;
+        color: #f59e0b;
         font-size: 14px;
         flex-shrink: 0;
       }
 
       .alert-action {
         font-weight: 700;
-        color: #b45309;
+        color: #f59e0b;
         font-size: 12px;
         display: flex;
         align-items: center;
@@ -223,13 +223,13 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
       padding: 14px 16px;
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 12px;
-      background: var(--tcc-card-bg, #ffffff);
+      background: var(--tcc-surface, #ffffff);
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        border-color: #93c5fd;
-        background: #f8faff;
+        border-color: var(--tcc-primary, #3b82f6);
+        background: var(--tcc-surface-hover, #f8faff);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
       }
@@ -240,8 +240,8 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: #eff6ff;
-      border: 1px solid #dbeafe;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
       padding: 6px 10px;
       border-radius: 10px;
       min-width: 58px;
@@ -250,7 +250,7 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
 
     .tcc-appt-day {
       font-size: 11px;
-      color: #64748b;
+      color: var(--tcc-text-muted, #64748b);
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -304,13 +304,13 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
     }
 
     .tcc-appt-dot {
-      color: #cbd5e1;
+      color: var(--tcc-border, #cbd5e1);
     }
 
     .tcc-appt-tag {
       font-size: 11px;
-      color: #64748b;
-      background: #f1f5f9;
+      color: var(--tcc-text-secondary, #64748b);
+      background: var(--tcc-bg, #f1f5f9);
       padding: 2px 6px;
       border-radius: 4px;
     }
@@ -330,27 +330,27 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
       white-space: nowrap;
 
       &.status-confirmado {
-        background: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background: rgba(59, 130, 246, 0.12);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
       }
 
       &.status-pendente {
-        background: #fff7ed;
-        color: #c2410c;
-        border: 1px solid #fed7aa;
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
       }
 
       &.status-concluido {
-        background: #f0fdf4;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
       }
 
       &.status-cancelado {
-        background: #fef2f2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
+        background: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
       }
     }
 
@@ -367,8 +367,8 @@ import { parseAgendamentoDate, isAgendamentoAtrasado, isAgendamentoProximo } fro
         width: 56px;
         height: 56px;
         border-radius: 16px;
-        background: #f1f5f9;
-        color: #94a3b8;
+        background: var(--tcc-bg, #f1f5f9);
+        color: var(--tcc-text-muted, #94a3b8);
         display: flex;
         align-items: center;
         justify-content: center;

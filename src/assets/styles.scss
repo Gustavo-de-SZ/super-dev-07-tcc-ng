@@ -6,23 +6,31 @@
 :root {
   --tcc-primary: #3b82f6;
   --tcc-primary-hover: #2563eb; 
+  --tcc-primary-light: rgba(59, 130, 246, 0.12);
   --tcc-bg: #f8fafc;
   --tcc-surface: #ffffff;
   --tcc-surface-hover: #f1f5f9;
+  --tcc-card-bg: #ffffff;
   --tcc-text-main: #0f172a;
+  --tcc-text-secondary: #475569;
   --tcc-text-muted: #64748b;
   --tcc-border: #e2e8f0;
+  --tcc-border-subtle: #f1f5f9;
   --tcc-radius: 12px; 
   --tcc-shadow: 0 4px 20px #00000008; 
 }
 
 body.tp-dark-theme {
+  --tcc-primary-light: rgba(59, 130, 246, 0.18);
   --tcc-bg: #090e17; 
   --tcc-surface: #131c2c;
   --tcc-surface-hover: #1e293b;
+  --tcc-card-bg: #131c2c;
   --tcc-text-main: #f1f5f9;
+  --tcc-text-secondary: #cbd5e1;
   --tcc-text-muted: #94a3b8;
   --tcc-border: #223047;
+  --tcc-border-subtle: #1a2436;
   --tcc-shadow: 0 4px 20px #00000066;
 }
 
@@ -307,21 +315,25 @@ body {
   color: #ffffff !important;
 }
 
-/* Modo escuro para os componentes de overlay PrimeNG */
+/* Modo escuro para os componentes de overlay e interface PrimeNG */
 body.tp-dark-theme {
   .p-autocomplete-panel,
   .p-datepicker-panel,
-  .p-select-panel {
-    background-color: #131c2c !important;
-    border: 1px solid #223047 !important;
-    color: #f1f5f9 !important;
+  .p-select-panel,
+  .p-multiselect-panel,
+  .p-menu,
+  .p-tieredmenu,
+  .p-contextmenu {
+    background-color: var(--tcc-surface) !important;
+    border: 1px solid var(--tcc-border) !important;
+    color: var(--tcc-text-main) !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5) !important;
   }
   
   .p-datepicker-header {
-    background-color: #131c2c !important;
-    border-bottom: 1px solid #223047 !important;
-    color: #f1f5f9 !important;
+    background-color: var(--tcc-surface) !important;
+    border-bottom: 1px solid var(--tcc-border) !important;
+    color: var(--tcc-text-main) !important;
   }
   
   .p-datepicker-title,
@@ -329,42 +341,88 @@ body.tp-dark-theme {
   .p-datepicker-next-icon,
   .p-datepicker-prev,
   .p-datepicker-next {
-    color: #f1f5f9 !important;
+    color: var(--tcc-text-main) !important;
   }
   
   .p-datepicker-weekday {
-    color: #94a3b8 !important;
+    color: var(--tcc-text-muted) !important;
   }
   
   .p-datepicker-day {
-    color: #f1f5f9 !important;
+    color: var(--tcc-text-main) !important;
   }
   
   .p-datepicker table td > span {
-    color: #f1f5f9 !important;
+    color: var(--tcc-text-main) !important;
   }
 
   .p-datepicker table td > span:not(.p-highlight):hover {
-    background-color: #1e293b !important;
-    color: #3b82f6 !important;
+    background-color: var(--tcc-surface-hover) !important;
+    color: var(--tcc-primary) !important;
   }
 
   .p-datepicker table td > span.p-highlight {
-    background-color: #3b82f6 !important;
+    background-color: var(--tcc-primary) !important;
     color: #ffffff !important;
   }
   
   .p-autocomplete-option,
-  .p-select-option {
-    color: #f1f5f9 !important;
+  .p-select-option,
+  .p-multiselect-option,
+  .p-menuitem-link {
+    color: var(--tcc-text-main) !important;
   }
   
   .p-autocomplete-option:hover,
   .p-autocomplete-option.p-focus,
   .p-select-option:hover,
-  .p-select-option.p-focus {
-    background-color: #1e293b !important;
-    color: #f1f5f9 !important;
+  .p-select-option.p-focus,
+  .p-multiselect-option:hover,
+  .p-multiselect-option.p-focus,
+  .p-menuitem-link:hover {
+    background-color: var(--tcc-surface-hover) !important;
+    color: var(--tcc-text-main) !important;
+  }
+
+  /* PrimeNG Paginator Dark Mode */
+  .p-paginator {
+    background-color: var(--tcc-surface) !important;
+    border-color: var(--tcc-border) !important;
+    color: var(--tcc-text-main) !important;
+  }
+  .p-paginator .p-paginator-pages .p-paginator-page,
+  .p-paginator .p-paginator-first,
+  .p-paginator .p-paginator-prev,
+  .p-paginator .p-paginator-next,
+  .p-paginator .p-paginator-last {
+    color: var(--tcc-text-muted) !important;
+    border-radius: 8px !important;
+    
+    &:hover {
+      background-color: var(--tcc-surface-hover) !important;
+      color: var(--tcc-text-main) !important;
+    }
+    
+    &.p-paginator-page-selected,
+    &.p-highlight {
+      background-color: var(--tcc-primary) !important;
+      color: #ffffff !important;
+    }
+  }
+
+  /* PrimeNG Dialog Dark Mode */
+  .p-dialog {
+    background-color: var(--tcc-surface) !important;
+    border: 1px solid var(--tcc-border) !important;
+    color: var(--tcc-text-main) !important;
+
+    .p-dialog-header,
+    .p-dialog-content,
+    .p-dialog-footer {
+      background-color: var(--tcc-surface) !important;
+      color: var(--tcc-text-main) !important;
+      border-color: var(--tcc-border) !important;
+    }
   }
 }
 

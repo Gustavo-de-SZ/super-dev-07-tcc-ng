@@ -379,6 +379,22 @@ import { EquipamentoService } from '../../../services/equipamento.service';
       transition: background-color 0.2s, color 0.2s;
     }
 
+    ::ng-deep body.tp-dark-theme .ns-page-container {
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #223047;
+      --border-input: #334155;
+      --bg-main: #090e17;
+      --bg-card: #131c2c;
+      --primary-bg: rgba(59, 130, 246, 0.15);
+      --error-bg: rgba(239, 68, 68, 0.05);
+      --tcc-surface: var(--bg-card);
+      --tcc-text-main: var(--text-main);
+      --tcc-text-muted: var(--text-muted);
+      --tcc-border: var(--border);
+      --tcc-surface-hover: var(--bg-card);
+    }
+
     .ns-page-header {
       display: flex;
       align-items: center;
@@ -754,10 +770,62 @@ import { EquipamentoService } from '../../../services/equipamento.service';
       margin-top: 4px;
     }
 
+    /* Fundo do painel do Datepicker e do Autocomplete */
+    ::ng-deep body.tp-dark-theme .p-datepicker-panel,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-overlay,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-panel {
+      background-color: #131c2c !important;
+      border: 1px solid #223047 !important;
+      color: #f1f5f9 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+    }
+
+    /* Cabeçalho e calendário interno do Datepicker */
+    ::ng-deep body.tp-dark-theme .p-datepicker-header {
+      background-color: #131c2c !important;
+      border-bottom: 1px solid #223047 !important;
+      color: #f1f5f9 !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-title,
+    ::ng-deep body.tp-dark-theme .p-datepicker-prev-icon,
+    ::ng-deep body.tp-dark-theme .p-datepicker-next-icon {
+      color: #f1f5f9 !important;
+    }
+
+    /* Dias da semana e números do mês */
+    ::ng-deep body.tp-dark-theme .p-datepicker-weekday {
+      color: #94a3b8 !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day {
+      color: #f1f5f9 !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day:not(.p-datepicker-day-selected):hover {
+      background-color: #1e293b !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-datepicker-day-selected {
+      background-color: #3b82f6 !important;
+      color: #ffffff !important;
+    }
+
+    /* Itens de sugestão do AutoComplete no Modo Escuro */
+    ::ng-deep body.tp-dark-theme .p-autocomplete-option {
+      color: #f1f5f9 !important;
+      background: transparent !important;
+    }
+
+    ::ng-deep body.tp-dark-theme .p-autocomplete-option:hover,
+    ::ng-deep body.tp-dark-theme .p-autocomplete-option.p-focus {
+      background-color: #1e293b !important;
+    }
+
     .ns-cliente-suggestion { display: flex; align-items: center; gap: 12px; padding: 2px 0; }
     .ns-cliente-avatar {
       width: 32px; height: 32px; border-radius: 50%;
-      background: #eff6ff;
+      background: rgba(59, 130, 246, 0.15);
       display: flex; align-items: center; justify-content: center;
       color: #3b82f6;
     }

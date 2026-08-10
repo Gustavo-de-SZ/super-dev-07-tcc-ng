@@ -82,7 +82,7 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
     .tcc-progress-track {
       width: 100%;
       height: 6px;
-      background-color: var(--tcc-bg);
+      background-color: var(--tcc-bg, #f1f5f9);
       border-radius: 4px;
       overflow: hidden;
     }
@@ -92,23 +92,24 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
       transition: width 0.5s ease;
     }
     .tcc-bg-success { background-color: #10b981; }
-    .tcc-bg-primary { background-color: var(--tcc-primary); }
-    .tcc-bg-warning { background-color: #eab308; }
+    .tcc-bg-primary { background-color: var(--tcc-primary, #3b82f6); }
+    .tcc-bg-warning { background-color: #f59e0b; }
     .tcc-summary-highlight {
       margin-top: 16px;
       padding: 24px;
-      background-color: var(--tcc-bg);
+      background-color: var(--tcc-bg, #f8fafc);
+      border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 8px;
       text-align: center;
       h2 {
         font-size: 36px;
         font-weight: 800;
-        color: var(--tcc-primary);
+        color: var(--tcc-primary, #3b82f6);
         margin: 0 0 8px 0;
       }
       p {
         font-size: 14px;
-        color: var(--tcc-text-muted);
+        color: var(--tcc-text-muted, #64748b);
         margin: 0;
       }
     }

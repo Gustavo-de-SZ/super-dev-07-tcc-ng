@@ -1,17 +1,18 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { MenuModule } from 'primeng/menu';
+import { MessageService, MenuItem } from 'primeng/api';
 import { Chamado } from '../../models/chamado';
 import { MeusChamadosService } from '../../services/meus-chamados.service';
 
 @Component({
   selector: 'app-meus-chamados',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginatorModule, ToastModule],
+  imports: [CommonModule, RouterModule, FormsModule, PaginatorModule, ToastModule, MenuModule],
   providers: [MessageService],
   template: `
     <div class="tcc-page-wrapper tcc-fade-in">
@@ -173,44 +174,30 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
               </div>
 
            
-              <div class="tcc-card-footer">
+              <div class="tcc-card-footer" (click)="$event.stopPropagation()">
                 <button class="tcc-btn-details" (click)="abrirDetalhes(chamado)">
                   <i class="pi pi-eye"></i> Ver Detalhes
                 </button>
 
                 <div class="tcc-footer-right">
-                  @if (chamado.status === 'CONCLUIDO' && chamado.profissional_id) {
-                    @if (!chamado.avaliacao_nota) {
-                      <button
-                        class="tcc-btn-rate"
-                        (click)="abrirModalAvaliacao(chamado)"
-                        title="Avaliar atendimento do técnico"
-                      >
-                        <i class="pi pi-star"></i>
-                        <span>Avaliar</span>
-                      </button>
-                    } @else {
-                      <button
-                        class="tcc-rating-badge"
-                        (click)="abrirModalAvaliacao(chamado)"
-                        title="Ver ou editar avaliação"
-                      >
-                        <i class="pi pi-star-fill"></i>
-                        <span>{{ chamado.avaliacao_nota }}.0</span>
-                      </button>
-                    }
+                  @if (chamado.status === 'CONCLUIDO' && chamado.avaliacao_nota) {
+                    <button
+                      class="tcc-rating-badge"
+                      (click)="abrirModalAvaliacao(chamado)"
+                      title="Ver ou editar avaliação"
+                    >
+                      <i class="pi pi-star-fill"></i>
+                      <span>{{ chamado.avaliacao_nota }}.0</span>
+                    </button>
                   }
 
-                  @if (chamado.profissional_id) {
-                    <a
-                      class="tcc-btn-chat"
-                      [routerLink]="['/cliente/chat', chamado.id]"
-                      title="Abrir chat em tempo real"
-                    >
-                      <i class="pi pi-comments"></i>
-                      <span>Chat</span>
-                    </a>
-                  }
+                  <button
+                    type="button"
+                    class="tcc-btn-outline small"
+                    (click)="abrirMenu($event, menu, chamado)"
+                  >
+                    Ações <i class="pi pi-chevron-down"></i>
+                  </button>
                 </div>
               </div>
 
@@ -218,7 +205,6 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
           }
         </div>
 
-      
         @if (filteredChamados.length > rows) {
           <div class="tcc-paginator-container">
             <p-paginator
@@ -234,7 +220,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
         }
       }
 
-   
+      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+
       @if (chamadoDetalhes) {
         <div class="tcc-modal-backdrop" (click)="fecharDetalhes()">
           <div class="tcc-modal-content" (click)="$event.stopPropagation()">
@@ -544,10 +531,10 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       font-size: 20px;
       flex-shrink: 0;
     }
-    .metric-active .tcc-metric-icon { background: #eff6ff; color: #2563eb; }
-    .metric-pending .tcc-metric-icon { background: #fffbeb; color: #d97706; }
-    .metric-completed .tcc-metric-icon { background: #f0fdf4; color: #16a34a; }
-    .metric-total .tcc-metric-icon { background: #f8fafc; color: #64748b; }
+    .metric-active .tcc-metric-icon { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .metric-pending .tcc-metric-icon { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .metric-completed .tcc-metric-icon { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .metric-total .tcc-metric-icon { background: var(--tcc-bg, #f8fafc); color: var(--tcc-text-muted, #64748b); }
 
     .tcc-metric-info {
       display: flex;
@@ -610,9 +597,9 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       transition: all 0.2s;
 
       &:focus {
-        border-color: #3b82f6;
-        background: #ffffff;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: var(--tcc-primary, #3b82f6);
+        background: var(--tcc-surface, #ffffff);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
       }
     }
 
@@ -635,12 +622,12 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 
       &:hover {
-        border-color: #cbd5e1;
+        border-color: var(--tcc-primary, #3b82f6);
         box-shadow: 0 10px 20px -5px rgba(0,0,0,0.06);
         transform: translateY(-2px);
       }
       &.border-active {
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid var(--tcc-primary, #3b82f6);
       }
     }
     .tcc-card-top {
@@ -679,10 +666,10 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       font-weight: 600;
       text-transform: capitalize;
     }
-    .status-andamento { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .status-pendente { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
-    .status-concluido { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .status-cancelado { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+    .status-andamento { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .status-pendente { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-concluido { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-cancelado { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
     .tcc-card-body {
       display: flex;
@@ -723,8 +710,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #eff6ff;
-      color: #2563eb;
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -741,8 +728,9 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       align-items: center;
       gap: 8px;
       font-size: 12px;
-      color: #d97706;
-      background: #fffbeb;
+      color: #f59e0b;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
       padding: 6px 10px;
       border-radius: 8px;
     }
@@ -773,9 +761,9 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       gap: 8px;
     }
     .tcc-btn-rate {
-      background: #fefce8;
-      color: #b45309;
-      border: 1px solid #fde047;
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
       padding: 6px 12px;
       border-radius: 8px;
       font-size: 12px;
@@ -786,15 +774,15 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       gap: 6px;
       transition: all 0.2s;
       &:hover {
-        background: #fef08a;
-        color: #92400e;
+        background: rgba(245, 158, 11, 0.22);
+        color: #d97706;
         transform: translateY(-1px);
       }
     }
     .tcc-rating-badge {
-      background: #fffbeb;
-      color: #d97706;
-      border: 1px solid #fde68a;
+      background: rgba(245, 158, 11, 0.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
       padding: 5px 10px;
       border-radius: 8px;
       font-size: 12px;
@@ -806,14 +794,14 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       transition: all 0.2s;
       i { color: #f59e0b; font-size: 13px; }
       &:hover {
-        background: #fef3c7;
+        background: rgba(245, 158, 11, 0.22);
         border-color: #f59e0b;
       }
     }
     .tcc-btn-chat {
-      background: #eff6ff;
-      color: #2563eb;
-      border: 1px solid #bfdbfe;
+      background: rgba(59, 130, 246, 0.12);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.3);
       padding: 6px 14px;
       border-radius: 8px;
       font-size: 12px;
@@ -824,7 +812,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       gap: 6px;
       transition: all 0.2s;
       &:hover {
-        background: #2563eb;
+        background: var(--tcc-primary, #3b82f6);
         color: #ffffff;
       }
     }
@@ -845,18 +833,18 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
       transition: all 0.2s;
       text-decoration: none;
-      &:hover { background: #2563eb; }
+      &:hover { background: var(--tcc-primary-hover, #2563eb); }
     }
     .tcc-btn-outline {
-      background: transparent;
+      background: var(--tcc-surface, #ffffff);
       border: 1px solid var(--tcc-border, #cbd5e1);
-      color: var(--tcc-text-main, #334155);
+      color: var(--tcc-text-secondary, #334155);
       padding: 8px 16px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      &:hover { background: var(--tcc-bg, #f8fafc); }
+      &:hover { background: var(--tcc-surface-hover, #f8fafc); color: var(--tcc-text-main); }
     }
     .tcc-btn-danger {
       background: #dc2626;
@@ -873,9 +861,9 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       &:hover { background: #b91c1c; }
     }
     .tcc-btn-danger-outline {
-      background: transparent;
-      border: 1px solid #fca5a5;
-      color: #dc2626;
+      background: var(--tcc-surface, #ffffff);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
       padding: 8px 16px;
       border-radius: 8px;
       font-size: 13px;
@@ -884,7 +872,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      &:hover { background: #fef2f2; }
+      &:hover { background: rgba(239, 68, 68, 0.12); }
     }
     .tcc-btn-sm {
       padding: 6px 12px;
@@ -959,6 +947,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       flex-direction: column;
       overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      color: var(--tcc-text-main, #0f172a);
       animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .tcc-modal-sm {
@@ -988,8 +978,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
     .tcc-modal-badge {
       font-size: 11px;
       font-weight: 700;
-      color: #2563eb;
-      background: #eff6ff;
+      color: var(--tcc-primary, #3b82f6);
+      background: rgba(59, 130, 246, 0.15);
       padding: 2px 8px;
       border-radius: 6px;
       width: fit-content;
@@ -998,11 +988,11 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       background: transparent;
       border: none;
       font-size: 16px;
-      color: #94a3b8;
+      color: var(--tcc-text-muted, #94a3b8);
       cursor: pointer;
       padding: 4px;
       border-radius: 6px;
-      &:hover { background: #f1f5f9; color: #334155; }
+      &:hover { background: var(--tcc-surface-hover, #f1f5f9); color: var(--tcc-text-main, #334155); }
     }
     .tcc-modal-body {
       padding: 24px;
@@ -1051,12 +1041,12 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       padding: 14px 16px;
       font-size: 14px;
       line-height: 1.6;
-      color: var(--tcc-text-main, #334155);
+      color: var(--tcc-text-secondary, #334155);
       white-space: pre-wrap;
     }
     .tcc-tech-card-modal {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
       border-radius: 12px;
       padding: 14px 16px;
       display: flex;
@@ -1067,8 +1057,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background: #dcfce7;
-      color: #16a34a;
+      background: rgba(16, 185, 129, 0.18);
+      color: #10b981;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1076,25 +1066,25 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
     }
     .tcc-tech-info-modal {
       flex: 1;
-      h4 { margin: 0; font-size: 15px; color: #14532d; }
-      p { margin: 2px 0 0 0; font-size: 12px; color: #166534; }
+      h4 { margin: 0; font-size: 15px; color: var(--tcc-text-main, #14532d); }
+      p { margin: 2px 0 0 0; font-size: 12px; color: var(--tcc-text-muted, #166534); }
     }
     .tcc-unassigned-banner {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
       border-radius: 12px;
       padding: 14px 16px;
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      i { font-size: 18px; color: #d97706; margin-top: 2px; }
-      strong { display: block; font-size: 14px; color: #92400e; }
-      p { margin: 2px 0 0 0; font-size: 12px; color: #b45309; line-height: 1.4; }
+      i { font-size: 18px; color: #f59e0b; margin-top: 2px; }
+      strong { display: block; font-size: 14px; color: var(--tcc-text-main, #92400e); }
+      p { margin: 2px 0 0 0; font-size: 12px; color: var(--tcc-text-muted, #b45309); line-height: 1.4; }
     }
     /* Rated Card in Details */
     .tcc-rated-card {
-      background: #fffbeb;
-      border: 1px solid #fde68a;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
       border-radius: 12px;
       padding: 14px 16px;
       display: flex;
@@ -1112,7 +1102,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       gap: 4px;
       i {
         font-size: 16px;
-        color: #cbd5e1;
+        color: var(--tcc-border, #cbd5e1);
         &.active, &.pi-star-fill {
           color: #f59e0b;
         }
@@ -1122,12 +1112,12 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       margin-left: 8px;
       font-size: 14px;
       font-weight: 700;
-      color: #92400e;
+      color: #f59e0b;
     }
     .tcc-btn-rate-edit {
       background: transparent;
-      border: 1px solid #fde68a;
-      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
       padding: 4px 10px;
       border-radius: 6px;
       font-size: 11px;
@@ -1137,21 +1127,21 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       align-items: center;
       gap: 4px;
       &:hover {
-        background: #fef3c7;
+        background: rgba(245, 158, 11, 0.18);
       }
     }
     .tcc-rated-comment {
       margin: 0;
       font-size: 13px;
       font-style: italic;
-      color: #78350f;
+      color: var(--tcc-text-secondary, #78350f);
       line-height: 1.4;
     }
 
     /* Invite Card in Details */
     .tcc-rate-invite-card {
-      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-      border: 1px solid #fde68a;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
       border-radius: 12px;
       padding: 16px;
       display: flex;
@@ -1171,7 +1161,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #fef08a;
+      background: rgba(245, 158, 11, 0.18);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1179,18 +1169,18 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
     }
     .tcc-invite-icon {
       font-size: 20px;
-      color: #d97706;
+      color: #f59e0b;
     }
     .tcc-invite-title {
       font-size: 14px;
       font-weight: 600;
-      color: #92400e;
+      color: var(--tcc-text-main, #92400e);
       display: block;
       margin-bottom: 2px;
     }
     .tcc-invite-desc {
       font-size: 12px;
-      color: #b45309;
+      color: var(--tcc-text-muted, #b45309);
       margin: 0;
     }
     .tcc-btn-rate-action {
@@ -1219,8 +1209,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       max-width: 500px;
     }
     .badge-rate {
-      color: #b45309 !important;
-      background: #fef3c7 !important;
+      color: #f59e0b !important;
+      background: rgba(245, 158, 11, 0.15) !important;
     }
     .tcc-modal-sub {
       margin: 0;
@@ -1240,7 +1230,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #eff6ff;
+      background: rgba(59, 130, 246, 0.15);
       color: #3b82f6;
       display: flex;
       align-items: center;
@@ -1259,8 +1249,8 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       align-items: center;
       justify-content: center;
       padding: 20px;
-      background: #fafaf9;
-      border: 1px solid #e7e5e4;
+      background: var(--tcc-bg, #fafaf9);
+      border: 1px solid var(--tcc-border, #e7e5e4);
       border-radius: 14px;
       gap: 12px;
     }
@@ -1278,7 +1268,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       border: none;
       cursor: pointer;
       padding: 4px;
-      color: #d6d3d1;
+      color: var(--tcc-text-muted, #d6d3d1);
       transition: transform 0.15s ease, color 0.15s ease;
       display: flex;
       align-items: center;
@@ -1294,7 +1284,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
     .tcc-rating-label-text {
       font-size: 13px;
       font-weight: 600;
-      color: #d97706;
+      color: #f59e0b;
       min-height: 20px;
     }
     .tcc-rate-field {
@@ -1335,7 +1325,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       display: flex;
       align-items: center;
       gap: 12px;
-      background: var(--tcc-bg, #f8fafc);
+      background: var(--tcc-surface, #f8fafc);
     }
     .ml-auto { margin-left: auto; }
   `]
@@ -1343,7 +1333,9 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
 export class MeusChamados implements OnInit {
   private meusChamadosService = inject(MeusChamadosService);
   private messageService = inject(MessageService);
+  private router = inject(Router);
 
+  menuItems: MenuItem[] = [];
   chamados: Chamado[] = [];
   filteredChamados: Chamado[] = [];
   carregando: boolean = true;
@@ -1460,6 +1452,46 @@ export class MeusChamados implements OnInit {
   onPageChange(event: any): void {
     this.first = event.first;
     this.rows = event.rows;
+  }
+
+  abrirMenu(event: Event, menu: any, chamado: Chamado): void {
+    event.stopPropagation();
+    const items: MenuItem[] = [
+      {
+        label: 'Ver Detalhes',
+        icon: 'pi pi-eye',
+        command: () => this.abrirDetalhes(chamado)
+      }
+    ];
+
+    if (chamado.profissional_id) {
+      items.push({
+        label: 'Abrir Chat',
+        icon: 'pi pi-comments',
+        command: () => this.router.navigate(['/cliente/chat', chamado.id])
+      });
+    }
+
+    if (chamado.status === 'CONCLUIDO' && chamado.profissional_id) {
+      items.push({
+        label: chamado.avaliacao_nota ? `Avaliação (${chamado.avaliacao_nota}.0 ★)` : 'Avaliar Atendimento',
+        icon: 'pi pi-star',
+        command: () => this.abrirModalAvaliacao(chamado)
+      });
+    }
+
+    if (chamado.status === 'ABERTO' || chamado.status === 'PENDENTE') {
+      items.push({ separator: true });
+      items.push({
+        label: 'Cancelar Chamado',
+        icon: 'pi pi-trash',
+        styleClass: 'text-red-500',
+        command: () => this.confirmarCancelarChamado(chamado)
+      });
+    }
+
+    this.menuItems = items;
+    menu.toggle(event);
   }
 
   abrirDetalhes(chamado: Chamado): void {

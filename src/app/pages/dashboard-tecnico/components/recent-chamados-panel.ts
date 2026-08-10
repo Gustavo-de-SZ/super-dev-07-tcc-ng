@@ -156,13 +156,13 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
       padding: 14px 16px;
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 12px;
-      background: var(--tcc-card-bg, #ffffff);
+      background: var(--tcc-surface, #ffffff);
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
       &:hover {
-        border-color: #93c5fd;
-        background: #f8faff;
+        border-color: var(--tcc-primary, #3b82f6);
+        background: var(--tcc-surface-hover, #f8faff);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
 
@@ -192,23 +192,23 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
       flex-shrink: 0;
 
       &.badge-blue {
-        background: #eff6ff;
-        color: #2563eb;
+        background: rgba(59, 130, 246, 0.12);
+        color: #3b82f6;
       }
 
       &.badge-amber {
-        background: #fffbeb;
-        color: #d97706;
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
       }
 
       &.badge-green {
-        background: #ecfdf5;
-        color: #059669;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
       }
 
       &.badge-purple {
-        background: #faf5ff;
-        color: #7c3aed;
+        background: rgba(139, 92, 246, 0.12);
+        color: #8b5cf6;
       }
     }
 
@@ -255,7 +255,7 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
       }
 
       .ch-meta-dot {
-        color: #cbd5e1;
+        color: var(--tcc-border, #cbd5e1);
       }
     }
 
@@ -275,33 +275,33 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
       letter-spacing: 0.2px;
 
       &.status-andamento {
-        background: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background: rgba(59, 130, 246, 0.12);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
       }
 
       &.status-aberto {
-        background: #fff7ed;
-        color: #c2410c;
-        border: 1px solid #fed7aa;
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
       }
 
       &.status-concluido {
-        background: #f0fdf4;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
       }
 
       &.status-orcamento {
-        background: #faf5ff;
-        color: #6b21a8;
-        border: 1px solid #e9d5ff;
+        background: rgba(139, 92, 246, 0.12);
+        color: #8b5cf6;
+        border: 1px solid rgba(139, 92, 246, 0.3);
       }
     }
 
     .ch-chevron {
       font-size: 12px;
-      color: #94a3b8;
+      color: var(--tcc-text-muted, #94a3b8);
       transition: all 0.2s ease;
     }
 
@@ -314,7 +314,7 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
     .ch-skeleton-item {
       height: 64px;
       border-radius: 12px;
-      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background: linear-gradient(90deg, var(--tcc-bg, #f1f5f9) 25%, var(--tcc-border, #e2e8f0) 50%, var(--tcc-bg, #f1f5f9) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
     }
@@ -337,8 +337,8 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
         width: 56px;
         height: 56px;
         border-radius: 16px;
-        background: #f1f5f9;
-        color: #94a3b8;
+        background: var(--tcc-bg, #f1f5f9);
+        color: var(--tcc-text-muted, #94a3b8);
         display: flex;
         align-items: center;
         justify-content: center;

@@ -2,14 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, TecnicoAdmin } from '../../../services/admin.service';
-import { MessageService } from 'primeng/api';
+import { MessageService, MenuItem } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
+import { MenuModule } from 'primeng/menu';
 
 @Component({
   selector: 'app-tecnicos-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastModule, PaginatorModule],
+  imports: [CommonModule, FormsModule, ToastModule, PaginatorModule, MenuModule],
   providers: [MessageService],
   template: `
     <p-toast></p-toast>
@@ -160,25 +161,14 @@ import { PaginatorModule } from 'primeng/paginator';
                           <span>Detalhes</span>
                         </button>
 
-                        @if (!tecnico.aprovado_pelo_admin) {
-                          <button 
-                            class="btn-approve" 
-                            (click)="aprovar(tecnico)"
-                            [disabled]="actionLoading[tecnico.id]"
-                            title="Aprovar Cadastro">
-                            <i class="pi" [class.pi-check]="!actionLoading[tecnico.id]" [class.pi-spin]="actionLoading[tecnico.id]" [class.pi-spinner]="actionLoading[tecnico.id]"></i>
-                            <span>Aprovar</span>
-                          </button>
-                        } @else {
-                          <button 
-                            class="btn-reject-subtle" 
-                            (click)="rejeitar(tecnico)"
-                            [disabled]="actionLoading[tecnico.id]"
-                            title="Desativar aprovação e solicitar revisão">
-                            <i class="pi pi-ban"></i>
-                            <span>Revisar</span>
-                          </button>
-                        }
+                        <button
+                          type="button"
+                          class="tcc-btn-outline small"
+                          (click)="abrirMenu($event, menu, tecnico)"
+                          title="Mais Ações"
+                        >
+                          Ações <i class="pi pi-chevron-down"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -203,7 +193,8 @@ import { PaginatorModule } from 'primeng/paginator';
         }
       </div>
 
-      
+      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+
       @if (tecnicoSelecionado) {
         <div class="modal-backdrop" (click)="fecharDetalhes()">
           <div class="modal-card" (click)="$event.stopPropagation()">
@@ -882,9 +873,28 @@ import { PaginatorModule } from 'primeng/paginator';
         color: var(--tcc-text-main, #0f172a);
       }
     }
+
+    .tcc-btn-outline.small {
+      background-color: transparent;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      color: var(--tcc-text-main, #475569);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: var(--tcc-bg, #f8fafc);
+      }
+    }
   `]
 })
 export class TecnicosAdmin implements OnInit {
+  menuItems: MenuItem[] = [];
   todosTecnicos: TecnicoAdmin[] = [];
   tecnicosFiltrados: TecnicoAdmin[] = [];
   
@@ -983,6 +993,35 @@ export class TecnicosAdmin implements OnInit {
   onPageChange(event: any) {
     this.first = event.first;
     this.rows = event.rows;
+  }
+
+  abrirMenu(event: Event, menu: any, tecnico: TecnicoAdmin) {
+    event.stopPropagation();
+    const items: MenuItem[] = [
+      {
+        label: 'Ver Detalhes',
+        icon: 'pi pi-eye',
+        command: () => this.abrirDetalhes(tecnico)
+      }
+    ];
+
+    if (!tecnico.aprovado_pelo_admin) {
+      items.push({
+        label: 'Aprovar Cadastro',
+        icon: 'pi pi-check',
+        command: () => this.aprovar(tecnico)
+      });
+    } else {
+      items.push({
+        label: 'Solicitar Revisão / Suspender',
+        icon: 'pi pi-ban',
+        styleClass: 'text-amber-500',
+        command: () => this.rejeitar(tecnico)
+      });
+    }
+
+    this.menuItems = items;
+    menu.toggle(event);
   }
 
   abrirDetalhes(tecnico: TecnicoAdmin) {

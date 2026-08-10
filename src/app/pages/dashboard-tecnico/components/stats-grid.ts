@@ -74,10 +74,10 @@ import { StatCard } from '../../../shared/models';
       margin-top: 8px;
     }
 
-    .tcc-icon-blue { background: #3b82f61a; color: #3b82f6; }
-    .tcc-icon-orange { background: #f973161a; color: #f97316; }
-    .tcc-icon-yellow { background: #eab3081a; color: #eab308; }
-    .tcc-icon-green { background: #10b9811a; color: #10b981; }
+    .tcc-icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .tcc-icon-orange { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+    .tcc-icon-yellow { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+    .tcc-icon-green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
   `]
 })
 export class StatsGridComponent {

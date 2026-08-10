@@ -2,14 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, ClienteAdmin } from '../../../services/admin.service';
-import { MessageService } from 'primeng/api';
+import { MessageService, MenuItem } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
+import { MenuModule } from 'primeng/menu';
 
 @Component({
   selector: 'app-clientes-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastModule, PaginatorModule],
+  imports: [CommonModule, FormsModule, ToastModule, PaginatorModule, MenuModule],
   providers: [MessageService],
   template: `
     <p-toast></p-toast>
@@ -86,6 +87,7 @@ import { PaginatorModule } from 'primeng/paginator';
                   <th>Contato</th>
                   <th>Data de Cadastro</th>
                   <th class="text-center">Chamados</th>
+                  <th class="text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,6 +116,26 @@ import { PaginatorModule } from 'primeng/paginator';
                     <td class="text-center">
                       <span class="badge-chamados">{{ cliente.total_chamados || 0 }}</span>
                     </td>
+                    <td class="text-right">
+                      <div class="action-buttons-group">
+                        <button 
+                          class="btn-detail" 
+                          (click)="abrirDetalhes(cliente)"
+                          title="Ver Detalhes do Cliente">
+                          <i class="pi pi-eye"></i>
+                          <span>Detalhes</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          class="tcc-btn-outline small"
+                          (click)="abrirMenu($event, menu, cliente)"
+                          title="Mais Ações"
+                        >
+                          Ações <i class="pi pi-chevron-down"></i>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 }
               </tbody>
@@ -135,6 +157,71 @@ import { PaginatorModule } from 'primeng/paginator';
           }
         }
       </div>
+
+      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+
+      @if (clienteSelecionado) {
+        <div class="modal-backdrop" (click)="fecharDetalhes()">
+          <div class="modal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div class="modal-header-title">
+                <div class="modal-avatar">
+                  {{ clienteSelecionado.nome_completo ? clienteSelecionado.nome_completo.charAt(0).toUpperCase() : 'C' }}
+                </div>
+                <div>
+                  <h3 class="modal-title">{{ clienteSelecionado.nome_completo }}</h3>
+                  <p class="modal-subtitle">Detalhes cadastrais do cliente</p>
+                </div>
+              </div>
+              <button class="modal-close-btn" (click)="fecharDetalhes()">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+
+            <div class="modal-body">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Status da Conta</span>
+                  <span class="detail-value">
+                    <span class="status-badge status-approved">
+                      <i class="pi pi-check-circle"></i> Ativo
+                    </span>
+                  </span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Empresa / Razão Social</span>
+                  <span class="detail-value">{{ clienteSelecionado.empresa || 'Pessoa Física / Não informada' }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Email</span>
+                  <span class="detail-value">{{ clienteSelecionado.email || 'Não informado' }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Telefone</span>
+                  <span class="detail-value">{{ clienteSelecionado.telefone || 'Não informado' }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Data de Registro</span>
+                  <span class="detail-value">{{ clienteSelecionado.criado_em | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+
+                <div class="detail-item">
+                  <span class="detail-label">Chamados Solicitados</span>
+                  <span class="detail-value font-semibold">{{ clienteSelecionado.total_chamados || 0 }} chamado(s)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn-cancel" (click)="fecharDetalhes()">Fechar</button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -431,13 +518,230 @@ import { PaginatorModule } from 'primeng/paginator';
       display: flex;
       justify-content: center;
     }
+
+    .text-right { text-align: right; }
+
+    .action-buttons-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-detail {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background-color: var(--tcc-surface, #ffffff);
+      color: var(--tcc-text-main, #0f172a);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: var(--tcc-bg, #f8fafc);
+        border-color: var(--tcc-border-focus, #cbd5e1);
+      }
+    }
+
+    .tcc-btn-outline.small {
+      background-color: transparent;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      color: var(--tcc-text-main, #475569);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: var(--tcc-bg, #f8fafc);
+      }
+    }
+
+    /* Modal Backdrop & Card */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+      animation: fadeInModal 0.2s ease-out;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-card {
+      background-color: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.95) translateY(10px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--tcc-border, #f1f5f9);
+    }
+
+    .modal-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--tcc-text-main, #0f172a);
+      margin: 0;
+    }
+
+    .modal-subtitle {
+      font-size: 12px;
+      color: var(--tcc-text-muted, #64748b);
+      margin: 0;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      color: var(--tcc-text-muted, #94a3b8);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: var(--tcc-bg, #f1f5f9);
+        color: var(--tcc-text-main, #0f172a);
+      }
+    }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--tcc-text-muted, #94a3b8);
+    }
+
+    .detail-value {
+      font-size: 14px;
+      color: var(--tcc-text-main, #0f172a);
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+
+      &.status-approved {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      }
+    }
+
+    .font-semibold { font-weight: 600; }
+
+    .modal-footer {
+      padding: 16px 24px;
+      background-color: var(--tcc-bg, #f8fafc);
+      border-top: 1px solid var(--tcc-border, #f1f5f9);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn-cancel {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--tcc-border, #e2e8f0);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tcc-text-muted, #64748b);
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--tcc-surface, #ffffff);
+        color: var(--tcc-text-main, #0f172a);
+      }
+    }
   `]
 })
 export class ClientesAdmin implements OnInit {
+  menuItems: MenuItem[] = [];
   clientes: ClienteAdmin[] = [];
   clientesFiltrados: ClienteAdmin[] = [];
   termoBusca = '';
   loading = true;
+  clienteSelecionado: ClienteAdmin | null = null;
 
   first = 0;
   rows = 10;
@@ -503,5 +807,25 @@ export class ClientesAdmin implements OnInit {
   onPageChange(event: any) {
     this.first = event.first;
     this.rows = event.rows;
+  }
+
+  abrirDetalhes(cliente: ClienteAdmin) {
+    this.clienteSelecionado = cliente;
+  }
+
+  fecharDetalhes() {
+    this.clienteSelecionado = null;
+  }
+
+  abrirMenu(event: Event, menu: any, cliente: ClienteAdmin) {
+    event.stopPropagation();
+    this.menuItems = [
+      {
+        label: 'Ver Detalhes',
+        icon: 'pi pi-eye',
+        command: () => this.abrirDetalhes(cliente)
+      }
+    ];
+    menu.toggle(event);
   }
 }
