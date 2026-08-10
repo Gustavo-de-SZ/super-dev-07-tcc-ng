@@ -10,6 +10,6 @@ export const environment = {
   },
   api: {
     // Substitua pela URL real do seu backend no Render após o deploy
-    serverUrl: 'https://tcc-api.onrender.com',
+    serverUrl: 'https://super-dev-07-tcc-api.onrender.com',
   }
 };
