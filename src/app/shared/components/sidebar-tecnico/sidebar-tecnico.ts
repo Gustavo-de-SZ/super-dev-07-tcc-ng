@@ -15,7 +15,7 @@ import { SolicitacaoService } from '../../../services/solicitacao.service';
           <i class="pi pi-desktop"></i>
         </div>
         <div class="tcc-logo-text">
-          <strong>TechConnect</strong>
+          <strong>tcc</strong>
           <span>Painel do Técnico</span>
         </div>
       </div>

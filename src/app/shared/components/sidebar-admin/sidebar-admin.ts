@@ -14,7 +14,7 @@ import { AuthService } from '../../../services/auth.service';
           <i class="pi pi-shield"></i>
         </div>
         <div class="tcc-logo-text">
-          <strong>TechConnect</strong>
+          <strong>tcc</strong>
           <span>Painel Admin</span>
         </div>
       </div>

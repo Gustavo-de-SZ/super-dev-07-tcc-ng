@@ -15,7 +15,7 @@ import { MeusChamadosService } from '../../../services/meus-chamados.service';
           <i class="pi pi-desktop"></i>
         </div>
         <div class="tcc-logo-text">
-          <strong>TechConnect</strong>
+          <strong>tcc</strong>
           <span>Portal do Cliente</span>
         </div>
       </div>

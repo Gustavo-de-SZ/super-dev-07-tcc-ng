@@ -18,12 +18,7 @@ import { take } from 'rxjs/operators';
       <div class="tcc-wrapper tcc-flex-split">
 
         <div style="display: flex; align-items: center; gap: 3rem;">
-          <div class="tcc-menu">
-            <a href="#">Serviços</a>
-            <a href="#">Para Profissionais</a>
-            <a href="#">Como Funciona</a>
-            <a href="#">Contato</a>
-          </div>
+        
         </div>
 
         <div style="display: flex; align-items: center; gap: 1rem;">
