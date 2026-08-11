@@ -250,7 +250,7 @@ import { AuthService } from '@auth0/auth0-angular';
                       <i class="pi pi-wrench"></i>
                     </div>
                     <div class="os-brand-info">
-                      <h1 class="os-company-name">TechCare</h1>
+                      <h1 class="os-company-name">tcc</h1>
                       <p class="os-company-sub">Gestão & Assistência Técnica Especializada</p>
                       <div class="os-company-meta">
                         <span>Registro Técnico / CNPJ: 42.108.923/0001-55</span>
@@ -302,7 +302,7 @@ import { AuthService } from '@auth0/auth0-angular';
                       </div>
                       <div class="os-party-row">
                         <span class="lbl">Qualificação:</span>
-                        <span class="val">Profissional Verificado TechCare</span>
+                        <span class="val">Profissional Verificado tcc</span>
                       </div>
                       <div class="os-party-row">
                         <span class="lbl">Modalidade:</span>
@@ -404,7 +404,7 @@ import { AuthService } from '@auth0/auth0-angular';
                     
                     <div class="os-desc-content">
                       <strong>Solicitação Inicial / Problema Relatado:</strong>
-                      <p>{{ selectedItem.descricao || 'Atendimento técnico preventivo e corretivo realizado conforme solicitação e padrões de qualidade TechCare.' }}</p>
+                      <p>{{ selectedItem.descricao || 'Atendimento técnico preventivo e corretivo realizado conforme solicitação e padrões de qualidade tcc.' }}</p>
                     </div>
 
                     @if (selectedItem.laudo_tecnico) {
@@ -509,7 +509,7 @@ import { AuthService } from '@auth0/auth0-angular';
          
                 <div class="os-document-footer">
                   <div class="os-footer-content">
-                    <span>TechCare Solutions • Sistema de Gestão Técnica • Impresso em {{ dataHoraImpressao }}</span>
+                    <span> tcc • Sistema de Gestão Técnica • Impresso em {{ dataHoraImpressao }}</span>
                     <span>Documento autêntico • Página 1 de 1</span>
                   </div>
                 </div>
@@ -1311,9 +1311,7 @@ import { AuthService } from '@auth0/auth0-angular';
       color: #94a3b8;
     }
 
-    /* ==========================================================================
-       PRINT MEDIA QUERY (PRINT ONLY THE A4 DOCUMENT)
-       ========================================================================== */
+  
     @media print {
       body * {
         visibility: hidden !important;

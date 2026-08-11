@@ -92,7 +92,7 @@ export class AppLayoutComponent implements OnInit {
   userAvatar = '';
   isDark = false;
   
-  brandTitle = 'TechConnect';
+  brandTitle = 'TCC';
   brandSubtitle = '';
   brandIcon = 'pi-desktop';
   searchPlaceholder = 'Buscar...';
