@@ -206,7 +206,7 @@ interface InfoUsuario {
 
         <div class="tcc-divider"></div>
 
-        <div class="tcc-profile-section" routerLink="/painel/perfil" title="Meu Perfil">
+        <div class="tcc-profile-section" routerLink="/painel/configuracoes" title="Meu Perfil">
           <div class="tcc-profile-info">
             <span class="tcc-profile-name">{{ usuario.nome }}</span>
             <span class="tcc-profile-role">{{ usuario.cargo }}</span>

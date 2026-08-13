@@ -203,7 +203,7 @@ import { Chamado } from '../../../models/chamado';
         <div class="tcc-divider"></div>
 
     
-        <div class="tcc-profile-section" routerLink="/cliente/perfil" title="Meu Perfil">
+        <div class="tcc-profile-section" routerLink="/cliente/configuracoes" title="Meu Perfil">
           <div class="tcc-profile-info">
             <span class="tcc-profile-name">{{ userName }}</span>
             <span class="tcc-profile-role">Cliente</span>

@@ -101,7 +101,7 @@ import { AuthService } from '../../../services/auth.service';
         <div class="tcc-divider"></div>
 
        
-        <div class="tcc-profile-section" title="Administrador do Sistema">
+        <div class="tcc-profile-section" routerLink="/admin/configuracoes" title="Meu Perfil">
           <div class="tcc-profile-info">
             <span class="tcc-profile-name">{{ usuarioNome }}</span>
             <span class="tcc-profile-role">{{ usuarioCargo }}</span>
