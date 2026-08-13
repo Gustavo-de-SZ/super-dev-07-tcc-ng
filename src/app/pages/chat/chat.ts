@@ -1294,7 +1294,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     } else {
       return [
         'Olá! Em quanto tempo você poderá me atender?',
-        'O equipamento já está disponível para análise.',
         'Muito obrigado pela ajuda!',
         'Preciso de mais esclarecimentos.'
       ];

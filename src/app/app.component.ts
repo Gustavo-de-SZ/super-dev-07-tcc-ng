@@ -26,32 +26,5 @@ export class App {
     private primeng: PrimeNG
   ) {
     this.primeng.setTranslation(PRIME_NG_PT_BR);
-    this.verificarECriarPerfilSeNecessario();
-  }
-
-  private verificarECriarPerfilSeNecessario(): void {
-    // Aguarda autenticação confirmada e dados do usuário disponíveis
-    this.auth.isAuthenticated$.pipe(
-      filter(authenticated => authenticated),
-      switchMap(() => this.auth.user$),
-      filter(user => !!user), // Aguarda até ter dados reais do usuário
-      take(1) // Pega a primeira emissão válida do usuário
-    ).subscribe({
-      next: (user) => {
-        this.profileService.verificarPerfilExistente().subscribe({
-          next: (response) => {
-            const currentUrl = this.router.url.split('?')[0];
-            if (currentUrl === '/' || currentUrl === '') {
-              this.profileService.redirecionarParaPainelCorrespondente(response);
-            } else if (!response.exists && !currentUrl.includes('/completar-cadastro')) {
-              // Redireciona para completar o cadastro se o perfil não existe
-              this.router.navigate(['/completar-cadastro']);
-            }
-          },
-          error: (err) => console.error('Erro ao verificar perfil:', err)
-        });
-      },
-      error: (err) => console.error('Erro ao obter dados do usuário:', err)
-    });
   }
 }

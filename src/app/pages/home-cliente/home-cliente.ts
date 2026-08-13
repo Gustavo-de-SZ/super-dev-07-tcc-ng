@@ -114,7 +114,7 @@ import { Chamado } from '../../models/chamado';
         } @else {
           <div class="tcc-tickets-list">
             @for (item of chamados.slice(0, 4); track item.id) {
-              <div class="tcc-ticket-item">
+              <div class="tcc-ticket-item" [routerLink]="['/cliente/meus-chamados']">
                 
                 <div class="tcc-ticket-main">
                   <div class="tcc-ticket-meta">
@@ -140,17 +140,13 @@ import { Chamado } from '../../models/chamado';
                     ● {{ getStatusLabel(item.status) }}
                   </span>
 
-                  <div class="tcc-ticket-actions">
+                  <div class="tcc-ticket-actions" (click)="$event.stopPropagation()">
                     @if (item.profissional_id) {
                       <a [routerLink]="['/cliente/chat', item.id]" class="tcc-btn-chat" title="Conversar no Chat">
                         <i class="pi pi-comments"></i>
                         <span>Chat</span>
                       </a>
                     }
-                    <a [routerLink]="['/cliente/meus-chamados']" class="tcc-btn-details">
-                      <span>Detalhes</span>
-                      <i class="pi pi-chevron-right"></i>
-                    </a>
                   </div>
                 </div>
 
@@ -181,9 +177,7 @@ import { Chamado } from '../../models/chamado';
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* -------------------------------------------------------------
-       1. Header
-       ------------------------------------------------------------- */
+    
     .tcc-header-simple {
       padding-bottom: 4px;
     }
@@ -206,9 +200,7 @@ import { Chamado } from '../../models/chamado';
       color: var(--tcc-text-muted, #64748b);
     }
 
-    /* -------------------------------------------------------------
-       2. 3 Action Cards
-       ------------------------------------------------------------- */
+    
     .tcc-actions-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -316,9 +308,7 @@ import { Chamado } from '../../models/chamado';
       transition: all 0.2s;
     }
 
-    /* -------------------------------------------------------------
-       3. Recent Tickets Section
-       ------------------------------------------------------------- */
+    
     .tcc-recent-section {
       background: var(--tcc-surface, #ffffff);
       border: 1px solid var(--tcc-border, #e2e8f0);
@@ -366,9 +356,7 @@ import { Chamado } from '../../models/chamado';
       }
     }
 
-    /* -------------------------------------------------------------
-       4. Tickets List
-       ------------------------------------------------------------- */
+   
     .tcc-tickets-list {
       display: flex;
       flex-direction: column;
@@ -385,6 +373,7 @@ import { Chamado } from '../../models/chamado';
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
+      cursor: pointer;
       transition: all 0.2s;
 
       &:hover {
@@ -519,29 +508,7 @@ import { Chamado } from '../../models/chamado';
       }
     }
 
-    .tcc-btn-details {
-      background: #ffffff;
-      border: 1px solid var(--tcc-border, #cbd5e1);
-      color: var(--tcc-text-main, #334155);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12.5px;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-
-      &:hover {
-        background: #f8fafc;
-        color: #0f172a;
-      }
-    }
-
-    /* -------------------------------------------------------------
-       5. Loading & Empty
-       ------------------------------------------------------------- */
+   
     .tcc-loading-state {
       display: flex;
       align-items: center;
