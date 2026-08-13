@@ -100,10 +100,10 @@ interface ProfissionalParsed {
     
         <div class="tcc-prof-grid">
           @for (prof of paginatedProfissionais; track (prof.id || prof.email || $index)) {
-            <div class="tcc-prof-card">
+            <div class="tcc-prof-card" (click)="abrirPerfil(prof)">
          
               <button
-                (click)="toggleFavorito(prof)"
+                (click)="toggleFavorito(prof); $event.stopPropagation()"
                 class="tcc-btn-fav"
                 [class.active]="isFavorito(prof.id)"
                 [title]="isFavorito(prof.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
@@ -122,7 +122,7 @@ interface ProfissionalParsed {
                 </div>
 
                 <div class="tcc-prof-title">
-                  <h3 class="tcc-prof-name" (click)="abrirPerfil(prof)">
+                  <h3 class="tcc-prof-name">
                     {{ prof.nome_fantasia || prof.email }}
                   </h3>
                   <div class="tcc-badges-row">
@@ -164,11 +164,8 @@ interface ProfissionalParsed {
                 </p>
               }
 
-         
-              <div class="tcc-prof-footer">
-                <button class="tcc-btn-view-profile" (click)="abrirPerfil(prof)">
-                  <i class="pi pi-user"></i> Ver Perfil
-                </button>
+          
+              <div class="tcc-prof-footer" (click)="$event.stopPropagation()">
                 <a
                   class="tcc-btn-solicitar"
                   [routerLink]="['/cliente/solicitacao']"
@@ -427,6 +424,7 @@ interface ProfissionalParsed {
       display: flex;
       flex-direction: column;
       position: relative;
+      cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 
@@ -625,24 +623,11 @@ interface ProfissionalParsed {
 
     .tcc-prof-footer {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       padding-top: 14px;
       border-top: 1px solid var(--tcc-border, #f1f5f9);
       margin-top: auto;
-    }
-    .tcc-btn-view-profile {
-      background: transparent;
-      border: none;
-      color: var(--tcc-text-muted, #64748b);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 0;
-      &:hover { color: var(--tcc-primary, #3b82f6); text-decoration: underline; }
     }
     .tcc-btn-solicitar {
       background: #eff6ff;
