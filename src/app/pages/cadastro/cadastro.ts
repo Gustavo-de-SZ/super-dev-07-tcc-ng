@@ -81,11 +81,11 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
                 id="cardCliente"
               >
                 <div class="cd-role-icon cd-icon-blue">
-                  <i class="pi pi-briefcase"></i>
+                  <i class="pi pi-user"></i>
                 </div>
-                <h3 class="cd-role-title">Cliente / Empresa</h3>
+                <h3 class="cd-role-title">Cliente / Solicitante</h3>
                 <p class="cd-role-desc">
-                  Preciso de suporte técnico rápido e soluções de TI para o meu negócio.
+                  Preciso de suporte técnico e soluções de TI para mim ou minha empresa.
                 </p>
               </div>
 
@@ -153,12 +153,12 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
               </div>
 
               <div class="cd-field">
-                <label for="cliEmpresa" class="cd-label">Empresa / Negócio</label>
+                <label for="cliEmpresa" class="cd-label">Empresa / Negócio (Opcional)</label>
                 <input
                   id="cliEmpresa"
                   formControlName="empresa"
                   type="text"
-                  placeholder="Ex: Minha Empresa S/A"
+                  placeholder="Ex: Minha Empresa S/A (ou deixe em branco)"
                   class="ns-input"
                   
                 />
@@ -217,7 +217,7 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
               </div>
 
               <div class="cd-field">
-                <label for="cliTipo" class="cd-label">Segmento da Empresa</label>
+                <label for="cliTipo" class="cd-label">Perfil de Cliente</label>
                 <p-select
                   id="cliTipo"
                   formControlName="tipoCliente"
@@ -722,9 +722,9 @@ export class Cadastro implements OnInit {
   tecnicoForm!: FormGroup;
 
   tipoClienteOptions = [
+    { label: 'Individual (Pessoa Física)', value: 'Individual' },
     { label: 'PME (Pequena e Média Empresa)', value: 'PME' },
-    { label: 'Corporate (Grande Empresa)', value: 'Corporate' },
-    { label: 'Individual (Pessoa Física)', value: 'Individual' }
+    { label: 'Corporate (Grande Empresa)', value: 'Corporate' }
   ];
 
   especialidadeOptions = [
@@ -751,7 +751,7 @@ export class Cadastro implements OnInit {
       empresa: [''],
       telefone: ['', [Validators.required, this.phoneNumberValidator]],
       local: ['', [Validators.required, Validators.minLength(3)]],
-      tipoCliente: ['PME', [Validators.required]]
+      tipoCliente: ['Individual', [Validators.required]]
     });
 
     this.tecnicoForm = this.fb.group({
