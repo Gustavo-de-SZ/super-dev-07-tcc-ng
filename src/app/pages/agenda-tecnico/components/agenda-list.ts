@@ -30,7 +30,7 @@ import { AgendaService } from '../../../services/agenda.service';
 
     <div class="tcc-agenda-list">
       @for (item of paginatedCompromissos; track trackByAgendamento($index, item)) {
-        <div class="tcc-agenda-card" [class.card-atrasado]="isAtrasado(item)">
+        <div class="tcc-agenda-card" [class.card-atrasado]="isAtrasado(item)" (click)="abrirDetalhes(item)">
           <div class="tcc-agenda-datetime-col" [class.col-atrasado]="isAtrasado(item)">
             <span class="tcc-date-month">{{ getDisplayMonth(item) }}</span>
             <span class="tcc-date-day">{{ getDisplayDay(item) }}</span>
@@ -64,7 +64,7 @@ import { AgendaService } from '../../../services/agenda.service';
             </div>
           </div>
 
-          <div class="tcc-agenda-actions">
+          <div class="tcc-agenda-actions" (click)="$event.stopPropagation()">
             <button
               type="button"
               class="tcc-btn-outline small"
@@ -215,6 +215,7 @@ import { AgendaService } from '../../../services/agenda.service';
       display: flex;
       align-items: center;
       gap: 24px;
+      cursor: pointer;
       transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s ease;
 
       &.card-atrasado {
@@ -570,11 +571,6 @@ export class AgendaList {
     const atrasado = this.isAtrasado(item);
 
     this.menuItems = [
-      {
-        label: 'Ver Detalhes',
-        icon: 'pi pi-eye',
-        command: () => this.abrirDetalhes(item)
-      },
       {
         label: atrasado ? 'Reagendar / Editar' : 'Editar',
         icon: 'pi pi-pencil',

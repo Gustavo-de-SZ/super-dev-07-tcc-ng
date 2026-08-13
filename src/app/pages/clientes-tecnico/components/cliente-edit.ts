@@ -1,6 +1,5 @@
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { HttpClient } from '@angular/common/http';
-import { timeout, TimeoutError } from 'rxjs';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -8,7 +7,6 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 // Imports do PrimeNG (v18+)
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
@@ -26,69 +24,76 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
     ReactiveFormsModule,
     RouterModule,
     InputTextModule,
-    SelectModule,
     ToastModule
   ],
   
   template: `
-    <div class="ns-page-container">
+    <div class="tcc-page-wrapper tcc-fade-in">
    
-      <header class="ns-page-header">
-        <a routerLink="/painel/clientes" class="ns-back-btn">
-          <i class="pi pi-chevron-left"></i>
-        </a>
-        <div>
-          <h1>Editar Cliente</h1>
-          <p>Atualize as informações do cliente</p>
+      <header class="tcc-page-header">
+        <div class="tcc-header-title-group" style="flex-direction: row; align-items: center; gap: 16px;">
+          <a routerLink="/painel/clientes" class="tcc-btn-outline small" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center;">
+            <i class="pi pi-chevron-left"></i>
+          </a>
+          <div>
+            <h1 class="tcc-title-lg">Editar Cliente</h1>
+            <p class="tcc-subtitle">Atualize as informações de contato e endereço</p>
+          </div>
         </div>
       </header>
 
-      <div class="ns-grid-layout">
-        <main class="ns-form-column">
-          <section class="ns-card">
-            <h2 class="ns-card-title">
-              <i class="pi pi-user-edit text-primary"></i> Informações do Cliente
+      <div class="tcc-grid-layout">
+        <main class="tcc-form-column">
+          <section class="tcc-card">
+            <h2 class="tcc-card-title" style="font-size: 18px; font-weight: 600; margin-bottom: 24px; color: var(--tcc-text-main);">
+              <i class="pi pi-user-edit" style="color: var(--tcc-primary); margin-right: 8px;"></i> Dados do Cliente
             </h2>
+
+            @if (clienteTemApp) {
+              <div class="tcc-alert tcc-alert-info" style="margin-bottom: 24px;">
+                <i class="pi pi-info-circle"></i>
+                <div>
+                  <strong>Usuário do Aplicativo</strong>
+                  <p style="margin: 4px 0 0; font-size: 13px;">Este cliente possui uma conta no aplicativo. Dados pessoais como Nome, E-mail e Telefone só podem ser alterados pelo próprio cliente através do app.</p>
+                </div>
+              </div>
+            }
 
             <form [formGroup]="form" (ngSubmit)="atualizarCliente()">
 
-              <div class="ns-form-row">
-                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('nome')">
-                  <label>Nome *</label>
-                  <input type="text" formControlName="nome" class="ns-input" placeholder="Digite o nome completo">
+              <div class="tcc-form-row">
+                <div class="tcc-form-group" [class.is-invalid]="isInvalid('nome')">
+                  <label>Nome Completo *</label>
+                  <input type="text" formControlName="nome" class="tcc-input" placeholder="Digite o nome completo">
                   @if (isInvalid('nome')) {
-                    <div class="ns-error-message">
-                      O nome é obrigatório
-                    </div>
+                    <div class="tcc-error-message">O nome é obrigatório</div>
                   }
                 </div>
 
-                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('email')">
+                <div class="tcc-form-group" [class.is-invalid]="isInvalid('email')">
                   <label>E-mail</label>
-                  <input type="email" formControlName="email" class="ns-input" placeholder="Digite o e-mail (opcional)">
+                  <input type="email" formControlName="email" class="tcc-input" placeholder="Digite o e-mail (opcional)">
                   @if (isInvalid('email')) {
-                    <div class="ns-error-message">
-                      O e-mail deve ser válido
-                    </div>
+                    <div class="tcc-error-message">O e-mail deve ser válido</div>
                   }
                 </div>
               </div>
 
-              <div class="ns-form-row">
-                <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('telefone')">
-                  <label>Telefone</label>
-                  <input type="tel" formControlName="telefone" class="ns-input" placeholder="(xx) xxxxx-xxxx">
+              <div class="tcc-form-row">
+                <div class="tcc-form-group" [class.is-invalid]="isInvalid('telefone')">
+                  <label>Telefone / WhatsApp</label>
+                  <input type="tel" formControlName="telefone" class="tcc-input" placeholder="(xx) xxxxx-xxxx">
                 </div>
 
-                <div class="ns-form-group">
+                <div class="tcc-form-group">
                   <label>Empresa</label>
-                  <input type="text" formControlName="empresa" class="ns-input" placeholder="Nome da empresa">
+                  <input type="text" formControlName="empresa" class="tcc-input" placeholder="Nome da empresa">
                 </div>
               </div>
 
-              <div class="ns-form-row">
-                <div class="ns-form-group">
-                  <label>Local</label>
+              <div class="tcc-form-row" style="grid-template-columns: 1fr;">
+                <div class="tcc-form-group">
+                  <label>Local / Endereço</label>
                   <p-autoComplete
                       id="editLocal"
                       formControlName="local"
@@ -97,39 +102,11 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
                       field="label"
                       placeholder="Ex: São Paulo - SP"
                       emptyMessage="Nenhum resultado encontrado"
-                      inputStyleClass="ns-input"
-                      [styleClass]="isInvalid('local') ? 'ns-input-error' : ''"
+                      inputStyleClass="tcc-input"
+                      [styleClass]="isInvalid('local') ? 'tcc-input-error' : ''"
                       autocomplete="off"
+                      styleClass="w-full"
                     ></p-autoComplete>
-                </div>
-
-                <div class="ns-form-group">
-                  <label>Avaliação</label>
-                  <input type="number" formControlName="avaliacao" class="ns-input" min="0" max="5" step="0.1" placeholder="0.0 a 5.0">
-                </div>
-              </div>
-
-              <div class="ns-form-row">
-                <div class="ns-form-group">
-                  <label>Serviços Ativos</label>
-                  <input type="number" formControlName="servicosAtivos" class="ns-input" min="0" placeholder="Número de serviços ativos">
-                </div>
-
-                <div class="ns-form-group">
-                  <label>Serviços Concluídos</label>
-                  <input type="number" formControlName="servicosConcluidos" class="ns-input" min="0" placeholder="Número de serviços concluídos">
-                </div>
-              </div>
-
-              <div class="ns-form-row">
-                <div class="ns-form-group">
-                  <label>Tipo de Cliente</label>
-                  <p-select formControlName="tipoCliente" [options]="tiposCliente" optionLabel="label" placeholder="Selecione o tipo" class="ns-select"></p-select>
-                </div>
-
-                <div class="ns-form-group">
-                  <label>Status</label>
-                  <p-select formControlName="status" [options]="statusOptions" optionLabel="label" placeholder="Selecione o status" class="ns-select"></p-select>
                 </div>
               </div>
 
@@ -137,177 +114,76 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
           </section>
         </main>
 
-        <aside class="ns-summary-column">
-        
-          <div class="ns-card ns-summary-card">
-            <h3>Resumo do Cliente</h3>
+        <aside class="tcc-summary-column">
+          <div class="tcc-card" style="position: sticky; top: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 20px 0; color: var(--tcc-text-main);">Ações</h3>
 
-            <div class="ns-summary-list">
-              <div class="ns-summary-item">
-                <span class="label">Nome</span>
-                <span class="value ns-truncate" [title]="form.get('nome')?.value">{{ form.get('nome')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">E-mail</span>
-                <span class="value ns-truncate" [title]="form.get('email')?.value">{{ form.get('email')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">Telefone</span>
-                <span class="value">{{ form.get('telefone')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">Empresa</span>
-                <span class="value ns-truncate" [title]="form.get('empresa')?.value">{{ form.get('empresa')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">Local</span>
-                <span class="value ns-truncate" [title]="form.get('local')?.value">{{ form.get('local')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">Avaliação</span>
-                <span class="value">{{ form.get('avaliacao')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">Serviços Ativos</span>
-                <span class="value">{{ form.get('servicosAtivos')?.value || '—' }}</span>
-              </div>
-              <div class="ns-summary-item">
-                <span class="label">Serviços Concluídos</span>
-                <span class="value">{{ form.get('servicosConcluidos')?.value || '—' }}</span>
-              </div>
-            </div>
-
-            <div class="ns-summary-divider"></div>
-
-            <div class="ns-summary-actions">
-              <button type="button" class="tcc-btn-main" [disabled]="form.invalid || enviando" (click)="atualizarCliente()" style="display:flex; align-items:center; gap:8px;">
+            <div class="tcc-summary-actions" style="display: flex; flex-direction: column; gap: 12px;">
+              <button type="button" class="tcc-btn-main" [disabled]="form.invalid || enviando" (click)="atualizarCliente()" style="width: 100%; justify-content: center;">
                 @if(enviando) { <i class="pi pi-spin pi-spinner"></i> }
-                Atualizar Cliente
+                Salvar Alterações
               </button>
-              <button type="button" routerLink="/painel/clientes" class="tcc-btn-cancel">
+              <button type="button" routerLink="/painel/clientes" class="tcc-btn-outline" style="width: 100%; justify-content: center; text-align: center;">
                 Cancelar
               </button>
             </div>
           </div>
         </aside>
       </div>
-
-      
     </div>
   `,
   styles: [`
+    .tcc-page-wrapper { display: flex; flex-direction: column; gap: 24px; padding: 0; }
+    .tcc-page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .tcc-header-title-group { display: flex; flex-direction: column; }
+    .tcc-title-lg { font-size: 28px; font-weight: 700; color: var(--tcc-text-main, #0f172a); margin: 0 0 6px 0; }
+    .tcc-subtitle { color: var(--tcc-text-muted, #64748b); font-size: 16px; margin: 0; }
 
-    .ns-page-container {
-      padding: 24px;
-      max-width: 1280px;
-      margin: 0 auto;
-      font-family: system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      background-color: var(--bg-main, #f8fafc);
-      --primary: #3b82f6;
-      --primary-bg: #eff6ff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --border-input: #94a3b8;
-      --bg-main: #f8fafc;
-      --bg-card: #ffffff;
-      --error: #ef4444;
-      --error-bg: #fef2f2;
-      transition: background-color 0.2s, color 0.2s;
-    }
-
-    ::ng-deep body.tp-dark-theme .ns-page-container {
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --border: #223047;
-      --border-input: #334155;
-      --bg-main: #090e17;
-      --bg-card: #131c2c;
-      --primary-bg: rgba(59, 130, 246, 0.15);
-      --error-bg: rgba(239, 68, 68, 0.05);
-      /* Override tcc variables for components */
-      --tcc-surface: var(--bg-card);
-      --tcc-text-main: var(--text-main);
-      --tcc-text-muted: var(--text-muted);
-      --tcc-border: var(--border);
-      --tcc-surface-hover: var(--bg-card);
-    }
-
-    .ns-back-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      color: var(--tcc-text-muted, #64748b);
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-
-    .ns-back-btn:hover {
-      background: var(--tcc-surface-hover, #e2e8f0);
-    }
-
-    .ns-grid-layout {
+    .tcc-grid-layout {
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 24px;
       align-items: start;
     }
-
-    .ns-form-column {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    
+    @media (max-width: 900px) {
+      .tcc-grid-layout { grid-template-columns: 1fr; }
     }
 
+    .tcc-form-column { display: flex; flex-direction: column; gap: 20px; }
 
-    .ns-card {
+    .tcc-card {
       background-color: var(--tcc-surface, #ffffff);
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 12px;
       padding: 24px;
-      box-shadow: var(--tcc-shadow, 0 1px 3px rgba(0,0,0,0.1));
-      color: var(--tcc-text-main, #0f172a);
-      transition: background-color 0.2s, border-color 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    .ns-card-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin: 0 0 20px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--tcc-text-main, #0f172a);
-    }
-
-    .text-primary {
-      color: #3b82f6;
-    }
-
-    .ns-form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .ns-form-group label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--tcc-text-muted, #64748b);
-    }
-
-    .ns-form-row {
+    .tcc-form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    @media (max-width: 600px) {
+      .tcc-form-row { grid-template-columns: 1fr; }
     }
 
-    ::ng-deep .ns-input {
+    .tcc-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tcc-form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--tcc-text-main, #334155);
+    }
+
+    ::ng-deep .tcc-input {
       width: 100% !important;
       height: 44px !important;
       border-radius: 8px !important;
@@ -316,104 +192,85 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
       transition: all 0.2s !important;
       box-shadow: none !important;
       font-family: inherit !important;
-      background-color: var(--tcc-surface, #ffffff) !important;
+      background-color: var(--tcc-bg, #f8fafc) !important;
       color: var(--tcc-text-main, #0f172a) !important;
-      border: 1px solid var(--tcc-border, #e2e8f0) !important;
+      border: 1px solid var(--tcc-border, #cbd5e1) !important;
       box-sizing: border-box !important;
     }
-
-    ::ng-deep .ns-textarea .p-inputtext {
-      width: 100% !important;
-      border-radius: 8px !important;
-      padding: 10px 14px !important;
-      font-size: 14px !important;
-      transition: all 0.2s !important;
-      box-shadow: none !important;
-      font-family: inherit !important;
+    ::ng-deep .tcc-input:focus {
       background-color: var(--tcc-surface, #ffffff) !important;
-      color: var(--tcc-text-main, #0f172a) !important;
-      border: 1px solid var(--tcc-border, #e2e8f0) !important;
-      box-sizing: border-box !important;
-    }
-
-    ::ng-deep .ns-input::placeholder,
-    ::ng-deep .ns-textarea .p-inputtext::placeholder {
-      color: var(--tcc-text-muted, #94a3b8) !important;
-      opacity: 0.7;
-    }
-
-    ::ng-deep .ns-input:focus,
-    ::ng-deep .ns-textarea .p-inputtext:focus {
-      border-color: #3b82f6 !important;
+      border-color: var(--tcc-primary, #3b82f6) !important;
       outline: none;
-      box-shadow: 0 0 0 1px #3b82f6 !important;
     }
-
-    /* P-select styling */
-    ::ng-deep .p-select {
-      width: 100% !important;
+    ::ng-deep .tcc-input:disabled {
+      background-color: var(--tcc-bg, #f1f5f9) !important;
+      color: var(--tcc-text-muted, #64748b) !important;
+      cursor: not-allowed;
+      opacity: 0.8;
+      border-color: var(--tcc-border, #e2e8f0) !important;
     }
+    
+    ::ng-deep .w-full .p-autocomplete { width: 100%; display: flex; }
 
-    ::ng-deep .p-select .p-dropdown-label {
-      padding: 10px 14px;
-      font-size: 14px;
-      color: var(--tcc-text-main, #0f172a) !important;
-      background-color: var(--tcc-surface, #ffffff) !important;
-      border: 1px solid var(--tcc-border, #e2e8f0) !important;
-      border-radius: 8px;
+    .is-invalid label { color: #ef4444 !important; }
+    .is-invalid ::ng-deep .tcc-input {
+      border-color: #ef4444 !important;
+      background-color: #fef2f2 !important;
     }
-
-    ::ng-deep .p-select .p-dropdown-trigger {
-      border-left: 1px solid var(--tcc-border, #e2e8f0);
-    }
-
-    ::ng-deep .p-select-panel {
-      border: 1px solid var(--tcc-border, #e2e8f0);
-      border-radius: 8px;
-      box-shadow: var(--tcc-shadow, 0 1px 3px rgba(0,0,0,0.1));
-    }
-
-    ::ng-deep .p-select-item {
-      padding: 8px 14px;
-      font-size: 14px;
-      color: var(--tcc-text-main, #0f172a);
-    }
-
-    ::ng-deep .p-select-item:hover {
-      background-color: var(--tcc-surface-hover, #f1f5f9);
-    }
-
-    ::ng-deep .p-select-item.p-highlight {
-      background-color: var(--primary-bg, #eff6ff);
-      color: var(--tcc-text-main, #0f172a);
-    }
-
-    .ns-is-invalid label { color: var(--error) !important; }
-    .ns-is-invalid ::ng-deep .ns-input,
-    .ns-is-invalid ::ng-deep .p-textarea .p-inputtext,
-    .ns-is-invalid ::ng-deep .p-select .p-dropdown-label {
-      border-color: var(--error) !important;
-      background-color: var(--error-bg) !important;
-    }
-
-    /* Summary Card Styling */
-    .ns-summary-column { position: sticky; top: 24px; }
-    .ns-summary-card h3 { font-size: 16px; font-weight: 700; margin: 0 0 20px 0; }
-    .ns-summary-list { display: flex; flex-direction: column; gap: 14px; }
-    .ns-summary-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; gap: 16px; }
-    .ns-summary-item .label { color: var(--text-muted, #64748b); font-weight: 500; white-space: nowrap; }
-    .ns-summary-item .value { font-weight: 500; text-align: right; color: var(--text-main, #0f172a); }
-    .ns-summary-divider { height: 1px; background-color: var(--border, #e2e8f0); margin: 20px 0; }
-    .ns-summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+    .tcc-error-message { color: #ef4444; font-size: 12px; margin-top: 4px; }
 
     .tcc-btn-main {
-      width: 100%; background: #3b82f6; color: #ffffff; border: none; padding: 12px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      background-color: var(--tcc-primary, #3b82f6);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
     }
-    .tcc-btn-main:hover:not(:disabled) { background: #2563eb; }
-    .tcc-btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
-    .tcc-btn-cancel { width: 100%; background: transparent; border: none; color: var(--tcc-text-muted, #64748b); font-size: 13px; cursor: pointer; text-align: center; }
-    .tcc-btn-cancel:hover { color: var(--tcc-text-main, #0f172a); }
+    .tcc-btn-main:hover:not(:disabled) { background-color: #2563eb; }
+    .tcc-btn-main:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .tcc-btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      color: var(--tcc-text-main, #334155);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tcc-btn-outline:hover {
+      background-color: var(--tcc-bg, #f1f5f9);
+      color: var(--tcc-text-main, #0f172a);
+    }
+
+    .tcc-alert-info {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      color: var(--tcc-text-main, #0f172a);
+    }
+    .tcc-alert-info i { color: var(--tcc-primary, #3b82f6); font-size: 20px; margin-top: 2px; }
+
+    .tcc-fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   `]
 })
 export class EditarCliente implements OnInit {
@@ -429,20 +286,8 @@ export class EditarCliente implements OnInit {
 
   form!: FormGroup;
   enviando = false;
-
-  // Para armazenar o identificador do cliente sendo editado (ID ou e-mail)
+  clienteTemApp = false;
   clienteIdentificador!: string | number;
-
-  tiposCliente = [
-    { label: 'Pessoa Física', value: 'fisica' },
-    { label: 'Pessoa Jurídica', value: 'juridica' }
-  ];
-
-  statusOptions = [
-    { label: 'Ativo', value: 'ativo' },
-    { label: 'Inativo', value: 'inativo' },
-    { label: 'Pendente', value: 'pendente' }
-  ];
 
   ngOnInit(): void {
     this.carregarCidades();
@@ -451,35 +296,19 @@ export class EditarCliente implements OnInit {
       email: ['', [Validators.email]],
       telefone: [''],
       empresa: [''],
-      local: [''],
-      avaliacao: [0, [Validators.min(0), Validators.max(5)]],
-      servicosAtivos: [0, Validators.min(0)],
-      servicosConcluidos: [0, Validators.min(0)],
-      tipoCliente: [null],
-      status: [null]
+      local: ['']
     });
 
-    // Obter ID ou email dos parâmetros da rota
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id') || params.get('email');
       if (!idParam || idParam.toLowerCase() === 'null') {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Identificador do cliente inválido. Por favor, selecione um cliente válido para editar.'
-        });
-        
-        this.enviando = false;
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Identificador do cliente inválido.' });
         setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
         return;
       }
       this.clienteIdentificador = idParam;
       this.carregarClienteParaEdicao(this.clienteIdentificador);
     });
-  }
-
-  goBack(): void {
-    this.router.navigate(['/painel/clientes']);
   }
 
   isInvalid(controlName: string): boolean {
@@ -490,30 +319,27 @@ export class EditarCliente implements OnInit {
   carregarClienteParaEdicao(identificador: string | number): void {
     this.clienteService.getClienteByEmail(identificador).subscribe({
       next: (cliente: any) => {
+        this.clienteTemApp = !!cliente.usuario_id;
         const localValue = cliente.endereco || cliente.local || '';
-        // Preencher o formulário com os dados do cliente
+        
         this.form.patchValue({
           nome: cliente.nome_completo || cliente.nome || '',
           email: cliente.email || '',
           telefone: cliente.telefone || '',
           empresa: cliente.empresa || '',
-          local: localValue ? { label: localValue, value: localValue } : null,
-          avaliacao: cliente.avaliacao !== undefined && cliente.avaliacao !== null ? cliente.avaliacao : 0,
-          servicosAtivos: cliente.servicos_ativos !== undefined ? cliente.servicos_ativos : (cliente.servicosAtivos || 0),
-          servicosConcluidos: cliente.servicos_concluidos !== undefined ? cliente.servicos_concluidos : (cliente.servicosConcluidos || 0),
-          tipoCliente: this.tiposCliente.find(t => t.value === (cliente.tipoCliente || cliente.tipo_cliente)) || null,
-          status: this.statusOptions.find(s => s.value === (cliente.status || (cliente.ativo ? 'ativo' : 'inativo'))) || null
+          local: localValue ? { label: localValue, value: localValue } : null
         });
+
+        // Se o cliente tem app, desabilita a edição dos dados base que pertencem a ele
+        if (this.clienteTemApp) {
+          this.form.get('nome')?.disable();
+          this.form.get('email')?.disable();
+          this.form.get('telefone')?.disable();
+        }
       },
       error: (err: any) => {
         console.error('Erro ao carregar cliente para edição', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Erro ao carregar dados do cliente para edição'
-        });
-        
-        this.enviando = false;
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar dados do cliente.' });
         setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
       }
     });
@@ -523,55 +349,35 @@ export class EditarCliente implements OnInit {
     if (this.enviando) return;
     if (this.form.valid) {
       this.enviando = true;
-      // Map form values to Cliente interface
-      const formValue = this.form.value;
+      // Usar getRawValue para pegar até os campos desabilitados
+      const formValue = this.form.getRawValue();
       if (formValue.local && typeof formValue.local === "object") {
         formValue.local = (formValue.local as any).value;
       }
 
-      const cliente: Cliente = {
+      const cliente: Partial<Cliente> = {
         email: formValue.email || undefined,
         nome: formValue.nome,
         empresa: formValue.empresa,
-        avaliacao: formValue.avaliacao,
         telefone: formValue.telefone,
-        local: formValue.local,
-        servicosAtivos: formValue.servicosAtivos,
-        servicosConcluidos: formValue.servicosConcluidos,
-        tipoCliente: formValue.tipoCliente ? formValue.tipoCliente.value : null,
-        status: formValue.status ? formValue.status.value : null
+        local: formValue.local
       };
 
-      // Call the service to update the cliente
-      this.clienteService.updateCliente(cliente, this.clienteIdentificador).subscribe({
+      this.clienteService.updateCliente(cliente as Cliente, this.clienteIdentificador).subscribe({
         next: (_) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Cliente atualizado com sucesso!'
-          });
-          
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Cliente atualizado com sucesso!' });
           this.enviando = false;
           setTimeout(() => this.router.navigate(['/painel/clientes']), 1000);
         },
         error: (err: any) => {
           console.error('Erro ao atualizar cliente', err);
           this.enviando = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Ocorreu um erro ao atualizar o cliente. Por favor, tente novamente.'
-          });
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Ocorreu um erro ao atualizar o cliente.' });
         }
       });
     } else {
-      // Mark all fields as touched to show validation errors
       this.form.markAllAsTouched();
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro de Validação',
-        detail: 'Por favor, preencha todos os campos obrigatórios corretamente'
-      });
+      this.messageService.add({ severity: 'error', summary: 'Erro de Validação', detail: 'Preencha os campos obrigatórios.' });
     }
   }
 
@@ -583,9 +389,7 @@ export class EditarCliente implements OnInit {
           this.filteredCidades = this.cidades.slice(0, 20);
         }
       },
-      error: (err) => {
-        console.error('Erro ao carregar cidades:', err);
-      }
+      error: (err) => console.error('Erro ao carregar cidades:', err)
     });
   }
 
@@ -595,14 +399,7 @@ export class EditarCliente implements OnInit {
   }
 
   filterCidade(query: string, cidades: any[]): any[] {
-    const filtered: any[] = [];
     const lowerQuery = query.toLowerCase();
-    for (let i = 0; i < cidades.length; i++) {
-      const cidade = cidades[i];
-      if (cidade.label.toLowerCase().indexOf(lowerQuery) === 0) {
-        filtered.push(cidade);
-      }
-    }
-    return filtered;
+    return cidades.filter(c => c.label.toLowerCase().indexOf(lowerQuery) === 0);
   }
-  }
+}

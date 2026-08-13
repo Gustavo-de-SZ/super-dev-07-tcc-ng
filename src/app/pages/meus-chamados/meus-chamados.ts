@@ -125,7 +125,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       } @else {
         <div class="tcc-chamados-grid">
           @for (chamado of paginatedChamados; track (chamado?.id || $index)) {
-            <div class="tcc-chamado-card" [class.border-active]="chamado.status === 'EM_ANDAMENTO'">
+            <div class="tcc-chamado-card" [class.border-active]="chamado.status === 'EM_ANDAMENTO'" (click)="abrirDetalhes(chamado)">
               
       
               <div class="tcc-card-top">
@@ -144,7 +144,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
 
          
               <div class="tcc-card-body">
-                <h3 class="tcc-chamado-title" (click)="abrirDetalhes(chamado)">
+                <h3 class="tcc-chamado-title">
                   {{ chamado.titulo || chamado.equipamento || 'Sem título' }}
                 </h3>
                 
@@ -175,11 +175,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
 
            
               <div class="tcc-card-footer" (click)="$event.stopPropagation()">
-                <button class="tcc-btn-details" (click)="abrirDetalhes(chamado)">
-                  <i class="pi pi-eye"></i> Ver Detalhes
-                </button>
-
-                <div class="tcc-footer-right">
+                <div class="tcc-footer-right" style="margin-left: auto;">
                   @if (chamado.status === 'CONCLUIDO' && chamado.avaliacao_nota) {
                     <button
                       class="tcc-rating-badge"
@@ -618,6 +614,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       flex-direction: column;
       justify-content: space-between;
       gap: 16px;
+      cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 
@@ -1456,13 +1453,7 @@ export class MeusChamados implements OnInit {
 
   abrirMenu(event: Event, menu: any, chamado: Chamado): void {
     event.stopPropagation();
-    const items: MenuItem[] = [
-      {
-        label: 'Ver Detalhes',
-        icon: 'pi pi-eye',
-        command: () => this.abrirDetalhes(chamado)
-      }
-    ];
+    const items: MenuItem[] = [];
 
     if (chamado.profissional_id) {
       items.push({
@@ -1487,6 +1478,13 @@ export class MeusChamados implements OnInit {
         icon: 'pi pi-trash',
         styleClass: 'text-red-500',
         command: () => this.confirmarCancelarChamado(chamado)
+      });
+    }
+
+    if (items.length === 0) {
+      items.push({
+        label: 'Nenhuma ação extra',
+        disabled: true
       });
     }
 

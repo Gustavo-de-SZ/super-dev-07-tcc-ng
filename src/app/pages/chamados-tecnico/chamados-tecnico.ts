@@ -247,9 +247,6 @@ import { MenuItem, MessageService } from 'primeng/api';
                     }
 
                     <div class="ch-card-footer" (click)="$event.stopPropagation()">
-                      <button class="ch-btn-view" (click)="abrirDetalhes(chamado)">
-                        <i class="pi pi-eye"></i> Ver Detalhes
-                      </button>
                       <button class="ch-btn-accept" (click)="aceitarChamado(chamado.id)">
                         <i class="pi pi-check-circle"></i> Aceitar Chamado
                       </button>
@@ -861,25 +858,7 @@ import { MenuItem, MessageService } from 'primeng/api';
       margin-top: 4px;
     }
 
-    .ch-btn-view {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--tcc-text-secondary, #475569);
-      background-color: var(--tcc-surface, #f8fafc);
-      border: 1px solid var(--tcc-border, #e2e8f0);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
 
-    .ch-btn-view:hover {
-      background-color: var(--tcc-surface-hover, #e2e8f0);
-      color: var(--tcc-text-main, #0f172a);
-    }
 
     .ch-btn-accept {
       display: inline-flex;
@@ -1509,11 +1488,6 @@ export class ChamadosTecnico {
     this.chamadoAtual = chamado;
     
     this.menuItems = [
-      {
-        label: 'Ver Detalhes',
-        icon: 'pi pi-eye',
-        command: () => this.abrirDetalhes(chamado)
-      },
       {
         label: 'Abrir Chat',
         icon: 'pi pi-comments',

@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { RouterModule, Router } from '@angular/router';
 import { MenuModule } from 'primeng/menu';
@@ -8,18 +9,20 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService, MenuItem } from 'primeng/api';
 import { Cliente } from '../../../models/cliente';
 import { ClienteService } from '../../../services/cliente.service';
+import { Equipamento } from '../../../models/equipamento';
+import { EquipamentoService } from '../../../services/equipamento.service';
 
 @Component({
   selector: 'app-clientes-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, MenuModule, PaginatorModule, ToastModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, RouterModule, MenuModule, PaginatorModule, ToastModule, EmptyStateComponent],
   providers: [MessageService],
   template: `
     <p-toast></p-toast>
 
     <div class="tcc-client-list">
       @for (cliente of paginatedClientes; track trackByCliente($index, cliente)) {
-        <div class="tcc-client-card" [class.tcc-card-app-user]="cliente.usuario_id">
+        <div class="tcc-client-card" [class.tcc-card-app-user]="cliente.usuario_id" (click)="verDetalhes(cliente)">
 
           <div class="tcc-client-icon-box" [class.app-user]="cliente.usuario_id">
             <i class="pi" [ngClass]="cliente.usuario_id ? 'pi-user-check' : 'pi-users'"></i>
@@ -27,62 +30,66 @@ import { ClienteService } from '../../../services/cliente.service';
 
           <div class="tcc-client-content">
             <div class="tcc-client-header">
-              <h3>{{ cliente.nome_completo || cliente.nome }}</h3>
+              <h3 class="tcc-client-name">{{ cliente.nome_completo || cliente.nome }}</h3>
+              
+              <div class="tcc-client-badges">
+                @if (cliente.usuario_id) {
+                  <span class="tcc-app-badge" title="Cliente com conta e login no aplicativo">
+                    <i class="pi pi-verified"></i> App
+                  </span>
+                } @else {
+                  <span class="tcc-manual-badge" title="Cliente cadastrado manualmente">
+                    <i class="pi pi-user-edit"></i> Manual
+                  </span>
+                }
 
-            
-              @if (cliente.usuario_id) {
-                <span class="tcc-app-badge" title="Cliente com conta e login no aplicativo">
-                  <i class="pi pi-verified"></i> Usuário App
-                </span>
-              } @else {
-                <span class="tcc-manual-badge" title="Cliente cadastrado manualmente">
-                  <i class="pi pi-user-edit"></i> Manual
-                </span>
-              }
-
-              @if (cliente.empresa) {
-                <span class="tcc-company-badge">{{ cliente.empresa }}</span>
-              }
-
-              @if (cliente.avaliacao !== undefined && cliente.avaliacao !== null && cliente.avaliacao > 0) {
-                <span class="tcc-rating" title="Média das avaliações que este cliente deu a você">
-                  <i class="pi pi-star-fill"></i> {{ cliente.avaliacao.toFixed(1) }}
-                </span>
-              } @else {
-                <span class="tcc-rating tcc-rating-empty" title="Cliente ainda não avaliou nenhum chamado">
-                  <i class="pi pi-star"></i> —
-                </span>
-              }
+                @if (cliente.empresa) {
+                  <span class="tcc-company-badge"><i class="pi pi-briefcase"></i> {{ cliente.empresa }}</span>
+                }
+              </div>
             </div>
 
             <div class="tcc-client-meta">
-              @if (cliente.email) {
-                <span class="tcc-meta-item"><i class="pi pi-envelope"></i> {{ cliente.email }}</span>
-              }
               @if (cliente.telefone) {
-                <span class="tcc-meta-item"><i class="pi pi-phone"></i> {{ formatPhone(cliente.telefone) }}</span>
+                <span class="tcc-meta-item"><i class="pi pi-phone"></i> <span>{{ formatPhone(cliente.telefone) }}</span></span>
               }
               @if (cliente.endereco || cliente.local) {
-                <span class="tcc-meta-item"><i class="pi pi-map-marker"></i> {{ cliente.endereco || cliente.local }}</span>
+                <span class="tcc-meta-item"><i class="pi pi-map-marker"></i> <span class="truncate">{{ cliente.endereco || cliente.local }}</span></span>
+              }
+              @if (cliente.email) {
+                <span class="tcc-meta-item"><i class="pi pi-envelope"></i> <span class="truncate">{{ cliente.email }}</span></span>
               }
             </div>
           </div>
 
-          <div class="tcc-client-stats">
-            <div class="tcc-mini-stat">
-              <span>Ativos</span>
-              <strong>{{ cliente.servicos_ativos !== undefined ? cliente.servicos_ativos : (cliente.servicosAtivos || 0) }}</strong>
+          <div class="tcc-client-right">
+            <div class="tcc-client-stats">
+              <div class="tcc-mini-stat">
+                <span class="stat-value">{{ cliente.servicos_ativos !== undefined ? cliente.servicos_ativos : (cliente.servicosAtivos || 0) }}</span>
+                <span class="stat-label">Ativos</span>
+              </div>
+              <div class="tcc-mini-stat">
+                <span class="stat-value">{{ cliente.servicos_concluidos !== undefined ? cliente.servicos_concluidos : (cliente.servicosConcluidos || 0) }}</span>
+                <span class="stat-label">Concluídos</span>
+              </div>
+              <div class="tcc-rating-wrapper">
+                @if (cliente.avaliacao !== undefined && cliente.avaliacao !== null && cliente.avaliacao > 0) {
+                  <span class="tcc-rating" title="Média das avaliações que este cliente deu a você">
+                    <i class="pi pi-star-fill"></i> {{ cliente.avaliacao.toFixed(1) }}
+                  </span>
+                } @else {
+                  <span class="tcc-rating tcc-rating-empty" title="Sem avaliações">
+                    <i class="pi pi-star"></i> —
+                  </span>
+                }
+              </div>
             </div>
-            <div class="tcc-mini-stat">
-              <span>Concluídos</span>
-              <strong>{{ cliente.servicos_concluidos !== undefined ? cliente.servicos_concluidos : (cliente.servicosConcluidos || 0) }}</strong>
-            </div>
-          </div>
 
-          <div class="tcc-client-actions">
-            <button class="tcc-btn-outline small" (click)="openMenu($event, menu, cliente)">
-              Ações <i class="pi pi-chevron-down"></i>
-            </button>
+            <div class="tcc-client-actions" (click)="$event.stopPropagation()">
+              <button class="tcc-btn-outline small" (click)="openMenu($event, menu, cliente)">
+                Ações <i class="pi pi-chevron-down"></i>
+              </button>
+            </div>
           </div>
 
         </div>
@@ -133,69 +140,126 @@ import { ClienteService } from '../../../services/cliente.service';
             </button>
           </div>
 
+          <div class="tcc-modal-tabs">
+            <button class="tcc-tab-btn" [class.active]="activeTab === 'detalhes'" (click)="activeTab = 'detalhes'">Detalhes</button>
+            <button class="tcc-tab-btn" [class.active]="activeTab === 'equipamentos'" (click)="activeTab = 'equipamentos'">Equipamentos</button>
+          </div>
+
           <div class="tcc-modal-body">
-            <div class="tcc-modal-stats-grid">
-              <div class="tcc-modal-stat-card">
-                <span class="stat-num text-blue">{{ clienteDetalhes.servicos_ativos !== undefined ? clienteDetalhes.servicos_ativos : (clienteDetalhes.servicosAtivos || 0) }}</span>
-                <span class="stat-lbl">Chamados Ativos</span>
-              </div>
-              <div class="tcc-modal-stat-card">
-                <span class="stat-num text-green">{{ clienteDetalhes.servicos_concluidos !== undefined ? clienteDetalhes.servicos_concluidos : (clienteDetalhes.servicosConcluidos || 0) }}</span>
-                <span class="stat-lbl">Concluídos</span>
-              </div>
-              <div class="tcc-modal-stat-card">
-                <span class="stat-num text-amber">
-                  @if (clienteDetalhes.avaliacao !== undefined && clienteDetalhes.avaliacao !== null && clienteDetalhes.avaliacao > 0) {
-                    <i class="pi pi-star-fill" style="font-size: 14px; margin-right: 4px;"></i>{{ clienteDetalhes.avaliacao.toFixed(1) }}
-                  } @else {
-                    <i class="pi pi-star" style="font-size: 14px; margin-right: 4px; color: #94a3b8;"></i>—
-                  }
-                </span>
-                <span class="stat-lbl">{{ (clienteDetalhes.avaliacao && clienteDetalhes.avaliacao > 0) ? 'Nota do Cliente' : 'Sem Avaliação' }}</span>
-              </div>
-            </div>
-
-            <div class="tcc-modal-info-list">
-              <div class="tcc-modal-info-item">
-                <div class="info-icon"><i class="pi pi-envelope"></i></div>
-                <div class="info-content">
-                  <label>E-mail</label>
-                  <span>{{ clienteDetalhes.email || 'Não informado' }}</span>
+            @if (activeTab === 'detalhes') {
+              <div class="tcc-modal-stats-grid">
+                <div class="tcc-modal-stat-card">
+                  <span class="stat-num text-blue">{{ clienteDetalhes.servicos_ativos !== undefined ? clienteDetalhes.servicos_ativos : (clienteDetalhes.servicosAtivos || 0) }}</span>
+                  <span class="stat-lbl">Chamados Ativos</span>
+                </div>
+                <div class="tcc-modal-stat-card">
+                  <span class="stat-num text-green">{{ clienteDetalhes.servicos_concluidos !== undefined ? clienteDetalhes.servicos_concluidos : (clienteDetalhes.servicosConcluidos || 0) }}</span>
+                  <span class="stat-lbl">Concluídos</span>
+                </div>
+                <div class="tcc-modal-stat-card">
+                  <span class="stat-num text-amber">
+                    @if (clienteDetalhes.avaliacao !== undefined && clienteDetalhes.avaliacao !== null && clienteDetalhes.avaliacao > 0) {
+                      <i class="pi pi-star-fill" style="font-size: 14px; margin-right: 4px;"></i>{{ clienteDetalhes.avaliacao.toFixed(1) }}
+                    } @else {
+                      <i class="pi pi-star" style="font-size: 14px; margin-right: 4px; color: #94a3b8;"></i>—
+                    }
+                  </span>
+                  <span class="stat-lbl">{{ (clienteDetalhes.avaliacao && clienteDetalhes.avaliacao > 0) ? 'Nota do Cliente' : 'Sem Avaliação' }}</span>
                 </div>
               </div>
 
-              <div class="tcc-modal-info-item">
-                <div class="info-icon"><i class="pi pi-phone"></i></div>
-                <div class="info-content">
-                  <label>Telefone / WhatsApp</label>
-                  <span>{{ formatPhone(clienteDetalhes.telefone) || 'Não informado' }}</span>
+              <div class="tcc-modal-info-list">
+                <div class="tcc-modal-info-item">
+                  <div class="info-icon"><i class="pi pi-envelope"></i></div>
+                  <div class="info-content">
+                    <label>E-mail</label>
+                    <span>{{ clienteDetalhes.email || 'Não informado' }}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="tcc-modal-info-item">
-                <div class="info-icon"><i class="pi pi-map-marker"></i></div>
-                <div class="info-content">
-                  <label>Endereço / Local</label>
-                  <span>{{ clienteDetalhes.endereco || clienteDetalhes.local || 'Não informado' }}</span>
+                <div class="tcc-modal-info-item">
+                  <div class="info-icon"><i class="pi pi-phone"></i></div>
+                  <div class="info-content">
+                    <label>Telefone / WhatsApp</label>
+                    <span>{{ formatPhone(clienteDetalhes.telefone) || 'Não informado' }}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div class="tcc-modal-info-item">
-                <div class="info-icon"><i class="pi pi-briefcase"></i></div>
-                <div class="info-content">
-                  <label>Empresa</label>
-                  <span>{{ clienteDetalhes.empresa || 'Pessoa Física / Não informado' }}</span>
+                <div class="tcc-modal-info-item">
+                  <div class="info-icon"><i class="pi pi-map-marker"></i></div>
+                  <div class="info-content">
+                    <label>Endereço / Local</label>
+                    <span>{{ clienteDetalhes.endereco || clienteDetalhes.local || 'Não informado' }}</span>
+                  </div>
+                </div>
+
+                <div class="tcc-modal-info-item">
+                  <div class="info-icon"><i class="pi pi-briefcase"></i></div>
+                  <div class="info-content">
+                    <label>Empresa</label>
+                    <span>{{ clienteDetalhes.empresa || 'Pessoa Física / Não informado' }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            } @else {
+              <div class="tcc-equipamentos-section">
+                @if (carregandoEquipamentos) {
+                  <div style="text-align:center; padding:20px;"><i class="pi pi-spin pi-spinner" style="font-size:24px; color: var(--tcc-primary, #3b82f6);"></i></div>
+                } @else if (equipamentos.length > 0) {
+                  <div class="tcc-equip-list">
+                    @for (eq of equipamentos; track eq.id) {
+                      <div class="tcc-equip-card">
+                        <div class="eq-icon"><i class="pi pi-desktop"></i></div>
+                        <div class="eq-info" style="flex: 1;">
+                          <h4>{{ eq.tipo }} {{ eq.marca }} {{ eq.modelo }}</h4>
+                          @if (eq.numeroSerie) { <span class="eq-meta">SN: {{ eq.numeroSerie }}</span> }
+                        </div>
+                        <div class="eq-actions" style="display: flex; gap: 8px;">
+                          <button class="tcc-btn-icon" (click)="editarEquipamento(eq)" title="Editar"><i class="pi pi-pencil"></i></button>
+                          <button class="tcc-btn-icon text-red-500" (click)="removerEquipamento(eq)" title="Remover"><i class="pi pi-trash"></i></button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <app-empty-state message="Nenhum equipamento cadastrado."></app-empty-state>
+                }
+                
+                <div class="tcc-equip-form">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h4>{{ editandoEquipamentoId ? 'Editar Equipamento' : 'Adicionar Novo Equipamento' }}</h4>
+                    @if (editandoEquipamentoId) {
+                      <button class="tcc-btn-text" (click)="cancelarEdicaoEquipamento()" style="font-size: 12px;">Cancelar Edição</button>
+                    }
+                  </div>
+                  <div class="tcc-equip-form-row">
+                    <select [(ngModel)]="novoEquipamento.tipo" class="tcc-input">
+                      <option value="Notebook">Notebook</option>
+                      <option value="Desktop">Desktop</option>
+                      <option value="Impressora">Impressora</option>
+                      <option value="Rede">Rede</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                    <input type="text" [(ngModel)]="novoEquipamento.marca" placeholder="Marca" class="tcc-input">
+                    <input type="text" [(ngModel)]="novoEquipamento.modelo" placeholder="Modelo" class="tcc-input">
+                  </div>
+                  <button class="tcc-btn-main tcc-btn-sm" (click)="salvarEquipamento()" [disabled]="salvandoEquipamento || !novoEquipamento.marca || !novoEquipamento.modelo">
+                    @if(salvandoEquipamento){ <i class="pi pi-spin pi-spinner"></i> }
+                    {{ editandoEquipamentoId ? 'Atualizar Equipamento' : 'Salvar Equipamento' }}
+                  </button>
+                </div>
+              </div>
+            }
           </div>
 
           <div class="tcc-modal-footer">
-            @if (clienteDetalhes.usuario_id) {
-              <button class="tcc-btn-danger-outline" (click)="confirmarDesvinculo(clienteDetalhes)">
+            <button class="tcc-btn-danger-outline" (click)="confirmarDesvinculo(clienteDetalhes)">
+              @if (clienteDetalhes.usuario_id) {
                 <i class="pi pi-user-minus"></i> Desvincular da Minha Base
-              </button>
-            }
+              } @else {
+                <i class="pi pi-trash"></i> Excluir Cliente
+              }
+            </button>
             <button class="tcc-btn-outline" (click)="fecharDetalhes()">Fechar</button>
             <button class="tcc-btn-main" (click)="editarCliente(clienteDetalhes)">
               <i class="pi pi-pencil" style="margin-right: 6px;"></i> Editar Cliente
@@ -213,13 +277,19 @@ import { ClienteService } from '../../../services/cliente.service';
             <div class="tcc-confirm-icon-box">
               <i class="pi pi-exclamation-triangle"></i>
             </div>
-            <h3 class="tcc-confirm-title">Desvincular Cliente?</h3>
+            <h3 class="tcc-confirm-title">{{ clienteParaDesvincular.usuario_id ? 'Desvincular Cliente?' : 'Excluir Cliente?' }}</h3>
             <p class="tcc-confirm-text">
               Deseja remover <strong>{{ clienteParaDesvincular.nome_completo || clienteParaDesvincular.nome }}</strong> da sua base de clientes?
             </p>
-            <p class="tcc-confirm-subtext">
-              O cliente continuará existindo normalmente no aplicativo e seus atendimentos anteriores não serão afetados.
-            </p>
+            @if (clienteParaDesvincular.usuario_id) {
+              <p class="tcc-confirm-subtext">
+                O cliente continuará existindo normalmente no aplicativo e seus atendimentos anteriores não serão afetados.
+              </p>
+            } @else {
+              <p class="tcc-confirm-subtext">
+                Este cliente foi cadastrado manualmente por você. A exclusão removerá ele da sua lista permanentemente.
+              </p>
+            }
           </div>
 
           <div class="tcc-modal-footer">
@@ -230,7 +300,7 @@ import { ClienteService } from '../../../services/cliente.service';
               @if (desvinculando) {
                 <i class="pi pi-spin pi-spinner"></i> Removendo...
               } @else {
-                <i class="pi pi-user-minus"></i> Confirmar Desvínculo
+                <i class="pi pi-user-minus"></i> {{ clienteParaDesvincular.usuario_id ? 'Confirmar Desvínculo' : 'Confirmar Exclusão' }}
               }
             </button>
           </div>
@@ -239,19 +309,29 @@ import { ClienteService } from '../../../services/cliente.service';
     }
   `,
   styles: [`
-    .tcc-client-list { display: flex; flex-direction: column; gap: 12px; }
+    .tcc-client-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 16px; 
+    }
 
     .tcc-client-card {
       background-color: var(--tcc-surface, #ffffff); 
       border: 1px solid var(--tcc-border, #e2e8f0);
       border-radius: 12px; 
-      padding: 16px 24px;
-      display: flex; 
+      display: flex;
+      flex-direction: row; 
       align-items: center; 
       gap: 24px; 
-      transition: box-shadow 0.2s, border-color 0.2s;
+      padding: 16px 24px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
-    .tcc-client-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); }
+    .tcc-client-card:hover { 
+      border-color: var(--tcc-primary, #3b82f6); 
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+      transform: translateY(-1px);
+    }
     .tcc-client-card.tcc-card-app-user {
       border-left: 4px solid var(--tcc-primary, #3b82f6);
     }
@@ -260,46 +340,52 @@ import { ClienteService } from '../../../services/cliente.service';
       width: 56px;
       height: 56px;
       border-radius: 12px;
-      background-color: #f1f5f9;
+      background-color: var(--tcc-bg, #f1f5f9);
       color: var(--tcc-text-muted, #64748b);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
       flex-shrink: 0;
     }
     .tcc-client-icon-box.app-user {
-      background-color: #eff6ff;
+      background-color: rgba(59, 130, 246, 0.1);
       color: var(--tcc-primary, #3b82f6);
     }
 
     .tcc-client-content {
-      flex: 1;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      flex: 1;
+      min-width: 0;
     }
 
     .tcc-client-header {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .tcc-client-header h3 {
+    .tcc-client-name {
       margin: 0;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--tcc-text-main, #0f172a);
     }
 
-    /* BADGES DE TIPO DE CONTA */
+    .tcc-client-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .tcc-app-badge {
       background-color: rgba(59, 130, 246, 0.1);
       color: var(--tcc-primary, #3b82f6);
       border: 1px solid rgba(59, 130, 246, 0.2);
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 600;
@@ -311,7 +397,7 @@ import { ClienteService } from '../../../services/cliente.service';
       background-color: var(--tcc-bg, #f8fafc);
       color: var(--tcc-text-muted, #64748b);
       border: 1px solid var(--tcc-border, #e2e8f0);
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 500;
@@ -323,56 +409,53 @@ import { ClienteService } from '../../../services/cliente.service';
     .tcc-company-badge {
       background-color: var(--tcc-bg, #f8fafc);
       border: 1px solid var(--tcc-border, #e2e8f0);
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 6px;
       font-size: 11px;
       font-weight: 500;
       color: var(--tcc-text-muted, #64748b);
-    }
-
-    .tcc-rating {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 4px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #eab308;
-    }
-
-    .tcc-rating.tcc-rating-empty {
-      color: var(--tcc-text-muted, #94a3b8);
-      font-weight: 500;
-      i { color: #cbd5e1; }
-    }
-
-    .tcc-rating i {
-      font-size: 12px;
     }
 
     .tcc-client-meta {
       display: flex;
       gap: 16px;
       flex-wrap: wrap;
-      font-size: 13px;
-      color: var(--tcc-text-muted, #64748b);
+      align-items: center;
     }
 
     .tcc-meta-item {
       display: flex;
       align-items: center;
       gap: 6px;
+      font-size: 13px;
+      color: var(--tcc-text-secondary, #475569);
+    }
+    .tcc-meta-item i {
+      color: var(--tcc-text-muted, #94a3b8);
+      font-size: 14px;
+    }
+    .truncate {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
     }
 
-    .tcc-meta-item i {
-      font-size: 13px;
-      opacity: 0.7;
+    .tcc-client-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-shrink: 0;
     }
 
     .tcc-client-stats {
       display: flex;
-      gap: 24px;
-      padding: 0 24px;
-      border-left: 1px solid var(--tcc-border, #e2e8f0);
+      align-items: center;
+      gap: 20px;
+      padding-right: 24px;
       border-right: 1px solid var(--tcc-border, #e2e8f0);
     }
 
@@ -381,41 +464,67 @@ import { ClienteService } from '../../../services/cliente.service';
       flex-direction: column;
       align-items: center;
       gap: 2px;
+      min-width: 60px;
     }
-
-    .tcc-mini-stat span {
+    .tcc-mini-stat .stat-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--tcc-text-main, #0f172a);
+    }
+    .tcc-mini-stat .stat-label {
       font-size: 11px;
       color: var(--tcc-text-muted, #64748b);
+      font-weight: 500;
+      text-transform: uppercase;
     }
 
-    .tcc-mini-stat strong {
-      font-size: 16px;
-      color: var(--tcc-text-main, #0f172a);
+    .tcc-rating-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+    }
+    .tcc-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
       font-weight: 700;
+      color: #eab308;
+      background: rgba(234, 179, 8, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .tcc-rating.tcc-rating-empty {
+      color: var(--tcc-text-muted, #94a3b8);
+      background: transparent;
+      font-weight: 500;
+      padding: 0;
+      i { color: var(--tcc-border, #cbd5e1); }
     }
 
     .tcc-client-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
     }
 
     .tcc-btn-outline.small {
-      background-color: transparent;
-      border: 1px solid var(--tcc-border, #e2e8f0);
-      color: var(--tcc-text-main, #475569);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
+      background-color: var(--tcc-surface, #ffffff);
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      color: var(--tcc-text-main, #334155);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: background-color 0.2s;
+      transition: all 0.2s;
     }
     .tcc-btn-outline.small:hover {
       background-color: var(--tcc-bg, #f8fafc);
+      color: var(--tcc-text-main, #0f172a);
     }
 
     /* Modal Styles */
@@ -562,11 +671,57 @@ import { ClienteService } from '../../../services/cliente.service';
       color: var(--tcc-text-main, #0f172a);
     }
 
+    .tcc-modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--tcc-border, #e2e8f0);
+      padding: 0 24px;
+      gap: 16px;
+      background: var(--tcc-surface, #ffffff);
+    }
+    .tcc-tab-btn {
+      background: none;
+      border: none;
+      padding: 12px 4px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--tcc-text-muted, #64748b);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tcc-tab-btn:hover { color: var(--tcc-text-main, #0f172a); }
+    .tcc-tab-btn.active {
+      color: var(--tcc-primary, #3b82f6);
+      border-bottom-color: var(--tcc-primary, #3b82f6);
+    }
+    
+    .tcc-equipamentos-section { display: flex; flex-direction: column; gap: 20px; }
+    .tcc-equip-list { display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; padding-right: 4px; }
+    .tcc-equip-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--tcc-border, #e2e8f0); border-radius: 8px; background: var(--tcc-bg, #f8fafc); }
+    .eq-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.1); color: var(--tcc-primary, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;}
+    .eq-info { display: flex; flex-direction: column; gap: 2px; }
+    .eq-info h4 { margin: 0; font-size: 14px; color: var(--tcc-text-main, #0f172a); font-weight: 600; }
+    .eq-info .eq-meta { font-size: 12px; color: var(--tcc-text-muted, #64748b); }
+    
+    .tcc-equip-form { padding-top: 16px; border-top: 1px solid var(--tcc-border, #e2e8f0); display: flex; flex-direction: column; gap: 12px; }
+    .tcc-equip-form h4 { margin: 0; font-size: 14px; font-weight: 600; color: var(--tcc-text-main, #0f172a); }
+    .tcc-equip-form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .tcc-equip-form .tcc-input { width: 100%; padding: 8px 12px; border: 1px solid var(--tcc-border, #cbd5e1); border-radius: 6px; font-size: 13px; font-family: inherit; background: var(--tcc-surface, #ffffff); color: var(--tcc-text-main, #0f172a); }
+    .tcc-equip-form .tcc-input:focus { outline: none; border-color: var(--tcc-primary, #3b82f6); }
+    .tcc-btn-sm { padding: 8px 16px; font-size: 13px; margin-left: auto; display: inline-flex; }
+    .tcc-btn-icon { background: none; border: none; cursor: pointer; color: var(--tcc-text-muted, #64748b); padding: 4px; transition: color 0.2s; }
+    .tcc-btn-icon:hover { color: var(--tcc-primary, #3b82f6); }
+    .tcc-btn-icon.text-red-500:hover { color: #ef4444; }
+    .tcc-btn-text { background: none; border: none; cursor: pointer; color: var(--tcc-primary, #3b82f6); padding: 0; transition: color 0.2s; }
+    .tcc-btn-text:hover { text-decoration: underline; }
+
     .tcc-modal-body {
       padding: 24px;
       display: flex;
       flex-direction: column;
       gap: 20px;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
     }
 
     .tcc-modal-stats-grid {
@@ -789,6 +944,7 @@ export class ClientesList {
 
   private router = inject(Router);
   private clienteService = inject(ClienteService);
+  private equipamentoService = inject(EquipamentoService);
   private messageService = inject(MessageService);
 
   menuItems: MenuItem[] = [];
@@ -796,6 +952,13 @@ export class ClientesList {
   clienteDetalhes: Cliente | null = null;
   clienteParaDesvincular: Cliente | null = null;
   desvinculando = false;
+
+  activeTab: 'detalhes' | 'equipamentos' = 'detalhes';
+  equipamentos: Equipamento[] = [];
+  carregandoEquipamentos = false;
+  salvandoEquipamento = false;
+  novoEquipamento: any = { tipo: 'Notebook', marca: '', modelo: '' };
+  editandoEquipamentoId: string | null = null;
 
   openMenu(event: MouseEvent, menu: any, cliente: Cliente): void {
     event.stopPropagation();
@@ -805,17 +968,10 @@ export class ClientesList {
 
   setMenuContext(cliente: Cliente): void {
     this.selectedCliente = cliente;
-    const items: MenuItem[] = [
-      {
-        label: 'Ver Detalhes',
-        icon: 'pi pi-eye',
-        command: () => {
-          if (this.selectedCliente) {
-            this.verDetalhes(this.selectedCliente);
-          }
-        }
-      },
-      {
+    const items: MenuItem[] = [];
+    
+    if (!cliente.usuario_id) {
+      items.push({
         label: 'Editar Cliente',
         icon: 'pi pi-pencil',
         command: () => {
@@ -823,30 +979,121 @@ export class ClientesList {
             this.editarCliente(this.selectedCliente);
           }
         }
-      }
-    ];
-
-    if (cliente.usuario_id) {
-      items.push({
-        separator: true
       });
-      items.push({
-        label: 'Desvincular da Base',
-        icon: 'pi pi-user-minus',
-        styleClass: 'text-red-500',
-        command: () => {
-          if (this.selectedCliente) {
-            this.confirmarDesvinculo(this.selectedCliente);
-          }
-        }
-      });
+      items.push({ separator: true });
     }
+
+    items.push({
+      label: cliente.usuario_id ? 'Desvincular da Base' : 'Excluir Cliente',
+      icon: cliente.usuario_id ? 'pi pi-user-minus' : 'pi pi-trash',
+      styleClass: 'text-red-500',
+      command: () => {
+        if (this.selectedCliente) {
+          this.confirmarDesvinculo(this.selectedCliente);
+        }
+      }
+    });
 
     this.menuItems = items;
   }
 
   verDetalhes(cliente: Cliente): void {
     this.clienteDetalhes = cliente;
+    this.activeTab = 'detalhes';
+    if (cliente.id) {
+      this.carregarEquipamentos(cliente.id.toString());
+    }
+  }
+
+  carregarEquipamentos(clienteId: string): void {
+    this.carregandoEquipamentos = true;
+    this.equipamentoService.getEquipamentosPorCliente(clienteId).subscribe({
+      next: (eqs) => {
+        this.equipamentos = eqs;
+        this.carregandoEquipamentos = false;
+      },
+      error: (err) => {
+        console.error('Erro ao buscar equipamentos:', err);
+        this.equipamentos = [];
+        this.carregandoEquipamentos = false;
+      }
+    });
+  }
+
+  editarEquipamento(eq: Equipamento): void {
+    if (!eq.id) return;
+    this.editandoEquipamentoId = eq.id.toString();
+    this.novoEquipamento = {
+      tipo: eq.tipo,
+      marca: eq.marca,
+      modelo: eq.modelo
+    };
+  }
+
+  cancelarEdicaoEquipamento(): void {
+    this.editandoEquipamentoId = null;
+    this.novoEquipamento = { tipo: 'Notebook', marca: '', modelo: '' };
+  }
+
+  removerEquipamento(eq: Equipamento): void {
+    if (!this.clienteDetalhes || !this.clienteDetalhes.id || !eq.id) return;
+    if (confirm(`Tem certeza que deseja remover o equipamento ${eq.marca} ${eq.modelo}?`)) {
+      this.equipamentoService.deleteEquipamento(this.clienteDetalhes.id.toString(), eq.id.toString()).subscribe({
+        next: () => {
+          this.equipamentos = this.equipamentos.filter(e => e.id !== eq.id);
+          this.messageService.add({ severity: 'success', summary: 'Removido', detail: 'Equipamento removido com sucesso!' });
+        },
+        error: (err) => {
+          console.error('Erro ao remover equipamento:', err);
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível remover o equipamento.' });
+        }
+      });
+    }
+  }
+
+  salvarEquipamento(): void {
+    if (!this.clienteDetalhes || !this.clienteDetalhes.id) return;
+    this.salvandoEquipamento = true;
+
+    const payload: Equipamento = {
+      clienteId: this.clienteDetalhes.id.toString(),
+      tipo: this.novoEquipamento.tipo,
+      marca: this.novoEquipamento.marca,
+      modelo: this.novoEquipamento.modelo
+    };
+
+    if (this.editandoEquipamentoId) {
+      this.equipamentoService.updateEquipamento(payload, payload.clienteId, this.editandoEquipamentoId).subscribe({
+        next: (res) => {
+          this.salvandoEquipamento = false;
+          const idx = this.equipamentos.findIndex(e => e.id?.toString() === this.editandoEquipamentoId);
+          if (idx !== -1) {
+            this.equipamentos[idx] = res;
+          }
+          this.cancelarEdicaoEquipamento();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Equipamento atualizado!' });
+        },
+        error: (err) => {
+          console.error('Erro ao atualizar equipamento:', err);
+          this.salvandoEquipamento = false;
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível atualizar o equipamento.' });
+        }
+      });
+    } else {
+      this.equipamentoService.addEquipamento(payload, payload.clienteId).subscribe({
+        next: (res) => {
+          this.salvandoEquipamento = false;
+          this.equipamentos.push(res);
+          this.cancelarEdicaoEquipamento();
+          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Equipamento adicionado!' });
+        },
+        error: (err) => {
+          console.error('Erro ao salvar equipamento:', err);
+          this.salvandoEquipamento = false;
+          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível adicionar o equipamento.' });
+        }
+      });
+    }
   }
 
   fecharDetalhes(): void {
