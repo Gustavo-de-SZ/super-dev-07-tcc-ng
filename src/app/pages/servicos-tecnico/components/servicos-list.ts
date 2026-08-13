@@ -20,7 +20,7 @@ import { AuthService } from '@auth0/auth0-angular';
   template: `
     <div class="tcc-services-list">
       @for (servico of paginatedServicos; track (servico.id || servico.titulo || $index)) {
-        <div class="tcc-service-card">
+        <div class="tcc-service-card" (click)="abrirDetalhes(servico)">
 
           <div class="tcc-service-icon-box">
             <i class="pi" [ngClass]="servico.icone || 'pi-cog'"></i>
@@ -54,7 +54,7 @@ import { AuthService } from '@auth0/auth0-angular';
             </div>
           </div>
 
-          <div class="tcc-service-actions">
+          <div class="tcc-service-actions" (click)="$event.stopPropagation()">
             <button
               type="button"
               class="tcc-btn-outline small"
@@ -250,12 +250,10 @@ import { AuthService } from '@auth0/auth0-angular';
                       <i class="pi pi-wrench"></i>
                     </div>
                     <div class="os-brand-info">
-                      <h1 class="os-company-name">tcc</h1>
-                      <p class="os-company-sub">Gestão & Assistência Técnica Especializada</p>
+                      <h1 class="os-company-name">{{ nomeTecnicoFormatado }}</h1>
+                      <p class="os-company-sub">Assistência Técnica Especializada</p>
                       <div class="os-company-meta">
-                        <span>Registro Técnico / CNPJ: 42.108.923/0001-55</span>
-                        <span class="dot">•</span>
-                        <span>Blumenau - SC</span>
+                        <span>Ordem de Serviço Eletrônica</span>
                       </div>
                     </div>
                   </div>
@@ -298,11 +296,7 @@ import { AuthService } from '@auth0/auth0-angular';
                       </div>
                       <div class="os-party-row">
                         <span class="lbl">Especialidade:</span>
-                        <span class="val">{{ selectedItem.categoria || 'Suporte Técnico em TI' }}</span>
-                      </div>
-                      <div class="os-party-row">
-                        <span class="lbl">Qualificação:</span>
-                        <span class="val">Profissional Verificado tcc</span>
+                        <span class="val">{{ selectedItem.categoria || 'Suporte Técnico' }}</span>
                       </div>
                       <div class="os-party-row">
                         <span class="lbl">Modalidade:</span>
@@ -433,26 +427,17 @@ import { AuthService } from '@auth0/auth0-angular';
                   <table class="os-pricing-table">
                     <thead>
                       <tr>
-                        <th class="col-desc">Item / Descrição do Serviço</th>
-                        <th class="col-cat">Categoria</th>
-                        <th class="col-mod">Modalidade</th>
-                        <th class="col-gar">Garantia</th>
+                        <th class="col-desc">Descrição do Serviço</th>
                         <th class="col-qty">Qtd/Tempo</th>
-                        <th class="col-unit">Valor Unitário</th>
-                        <th class="col-total">Subtotal</th>
+                        <th class="col-total">Valor Total</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
                         <td class="col-desc">
                           <strong>{{ selectedItem.titulo }}</strong>
-                          <small class="d-block">Execução Técnica Especializada e Diagnóstico</small>
                         </td>
-                        <td class="col-cat">{{ selectedItem.categoria || 'Geral' }}</td>
-                        <td class="col-mod">{{ selectedItem.tipo_atendimento || 'Presencial' }}</td>
-                        <td class="col-gar">{{ selectedItem.garantia || '90 dias' }}</td>
-                        <td class="col-qty">{{ selectedItem.duracao || '1h' }}</td>
-                        <td class="col-unit">{{ formatarValor(selectedItem.valor) }}</td>
+                        <td class="col-qty">{{ selectedItem.duracao || '1' }}</td>
                         <td class="col-total"><strong>{{ formatarValor(selectedItem.valor) }}</strong></td>
                       </tr>
                     </tbody>
@@ -482,10 +467,10 @@ import { AuthService } from '@auth0/auth0-angular';
                 <section class="os-warranty-section">
                   <div class="os-warranty-header">
                     <i class="pi pi-shield"></i>
-                    <span>Termo de Garantia e Condições de Atendimento</span>
+                    <span>Garantia do Serviço</span>
                   </div>
                   <p class="os-warranty-text">
-                    Fica assegurada a <strong>garantia de {{ selectedItem.garantia || '90 (noventa) dias' }}</strong> sobre os serviços técnicos executados e componentes aplicados a contar da data de entrega, conforme disposto no Artigo 26 da Lei Federal nº 8.078/1990 (Código de Defesa do Consumidor). A garantia perde a validade em casos de mau uso comprovado, derramamento de líquidos, oscilações severas de energia elétrica, descargas atmosféricas ou intervenção de terceiros não autorizados.
+                    Os serviços prestados possuem garantia conforme acordado previamente entre as partes. A garantia perde a validade em casos de intervenção de terceiros ou mau uso comprovado.
                   </p>
                 </section>
 
@@ -509,8 +494,8 @@ import { AuthService } from '@auth0/auth0-angular';
          
                 <div class="os-document-footer">
                   <div class="os-footer-content">
-                    <span> tcc • Sistema de Gestão Técnica • Impresso em {{ dataHoraImpressao }}</span>
-                    <span>Documento autêntico • Página 1 de 1</span>
+                    <span>Sistema de Gestão Técnica • Impresso em {{ dataHoraImpressao }}</span>
+                    <span>Documento autêntico</span>
                   </div>
                 </div>
 
@@ -532,6 +517,7 @@ import { AuthService } from '@auth0/auth0-angular';
       display: flex;
       align-items: center;
       gap: 24px;
+      cursor: pointer;
       transition: box-shadow 0.2s, border-color 0.2s;
     }
     .tcc-service-card:hover {
@@ -1322,8 +1308,7 @@ import { AuthService } from '@auth0/auth0-angular';
       }
 
       .os-preview-backdrop,
-      .tcc-os-print-document,
-      .tcc-os-print-document * {
+      .os-preview-backdrop * {
         visibility: visible !important;
       }
 
@@ -1333,22 +1318,28 @@ import { AuthService } from '@auth0/auth0-angular';
         top: 0 !important;
         width: 100% !important;
         height: auto !important;
+        min-height: 100vh !important;
         background: transparent !important;
         padding: 0 !important;
         margin: 0 !important;
+        overflow: visible !important;
       }
 
       .os-preview-modal-box {
         background: transparent !important;
         box-shadow: none !important;
+        border: none !important;
         border-radius: 0 !important;
         max-width: 100% !important;
         height: auto !important;
+        overflow: visible !important;
       }
 
       .os-preview-modal-body {
         background: transparent !important;
         padding: 0 !important;
+        overflow: visible !important;
+        height: auto !important;
       }
 
       .tcc-os-print-document {
@@ -1489,11 +1480,6 @@ export class ServicosListComponent implements OnInit {
     event.stopPropagation();
     this.selectedItem = servico;
     this.menuItems = [
-      {
-        label: 'Ver Detalhes',
-        icon: 'pi pi-eye',
-        command: () => this.abrirDetalhes(servico)
-      },
       {
         label: 'Visualizar / Imprimir OS',
         icon: 'pi pi-print',

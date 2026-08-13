@@ -32,4 +32,23 @@ export class EquipamentoService {
       ))
     );
   }
+
+  updateEquipamento(equipamento: Equipamento, clienteId: string, equipamentoId: string): Observable<Equipamento> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.put<Equipamento>(
+        `${this.configService.getApiUrl()}/clientes/${clienteId}/equipamentos/${equipamentoId}`,
+        equipamento,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ))
+    );
+  }
+
+  deleteEquipamento(clienteId: string, equipamentoId: string): Observable<void> {
+    return this.auth.getToken().pipe(
+      switchMap(token => this.http.delete<void>(
+        `${this.configService.getApiUrl()}/clientes/${clienteId}/equipamentos/${equipamentoId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ))
+    );
+  }
 }
