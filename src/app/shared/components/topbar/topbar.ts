@@ -212,7 +212,11 @@ interface InfoUsuario {
             <span class="tcc-profile-role">{{ usuario.cargo }}</span>
           </div>
           <div class="tcc-profile-avatar">
-            <i class="pi pi-user"></i>
+            @if (userAvatar) {
+              <img [src]="userAvatar" alt="Avatar" class="avatar-img" referrerpolicy="no-referrer">
+            } @else {
+              <i class="pi pi-user"></i>
+            }
           </div>
         </div>
 
@@ -398,6 +402,28 @@ interface InfoUsuario {
       align-items: center;
       justify-content: center;
       gap: 8px;
+    }
+
+    .tcc-profile-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background-color: var(--tcc-primary-light, #e0e7ff);
+      color: var(--tcc-primary, #4338ca);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      i {
+        font-size: 16px;
+      }
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .empty-icon-circle {
@@ -737,18 +763,7 @@ interface InfoUsuario {
     .tcc-profile-name { font-size: 13px; font-weight: 600; color: var(--tcc-text-main, #0f172a); }
     .tcc-profile-role { font-size: 11px; color: var(--tcc-text-muted, #64748b); }
 
-    .tcc-profile-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-      color: #4338ca;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      font-weight: 600;
-    }
+
   `]
 })
 export class TopbarTecnico implements OnInit, OnDestroy {
@@ -758,6 +773,7 @@ export class TopbarTecnico implements OnInit, OnDestroy {
     cargo: 'Técnico',
     temNotificacao: false
   };
+  userAvatar?: string;
 
   showNotificationsDropdown = false;
   showChatDropdown = false;
@@ -774,6 +790,7 @@ export class TopbarTecnico implements OnInit, OnDestroy {
   naoLidasCount = 0;
   private notifSub?: Subscription;
   private chamadosSub?: Subscription;
+  private profilePicSub?: Subscription;
 
   chamados: any[] = [];
   chamadosAtivosCount = 0;
@@ -786,6 +803,10 @@ export class TopbarTecnico implements OnInit, OnDestroy {
   constructor() {
     this.isDark = this.themeService.isDark();
     this.setupUserSubscription();
+    
+    this.profilePicSub = this.profileService.profilePicture$.subscribe(pic => {
+      if (pic) this.userAvatar = pic;
+    });
   }
 
   private setupUserSubscription(): void {
@@ -1004,5 +1025,6 @@ export class TopbarTecnico implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.notifSub) this.notifSub.unsubscribe();
     if (this.chamadosSub) this.chamadosSub.unsubscribe();
+    if (this.profilePicSub) this.profilePicSub.unsubscribe();
   }
 }

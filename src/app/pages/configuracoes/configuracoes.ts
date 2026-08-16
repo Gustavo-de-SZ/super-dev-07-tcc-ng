@@ -1,12 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { AuthService } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
-import { first, Observable } from 'rxjs';
+import { first, Observable, of, switchMap } from 'rxjs';
 import { CnpjMaskDirective } from '../../shared/directives/cnpj-mask.directive';
 import { ConsultaExternaService } from '../../services/consulta-externa.service';
 import { validarCNPJ } from '../../shared/validators/documento.validator';
@@ -35,6 +37,7 @@ interface ClienteUpdateRequest {
     ReactiveFormsModule,
     RouterModule,
     ToastModule,
+    AutoCompleteModule,
     CnpjMaskDirective
   ],
   providers: [MessageService],
@@ -76,6 +79,10 @@ interface ClienteUpdateRequest {
               <div class="cfg-avatar-status" title="Conta ativa">
                 <i class="pi pi-check"></i>
               </div>
+              <div class="cfg-avatar-edit-overlay" (click)="fileInput.click()">
+                <i class="pi pi-camera"></i>
+              </div>
+              <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none" />
             </div>
 
             <div class="cfg-user-meta">
@@ -242,15 +249,22 @@ interface ClienteUpdateRequest {
                   <label class="cfg-label" for="cfg-local">
                     Cidade / Local de Atuação <span class="cfg-required">*</span>
                   </label>
-                  <div class="cfg-input-icon-wrap">
-                    <i class="pi pi-map-marker"></i>
-                    <input
+                  <div class="cfg-input-icon-wrap" style="display: flex; width: 100%; position: relative;">
+                    <i class="pi pi-map-marker" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); z-index: 2; pointer-events: none;"></i>
+                    <p-autoComplete
                       id="cfg-local"
                       formControlName="local"
-                      type="text"
-                      class="cfg-input"
+                      [suggestions]="sugestoesLocal"
+                      (completeMethod)="buscarLocal($event)"
                       placeholder="Ex: Blumenau - SC"
-                    />
+                      class="w-full"
+                      styleClass="w-full"
+                      inputStyleClass="cfg-input w-full"
+                      [inputStyle]="{'width':'100%', 'padding-left': '40px'}"
+                      [style]="{'width':'100%'}"
+                      [minLength]="2"
+                      [delay]="0"
+                    ></p-autoComplete>
                   </div>
                   @if (isInvalid('local')) {
                     <span class="cfg-error-text">
@@ -336,17 +350,24 @@ interface ClienteUpdateRequest {
            
                 <div class="cfg-form-group col-span-2">
                   <label class="cfg-label" for="cfg-endereco">
-                    Endereço Completo / Ponto de Referência
+                    Cidade / Local de atuação
                   </label>
-                  <div class="cfg-input-icon-wrap">
-                    <i class="pi pi-map-marker"></i>
-                    <input
+                  <div class="cfg-input-icon-wrap" style="display: flex; width: 100%; position: relative;">
+                    <i class="pi pi-map-marker" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); z-index: 2; pointer-events: none;"></i>
+                    <p-autoComplete
                       id="cfg-endereco"
                       formControlName="endereco"
-                      type="text"
-                      class="cfg-input"
-                      placeholder="Ex: Rua das Flores, 123 - Centro, Blumenau - SC"
-                    />
+                      [suggestions]="sugestoesLocal"
+                      (completeMethod)="buscarLocal($event)"
+                      placeholder="Ex: Blumenau - SC"
+                      class="w-full"
+                      styleClass="w-full"
+                      inputStyleClass="cfg-input w-full"
+                      [inputStyle]="{'width':'100%', 'padding-left': '40px'}"
+                      [style]="{'width':'100%'}"
+                      [minLength]="2"
+                      [delay]="0"
+                    ></p-autoComplete>
                   </div>
                   <span class="cfg-hint">Utilizado para localização em chamados e ordens de serviço presenciais.</span>
                 </div>
@@ -413,7 +434,7 @@ interface ClienteUpdateRequest {
             <button
               type="submit"
               class="cfg-btn-primary"
-              [disabled]="form.invalid || loading"
+              [disabled]="form.invalid || loading || !temAlteracoes"
             >
               @if (loading) {
                 <i class="pi pi-spin pi-spinner"></i>
@@ -543,6 +564,32 @@ interface ClienteUpdateRequest {
       border: 4px solid var(--tcc-surface, #ffffff);
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
       object-fit: cover;
+    }
+
+    .cfg-avatar-wrapper {
+      cursor: pointer;
+    }
+
+    .cfg-avatar-wrapper:hover .cfg-avatar-edit-overlay {
+      opacity: 1;
+    }
+
+    .cfg-avatar-edit-overlay {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 5;
     }
 
     .cfg-avatar-fallback {
@@ -1009,6 +1056,7 @@ export class ConfiguracoesComponent implements OnInit {
   private router = inject(Router);
   private location = inject(Location);
   private consultaExternaService = inject(ConsultaExternaService);
+  private http = inject(HttpClient);
 
   form!: FormGroup;
   userRole: 'cliente' | 'tecnico' | 'admin' = 'tecnico';
@@ -1017,8 +1065,33 @@ export class ConfiguracoesComponent implements OnInit {
   buscandoCnpj = false;
   ultimoCnpjBuscado = '';
 
+  sugestoesLocal: string[] = [];
+  municipiosCache: string[] = [];
+  
+  buscarLocal(event: any) {
+    const query = (event.query || '').toLowerCase();
+    if (!query) return;
+    
+    if (this.municipiosCache.length === 0) {
+      this.consultaExternaService.consultarMunicipios()
+        .subscribe({
+          next: (data) => {
+            this.municipiosCache = data.map((m: any) => m.formatado);
+            this.sugestoesLocal = this.municipiosCache.filter(m => m.toLowerCase().includes(query)).slice(0, 50);
+          },
+          error: (err) => {
+            console.error('Erro ao buscar municípios via backend', err);
+            this.sugestoesLocal = [];
+          }
+        });
+    } else {
+      this.sugestoesLocal = this.municipiosCache.filter(m => m.toLowerCase().includes(query)).slice(0, 50);
+    }
+  }
+
   userEmail = '';
   userPicture = '';
+  selectedPhotoFile: File | null = null;
   private initialFormData: any = {};
 
   private cnpjValidator(control: any): { [key: string]: any } | null {
@@ -1057,7 +1130,19 @@ export class ConfiguracoesComponent implements OnInit {
       next: (data) => {
         this.buscandoCnpj = false;
         if (data && (data.razaoSocial || data.nomeFantasia)) {
-          const nomeEmpresa = data.nomeFantasia || data.razaoSocial;
+          let nomeEmpresa = data.nomeFantasia || data.razaoSocial || '';
+          if (nomeEmpresa && data.cnpj) {
+            const cleanCnpj = data.cnpj.replace(/\D/g, '');
+            if (cleanCnpj.length === 14) {
+              const root = cleanCnpj.substring(0, 8);
+              const formattedRoot = `${root.substring(0, 2)}.${root.substring(2, 5)}.${root.substring(5, 8)}`;
+              if (nomeEmpresa.startsWith(formattedRoot)) {
+                nomeEmpresa = nomeEmpresa.substring(formattedRoot.length).trim();
+              } else if (nomeEmpresa.startsWith(root)) {
+                nomeEmpresa = nomeEmpresa.substring(root.length).trim();
+              }
+            }
+          }
           const currentNome = this.form.get('nome_fantasia')?.value;
           const currentLocal = this.form.get('local')?.value;
           const currentTelefone = this.form.get('telefone')?.value;
@@ -1124,6 +1209,11 @@ export class ConfiguracoesComponent implements OnInit {
         this.userPicture = user.picture || '';
         this.initForm(user.email || '');
         this.carregarDadosPerfil();
+        
+        // Sobrescrever se houver foto no perfil customizado
+        this.profileService.profilePicture$.subscribe((pic: any) => {
+          if (pic) this.userPicture = pic;
+        });
       } else {
         this.initForm('');
         this.carregarDadosPerfil();
@@ -1175,6 +1265,12 @@ export class ConfiguracoesComponent implements OnInit {
     return this.form.get('nome_completo')?.value || '';
   }
 
+  get temAlteracoes(): boolean {
+    if (!this.initialFormData || Object.keys(this.initialFormData).length === 0) return false;
+    const current = this.form.getRawValue();
+    return Object.keys(this.initialFormData).some(key => current[key] !== this.initialFormData[key]);
+  }
+
   getUserInitials(): string {
     const name = this.getDisplayName();
     if (name) {
@@ -1222,6 +1318,7 @@ export class ConfiguracoesComponent implements OnInit {
   carregarDadosPerfil() {
     if (this.userRole === 'admin') {
       this.isLoadingInitialData = false;
+      this.initialFormData = { nome: this.form.get('nome')?.value };
       return;
     }
 
@@ -1269,6 +1366,21 @@ export class ConfiguracoesComponent implements OnInit {
     });
   }
 
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedPhotoFile = file;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.userPicture = e.target?.result as string;
+        this.form.markAsDirty(); // Habilita o botão salvar
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   salvarConfiguracoes() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -1314,7 +1426,13 @@ export class ConfiguracoesComponent implements OnInit {
       } as ClienteUpdateRequest);
     }
 
-    saveProfile$.pipe(first()).subscribe({
+    const saveFlow$ = this.selectedPhotoFile 
+      ? this.profileService.uploadFotoPerfil(this.selectedPhotoFile).pipe(
+          switchMap(() => saveProfile$)
+        )
+      : saveProfile$;
+
+    saveFlow$.pipe(first()).subscribe({
       next: (_: any) => {
         this.loading = false;
         this.initialFormData = { ...formData };

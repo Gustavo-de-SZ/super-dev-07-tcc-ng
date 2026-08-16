@@ -25,7 +25,11 @@ import { EquipamentoService } from '../../../services/equipamento.service';
         <div class="tcc-client-card" [class.tcc-card-app-user]="cliente.usuario_id" (click)="verDetalhes(cliente)">
 
           <div class="tcc-client-icon-box" [class.app-user]="cliente.usuario_id">
-            <i class="pi" [ngClass]="cliente.usuario_id ? 'pi-user-check' : 'pi-users'"></i>
+            @if (cliente.foto_perfil) {
+              <img [src]="cliente.foto_perfil" alt="Avatar" class="avatar-img" referrerpolicy="no-referrer">
+            } @else {
+              <i class="pi" [ngClass]="cliente.usuario_id ? 'pi-user' : 'pi-users'"></i>
+            }
           </div>
 
           <div class="tcc-client-content">
@@ -120,9 +124,13 @@ import { EquipamentoService } from '../../../services/equipamento.service';
         <div class="tcc-modal-content tcc-fade-in" (click)="$event.stopPropagation()">
           <div class="tcc-modal-header">
             <div class="tcc-modal-title-box">
-              <div class="tcc-modal-avatar" [class.app-user]="clienteDetalhes.usuario_id">
-                <i class="pi" [ngClass]="clienteDetalhes.usuario_id ? 'pi-user-check' : 'pi-user'"></i>
-              </div>
+                <div class="tcc-modal-avatar" [class.app-user]="clienteDetalhes.usuario_id">
+                  @if (clienteDetalhes.foto_perfil) {
+                    <img [src]="clienteDetalhes.foto_perfil" alt="Avatar" class="avatar-img" referrerpolicy="no-referrer">
+                  } @else {
+                    <i class="pi" [ngClass]="clienteDetalhes.usuario_id ? 'pi-user' : 'pi-users'"></i>
+                  }
+                </div>
               <div>
                 <div class="tcc-modal-title-row">
                   <h2 class="tcc-modal-title">{{ clienteDetalhes.nome_completo || clienteDetalhes.nome }}</h2>
@@ -351,6 +359,12 @@ import { EquipamentoService } from '../../../services/equipamento.service';
     .tcc-client-icon-box.app-user {
       background-color: rgba(59, 130, 246, 0.1);
       color: var(--tcc-primary, #3b82f6);
+    }
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
     }
 
     .tcc-client-content {

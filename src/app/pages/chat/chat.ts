@@ -96,8 +96,8 @@ import { ProfileService } from '../../services/profile.service';
               @if (contexto.anexo) {
                 <div class="context-attachment">
                   <button class="btn-view-attachment" (click)="abrirAnexoModal()">
-                    <i class="pi pi-image"></i>
-                    <span>Ver Anexo / Foto</span>
+                    <i class="pi pi-images"></i>
+                    <span>Ver Anexos ({{ anexosList.length }})</span>
                   </button>
                 </div>
               }
@@ -232,26 +232,30 @@ import { ProfileService } from '../../services/profile.service';
       </div>
 
      
-      @if (isAnexoModalAberto && contexto?.anexo; as anexoUrl) {
+      @if (isAnexoModalAberto && anexosList.length > 0) {
         <div class="tcc-modal-backdrop" (click)="fecharAnexoModal()">
-          <div class="tcc-modal-card attachment-modal" (click)="$event.stopPropagation()">
+          <div class="tcc-modal-card attachment-modal" (click)="$event.stopPropagation()" style="max-width: 800px; width: 90%;">
             <div class="tcc-modal-header">
               <div class="modal-title-group">
-                <i class="pi pi-image text-primary"></i>
-                <h3 class="tcc-modal-title">Anexo do Chamado #{{ ticketId }}</h3>
+                <i class="pi pi-images text-primary"></i>
+                <h3 class="tcc-modal-title">Anexos do Chamado #{{ ticketId }}</h3>
               </div>
               <button class="tcc-modal-close-btn" (click)="fecharAnexoModal()">
                 <i class="pi pi-times"></i>
               </button>
             </div>
-            <div class="tcc-modal-body text-center p-4">
-              <img [src]="anexoUrl" alt="Anexo do Chamado" class="attachment-preview-img" />
+            <div class="tcc-modal-body p-4" style="display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; max-height: 60vh; overflow-y: auto;">
+              @for (url of anexosList; track $index) {
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                  <img [src]="url" alt="Anexo {{ $index + 1 }}" class="attachment-preview-img" style="max-width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border);" />
+                  <a [href]="url" target="_blank" download class="tcc-btn-outline" style="font-size: 0.8rem; padding: 6px 12px; width: 100%; justify-content: center;">
+                    <i class="pi pi-external-link"></i> Abrir Original
+                  </a>
+                </div>
+              }
             </div>
             <div class="tcc-modal-footer">
-              <a [href]="anexoUrl" target="_blank" download class="tcc-btn-outline">
-                <i class="pi pi-download"></i> Abrir em Nova Aba
-              </a>
-              <button class="tcc-btn-main" (click)="fecharAnexoModal()">
+              <button class="tcc-btn-main" (click)="fecharAnexoModal()" style="width: 100%;">
                 Fechar
               </button>
             </div>
@@ -1132,6 +1136,11 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   isContextoExpandido = true;
   isAnexoModalAberto = false;
+
+  get anexosList(): string[] {
+    if (!this.contexto?.anexo) return [];
+    return this.contexto.anexo.split(',').map(url => url.trim()).filter(url => url.length > 0);
+  }
   showScrollBottom = false;
 
   novaMensagem = '';

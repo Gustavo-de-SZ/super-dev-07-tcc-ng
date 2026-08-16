@@ -369,6 +369,24 @@ import { MenuItem, MessageService } from 'primeng/api';
                     <p class="modal-problem-desc">{{ chamadoDetalhes.descricao_problema || 'Nenhuma descrição detalhada informada.' }}</p>
                   </div>
                 </div>
+
+                <div class="tcc-modal-info-item full-width">
+                  <div class="info-icon"><i class="pi pi-paperclip"></i></div>
+                  <div class="info-content">
+                    <label>Anexos</label>
+                    @if (chamadoDetalhes.anexo) {
+                      <div class="attachments-list">
+                        @for (url of getAnexos(chamadoDetalhes.anexo); track $index) {
+                          <a [href]="url" target="_blank" class="attachment-link">
+                            <i class="pi pi-file"></i> Anexo {{ $index + 1 }}
+                          </a>
+                        }
+                      </div>
+                    } @else {
+                      <p class="modal-problem-desc" style="color: var(--text-muted); font-style: italic;">Nenhum anexo fornecido.</p>
+                    }
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1154,6 +1172,31 @@ import { MenuItem, MessageService } from 'primeng/api';
       gap: 10px;
     }
 
+    .attachments-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .attachment-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--tcc-surface-hover, #f1f5f9);
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      border-radius: 6px;
+      color: var(--tcc-primary, #3b82f6);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .attachment-link:hover {
+      background: var(--tcc-primary-light, #eff6ff);
+      border-color: var(--tcc-primary, #3b82f6);
+    }
+
     .tcc-btn-outline {
       padding: 9px 16px;
       font-size: 13px;
@@ -1168,6 +1211,24 @@ import { MenuItem, MessageService } from 'primeng/api';
     .tcc-btn-outline:hover {
       background: var(--tcc-surface-hover, #f1f5f9);
       color: var(--tcc-text-main, #0f172a);
+    }
+
+    .tcc-btn-primary {
+      padding: 9px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      background: var(--tcc-primary, #3b82f6);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .tcc-btn-primary:hover {
+      background: var(--tcc-primary-hover, #2563eb);
     }
 
     .tcc-btn-danger-outline {
@@ -1389,6 +1450,11 @@ export class ChamadosTecnico {
 
   fecharDetalhes() {
     this.chamadoDetalhes = null;
+  }
+
+  getAnexos(anexoStr: any): string[] {
+    if (!anexoStr) return [];
+    return typeof anexoStr === 'string' ? anexoStr.split(',') : [];
   }
 
   abrirChat(id: string | number) {

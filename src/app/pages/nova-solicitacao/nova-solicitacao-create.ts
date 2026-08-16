@@ -70,22 +70,7 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
                 }
               </div>
 
-              <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('dataCriacao')">
-                <label for="dataCriacao">Data de Criação *</label>
-                <p-datePicker
-                  id="dataCriacao"
-                  formControlName="dataCriacao"
-                  dateFormat="dd/mm/yy"
-                  placeholder="dd/mm/yyyy"
-                  [showIcon]="true"
-                  iconDisplay="input"
-                  appendTo="body"
-                  class="ns-datepicker"
-                ></p-datePicker>
-                @if (hasError('dataCriacao', 'required')) {
-                  <span class="ns-error-text"><i class="pi pi-info-circle"></i> Data é obrigatória</span>
-                }
-              </div>
+
 
               <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('descricao')">
                 <label for="descricao">Descrição do Problema *</label>
@@ -102,24 +87,34 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
 
           
             <div class="ns-field-group">
-              <label>Anexo (Opcional)</label>
-              <div class="ns-upload-box" (click)="fileInput.click()">
-                <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*,.pdf" style="display: none">
-                
-                @if (solicitacaoForm.get('anexo')?.value) {
-                  <div class="ns-file-selected">
-                    <i class="pi pi-check-circle text-green-500"></i> Arquivo anexado
-                    <button type="button" class="icon-btn text-red-500" (click)="$event.stopPropagation(); removeFile()">
-                      <i class="pi pi-times"></i>
-                    </button>
-                  </div>
-                } @else {
+              <label>Anexos (Opcional, máx. 3)</label>
+              
+              <!-- Lista de anexos -->
+              @if (anexos.length > 0) {
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;">
+                  @for (anexo of anexos; track $index) {
+                    <div class="ns-file-selected" style="justify-content: space-between; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;">
+                      <span style="display: flex; align-items: center; gap: 8px;">
+                        <i class="pi pi-check-circle text-green-500"></i> {{ anexo.nome }}
+                      </span>
+                      <button type="button" class="icon-btn text-red-500" (click)="$event.stopPropagation(); removeFile($index)">
+                        <i class="pi pi-times"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Upload box -->
+              @if (anexos.length < 3) {
+                <div class="ns-upload-box" (click)="fileInput.click()">
+                  <input type="file" #fileInput (change)="onFileSelect($event)" accept="image/*,.pdf" style="display: none">
                   <div class="ns-upload-placeholder">
                     <i class="pi pi-cloud-upload"></i>
                     <span>Clique para anexar imagem ou documento</span>
                   </div>
-                }
-              </div>
+                </div>
+              }
             </div>
 
           </form>
@@ -148,7 +143,7 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
               </div>
               <div class="ns-summary-item">
                 <span class="label">Data</span>
-                <span class="value">{{ formatarDataExibicao(solicitacaoForm.get('dataCriacao')?.value) }}</span>
+                <span class="value">{{ formatarDataExibicao(dataAtual) }}</span>
               </div>
             </div>
 
@@ -372,6 +367,8 @@ export class NovaSolicitacao implements OnInit {
 
   solicitacaoForm!: FormGroup;
   enviando = false;
+  anexos: { url: string, nome: string }[] = [];
+  dataAtual = new Date();
 
   // Hardcoded categories - adjust based on actual categories in your system
   categoriasOptions = [
@@ -387,9 +384,7 @@ export class NovaSolicitacao implements OnInit {
     this.solicitacaoForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(10)]],
       descricao: ['', [Validators.required, Validators.minLength(10)]],
-      categoriaId: ['', Validators.required],
-      anexo: [null],
-      dataCriacao: [new Date(), Validators.required]
+      categoriaId: ['', Validators.required]
     });
 
     // Pré-preenchimento vindo de atalhos rápidos da home
@@ -469,16 +464,38 @@ export class NovaSolicitacao implements OnInit {
         return;
       }
       
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.solicitacaoForm.patchValue({ anexo: reader.result as string });
-      };
-      reader.readAsDataURL(file);
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Aguarde',
+        detail: 'Fazendo upload do anexo...'
+      });
+      this.enviando = true;
+
+      this.solicitacaoService.uploadAnexoChamado(file).subscribe({
+        next: (res) => {
+          this.anexos.push({ url: res.url, nome: file.name });
+          this.enviando = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Anexo adicionado com sucesso!'
+          });
+        },
+        error: (err) => {
+          console.error('Erro no upload de anexo', err);
+          this.enviando = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Não foi possível fazer upload do anexo.'
+          });
+        }
+      });
     }
   }
 
-  removeFile() {
-    this.solicitacaoForm.patchValue({ anexo: null });
+  removeFile(index: number) {
+    this.anexos.splice(index, 1);
   }
 
   criarSolicitacao(): void {
@@ -493,11 +510,8 @@ export class NovaSolicitacao implements OnInit {
         titulo: formValue.titulo,
         descricao_problema: formValue.descricao,
         categoria_id: catId,
-        anexo: formValue.anexo,
-        dataCriacao: formValue.dataCriacao instanceof Date
-          ? formValue.dataCriacao.toISOString().split('T')[0] // YYYY-MM-DD
-          : String(formValue.dataCriacao)
-        // status will be set to 'ABERTO' by default in the backend
+        anexo: this.anexos.length > 0 ? this.anexos.map(a => a.url).join(',') : undefined,
+        dataCriacao: new Date().toISOString().split('T')[0] // YYYY-MM-DD
       };
 
       this.solicitacaoService.createSolicitacao(solicitacao).subscribe({

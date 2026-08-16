@@ -4,6 +4,7 @@ import { RouterModule, Router, ActivatedRoute, NavigationEnd } from '@angular/ro
 import { SidebarComponent, NavItem } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { AuthService } from '../../../../services/auth.service';
+import { ProfileService } from '../../../../services/profile.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { filter } from 'rxjs/operators';
 
@@ -84,6 +85,7 @@ import { filter } from 'rxjs/operators';
 })
 export class AppLayoutComponent implements OnInit {
   authService = inject(AuthService);
+  profileService = inject(ProfileService);
   themeService = inject(ThemeService);
   router = inject(Router);
 
@@ -116,6 +118,12 @@ export class AppLayoutComponent implements OnInit {
         
         // Initial configuration based on URL
         this.configureLayoutForCurrentRoute(role);
+      }
+    });
+
+    this.profileService.profilePicture$.subscribe(pic => {
+      if (pic) {
+        this.userAvatar = pic;
       }
     });
 

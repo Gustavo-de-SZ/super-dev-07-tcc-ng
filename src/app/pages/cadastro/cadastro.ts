@@ -906,7 +906,19 @@ export class Cadastro implements OnInit {
       next: (data) => {
         this.buscandoCnpj = false;
         if (data && (data.razaoSocial || data.nomeFantasia)) {
-          const nomeEmpresa = data.nomeFantasia || data.razaoSocial;
+          let nomeEmpresa = data.nomeFantasia || data.razaoSocial || '';
+          if (nomeEmpresa && data.cnpj) {
+            const cleanCnpj = data.cnpj.replace(/\D/g, '');
+            if (cleanCnpj.length === 14) {
+              const root = cleanCnpj.substring(0, 8);
+              const formattedRoot = `${root.substring(0, 2)}.${root.substring(2, 5)}.${root.substring(5, 8)}`;
+              if (nomeEmpresa.startsWith(formattedRoot)) {
+                nomeEmpresa = nomeEmpresa.substring(formattedRoot.length).trim();
+              } else if (nomeEmpresa.startsWith(root)) {
+                nomeEmpresa = nomeEmpresa.substring(root.length).trim();
+              }
+            }
+          }
           const currentNome = this.tecnicoForm.get('nome')?.value;
           const currentLocal = this.tecnicoForm.get('local')?.value;
           const currentTelefone = this.tecnicoForm.get('telefone')?.value;

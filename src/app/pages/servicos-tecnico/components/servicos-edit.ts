@@ -352,7 +352,7 @@ import { EquipamentoService } from '../../../services/equipamento.service';
             <button
               type="button"
               class="tcc-btn-main"
-              [disabled]="form.invalid || enviando"
+              [disabled]="form.invalid || enviando || !temAlteracoes"
               (click)="atualizarServico()"
             >
               @if (enviando) {
@@ -852,6 +852,7 @@ export class EditarServico implements OnInit {
 
   form!: FormGroup;
   enviando = false;
+  initialFormData: any = null;
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
   equipamentosDoCliente: Equipamento[] = [];
@@ -905,6 +906,11 @@ export class EditarServico implements OnInit {
         this.carregarServicoParaEdicao(this.servicoId);
       }
     });
+  }
+
+  get temAlteracoes(): boolean {
+    if (!this.initialFormData) return false;
+    return JSON.stringify(this.form.getRawValue()) !== JSON.stringify(this.initialFormData);
   }
 
   isInvalid(controlName: string): boolean {
@@ -1049,6 +1055,8 @@ export class EditarServico implements OnInit {
           valor: (servico.valor !== null && servico.valor !== undefined && servico.valor !== '') ? String(servico.valor).replace('R$', '').trim() : '',
           status: servico.status || 'Pendente'
         });
+        
+        this.initialFormData = this.form.getRawValue();
       },
       error: (err) => {
         console.error('Erro ao carregar serviço para edição', err);

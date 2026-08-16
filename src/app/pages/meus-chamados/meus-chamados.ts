@@ -258,6 +258,23 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
               </div>
 
               <div class="tcc-modal-section">
+                <span class="info-label">Anexos</span>
+                @if (chamadoDetalhes.anexo) {
+                  <div class="attachments-list">
+                    @for (url of getAnexos(chamadoDetalhes.anexo); track $index) {
+                      <a [href]="url" target="_blank" class="attachment-link">
+                        <i class="pi pi-file"></i> Anexo {{ $index + 1 }}
+                      </a>
+                    }
+                  </div>
+                } @else {
+                  <div class="tcc-desc-box" style="font-style: italic; color: var(--text-muted);">
+                    Nenhum anexo fornecido.
+                  </div>
+                }
+              </div>
+
+              <div class="tcc-modal-section">
                 <span class="info-label">Profissional Atribuído</span>
                 @if (chamadoDetalhes.profissional_nome && chamadoDetalhes.profissional_id) {
                   <div class="tcc-tech-card-modal">
@@ -1041,6 +1058,32 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       color: var(--tcc-text-secondary, #334155);
       white-space: pre-wrap;
     }
+
+    .attachments-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .attachment-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--tcc-surface-hover, #f1f5f9);
+      border: 1px solid var(--tcc-border, #cbd5e1);
+      border-radius: 6px;
+      color: var(--tcc-primary, #3b82f6);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .attachment-link:hover {
+      background: var(--tcc-primary-light, #eff6ff);
+      border-color: var(--tcc-primary, #3b82f6);
+    }
+
     .tcc-tech-card-modal {
       background: rgba(16, 185, 129, 0.08);
       border: 1px solid rgba(16, 185, 129, 0.25);
@@ -1368,6 +1411,15 @@ export class MeusChamados implements OnInit {
 
   get countCancelados(): number {
     return this.chamados.filter(c => c.status === 'CANCELADO').length;
+  }
+
+  trackByChamadoId(index: number, chamado: any): number {
+    return chamado.id;
+  }
+
+  getAnexos(anexoStr: any): string[] {
+    if (!anexoStr) return [];
+    return typeof anexoStr === 'string' ? anexoStr.split(',') : [];
   }
 
   get paginatedChamados(): Chamado[] {

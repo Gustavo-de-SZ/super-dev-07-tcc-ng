@@ -7,6 +7,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { ProfileService } from '../../services/profile.service';
 import { take } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -35,8 +36,8 @@ import { take } from 'rxjs/operators';
             <div style="display: flex; align-items: center; gap: 1rem; margin-left: 0.5rem;">
 
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                @if (user.picture) {
-                  <img [src]="user.picture"
+                @if ((profilePicture$ | async) || user.picture) {
+                  <img [src]="(profilePicture$ | async) || user.picture"
                        alt="Foto de Perfil"
                        style="width: 36px; height: 36px; border-radius: 50%;">
                 }
@@ -65,7 +66,11 @@ export class NavbarComponent implements OnInit {
   // 7. Injetamos o Router para navegação programática
   private router = inject(Router);
 
+  profilePicture$: Observable<string | null> = of(null);
+
   ngOnInit(): void {
+    this.profilePicture$ = this.profileService.profilePicture$;
+    
     // Log the user and roles for debugging
     this.auth.user$.pipe(take(1)).subscribe(user => {
       if (user) {

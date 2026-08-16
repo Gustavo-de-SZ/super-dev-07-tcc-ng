@@ -108,6 +108,21 @@ export class SolicitacaoService {
     );
   }
 
+  uploadAnexoChamado(file: File): Observable<{url: string, message: string}> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{url: string, message: string}>(`${this.configService.getApiUrl()}/upload/anexo-chamado`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`
+            // Multipart boundaries are automatically added when not setting Content-Type
+          }
+        });
+      })
+    );
+  }
+
   // Optional: get all solicitacoes
   getSolicitacoes(): Observable<Solicitacao[]> {
     return this.auth.getAccessTokenSilently({

@@ -326,7 +326,7 @@ import { AuthService } from '@auth0/auth0-angular';
                         @if (cli.endereco || cli.local) {
                           <div class="os-party-row">
                             <span class="lbl">Localidade:</span>
-                            <span class="val">{{ cli.endereco ? cli.endereco + ' - ' : '' }}{{ cli.local || 'Blumenau - SC' }}</span>
+                            <span class="val">{{ cli.endereco ? cli.endereco + ' - ' : '' }}{{ cli.local || 'Endereço não informado' }}</span>
                           </div>
                         }
                       }
@@ -336,7 +336,7 @@ import { AuthService } from '@auth0/auth0-angular';
                       </div>
                       <div class="os-party-row">
                         <span class="lbl">Duração Prevista:</span>
-                        <span class="val">{{ selectedItem.duracao || '1h' }}</span>
+                        <span class="val">{{ selectedItem.duracao || 'Não informada' }}</span>
                       </div>
                     </div>
                   </div>
@@ -398,7 +398,7 @@ import { AuthService } from '@auth0/auth0-angular';
                     
                     <div class="os-desc-content">
                       <strong>Solicitação Inicial / Problema Relatado:</strong>
-                      <p>{{ selectedItem.descricao || 'Atendimento técnico preventivo e corretivo realizado conforme solicitação e padrões de qualidade tcc.' }}</p>
+                      <p>{{ selectedItem.descricao || 'Sem descrição detalhada informada pelo cliente/técnico.' }}</p>
                     </div>
 
                     @if (selectedItem.laudo_tecnico) {
@@ -437,7 +437,7 @@ import { AuthService } from '@auth0/auth0-angular';
                         <td class="col-desc">
                           <strong>{{ selectedItem.titulo }}</strong>
                         </td>
-                        <td class="col-qty">{{ selectedItem.duracao || '1' }}</td>
+                        <td class="col-qty">{{ selectedItem.duracao || 'N/A' }}</td>
                         <td class="col-total"><strong>{{ formatarValor(selectedItem.valor) }}</strong></td>
                       </tr>
                     </tbody>
@@ -447,7 +447,7 @@ import { AuthService } from '@auth0/auth0-angular';
                   <div class="os-financial-summary">
                     <div class="os-summary-left">
                       <span class="os-payment-status">
-                        <i class="pi pi-check-circle"></i> Condição de Pagamento: À vista / Conforme acordado
+                        <i class="pi pi-check-circle"></i> Condição de Pagamento: Conforme acordado
                       </span>
                     </div>
                     <div class="os-summary-right">
@@ -1299,59 +1299,8 @@ import { AuthService } from '@auth0/auth0-angular';
 
   
     @media print {
-      body * {
-        visibility: hidden !important;
-      }
-
       .no-print {
         display: none !important;
-      }
-
-      .os-preview-backdrop,
-      .os-preview-backdrop * {
-        visibility: visible !important;
-      }
-
-      .os-preview-backdrop {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 100vh !important;
-        background: transparent !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: visible !important;
-      }
-
-      .os-preview-modal-box {
-        background: transparent !important;
-        box-shadow: none !important;
-        border: none !important;
-        border-radius: 0 !important;
-        max-width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
-      }
-
-      .os-preview-modal-body {
-        background: transparent !important;
-        padding: 0 !important;
-        overflow: visible !important;
-        height: auto !important;
-      }
-
-      .tcc-os-print-document {
-        box-shadow: none !important;
-        max-width: 100% !important;
-        border: none !important;
-        border-radius: 0 !important;
-      }
-
-      .os-doc-page {
-        padding: 0 !important;
-        color: #000000 !important;
       }
 
       * {
@@ -1536,7 +1485,48 @@ export class ServicosListComponent implements OnInit {
   }
 
   imprimirOS(): void {
-    window.print();
+    const printContent = document.querySelector('.tcc-os-print-document');
+    if (!printContent) return;
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.top = '-10000px';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      // Re-use current styles
+      const styleTags = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(el => el.outerHTML)
+        .join('');
+        
+      doc.open();
+      doc.write(`
+        <html>
+          <head>
+            <title>Imprimir OS</title>
+            ${styleTags}
+            <style>
+              body { background: white; margin: 0; padding: 20px; }
+              .os-doc-page { box-shadow: none !important; border: none !important; max-width: 100% !important; }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>
+            ${printContent.innerHTML}
+          </body>
+        </html>
+      `);
+      doc.close();
+      
+      iframe.onload = () => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      };
+    }
   }
 
   private carregarDetalhesExtras(servico: Servico): void {

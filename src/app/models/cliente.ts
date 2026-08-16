@@ -18,5 +18,6 @@ export interface Cliente {
   ativo?: boolean;
   ja_vinculado?: boolean;
   criado_em?: string | Date;
+  foto_perfil?: string;
 }
 

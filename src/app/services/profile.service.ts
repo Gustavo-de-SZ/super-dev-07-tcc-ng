@@ -17,6 +17,7 @@ export interface Tecnico {
   aprovado_pelo_admin: boolean;
   criado_em: string;
   email: string;
+  foto_perfil?: string;
 }
 
 export interface ProfileResponse {
@@ -32,6 +33,7 @@ export interface ProfileResponse {
 })
 export class ProfileService {
   private profileState$ = new BehaviorSubject<{checked: boolean, exists: boolean, type: 'cliente' | 'tecnico' | 'admin' | null, aprovado?: boolean}>({ checked: false, exists: false, type: null });
+  public profilePicture$ = new BehaviorSubject<string | null>(null);
   private router = inject(Router);
 
   constructor(
@@ -123,6 +125,7 @@ export class ProfileService {
 
   clearProfileState(): void {
     this.profileState$.next({ checked: false, exists: false, type: null });
+    this.profilePicture$.next(null);
   }
 
   criarPerfilCliente(clienteData: Partial<Cliente>): Observable<Cliente> {
@@ -199,6 +202,32 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
+          tap(tecnico => {
+            if (tecnico.foto_perfil) {
+              this.profilePicture$.next(tecnico.foto_perfil);
+            }
+          })
+        );
+      })
+    );
+  }
+
+  uploadFotoPerfil(file: File): Observable<{url: string, message: string}> {
+    return this.auth.getToken().pipe(
+      switchMap(token => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{url: string, message: string}>(`${this.configService.getApiUrl()}/upload/foto-perfil`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`
+            // Don't set Content-Type manually, let the browser set it to multipart/form-data with boundary
+          }
+        }).pipe(
+          tap(res => {
+            if (res.url) {
+              this.profilePicture$.next(res.url);
+            }
+          })
         );
       })
     );
@@ -242,6 +271,11 @@ export class ProfileService {
             'Accept': 'application/json'
           }
         }).pipe(
+          tap(cliente => {
+            if (cliente.foto_perfil) {
+              this.profilePicture$.next(cliente.foto_perfil);
+            }
+          })
         );
       })
     );

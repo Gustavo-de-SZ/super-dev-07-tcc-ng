@@ -119,7 +119,7 @@ import { ConsultaExternaService } from '../../../services/consulta-externa.servi
             <h3 style="font-size: 16px; font-weight: 700; margin: 0 0 20px 0; color: var(--tcc-text-main);">Ações</h3>
 
             <div class="tcc-summary-actions" style="display: flex; flex-direction: column; gap: 12px;">
-              <button type="button" class="tcc-btn-main" [disabled]="form.invalid || enviando" (click)="atualizarCliente()" style="width: 100%; justify-content: center;">
+              <button type="button" class="tcc-btn-main" [disabled]="form.invalid || enviando || !temAlteracoes" (click)="atualizarCliente()" style="width: 100%; justify-content: center;">
                 @if(enviando) { <i class="pi pi-spin pi-spinner"></i> }
                 Salvar Alterações
               </button>
@@ -286,6 +286,7 @@ export class EditarCliente implements OnInit {
 
   form!: FormGroup;
   enviando = false;
+  initialFormData: any = null;
   clienteTemApp = false;
   clienteIdentificador!: string | number;
 
@@ -316,6 +317,11 @@ export class EditarCliente implements OnInit {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
+  get temAlteracoes(): boolean {
+    if (!this.initialFormData) return false;
+    return JSON.stringify(this.form.getRawValue()) !== JSON.stringify(this.initialFormData);
+  }
+
   carregarClienteParaEdicao(identificador: string | number): void {
     this.clienteService.getClienteByEmail(identificador).subscribe({
       next: (cliente: any) => {
@@ -336,6 +342,8 @@ export class EditarCliente implements OnInit {
           this.form.get('email')?.disable();
           this.form.get('telefone')?.disable();
         }
+        
+        this.initialFormData = this.form.getRawValue();
       },
       error: (err: any) => {
         console.error('Erro ao carregar cliente para edição', err);

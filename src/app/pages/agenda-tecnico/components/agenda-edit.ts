@@ -291,8 +291,8 @@ interface TipoAtendimentoCard {
               <button
                 type="button"
                 class="tcc-btn-main"
-                [disabled]="form.invalid || enviando"
-                (click)="atualizarAgendamento()"
+                [disabled]="form.invalid || enviando || !temAlteracoes"
+                (click)="salvarAgendamento()"
               >
                 @if (enviando) {
                   <i class="pi pi-spin pi-spinner" style="margin-right: 6px;"></i>
@@ -606,6 +606,7 @@ export class EditarAgendamento implements OnInit {
 
   form!: FormGroup;
   enviando = false;
+  initialFormData: any = null;
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
   agendamentoId!: string;
@@ -653,6 +654,15 @@ export class EditarAgendamento implements OnInit {
   hasError(controlName: string, errorName: string): boolean {
     const control = this.form.get(controlName);
     return !!(control && control.hasError(errorName) && (control.dirty || control.touched));
+  }
+
+  get temAlteracoes(): boolean {
+    if (!this.initialFormData) return false;
+    return JSON.stringify(this.form.getRawValue()) !== JSON.stringify(this.initialFormData);
+  }
+
+  salvarAgendamento(): void {
+    this.atualizarAgendamento();
   }
 
   selecionarTipo(valor: TipoAgendamento): void {
@@ -800,6 +810,8 @@ export class EditarAgendamento implements OnInit {
             status: agendamento.status || 'Pendente',
             observacoes: (agendamento as any).observacoes || ''
           });
+          
+          this.initialFormData = this.form.getRawValue();
         } else {
           this.messageService.add({
             severity: 'error',
