@@ -15,6 +15,8 @@ export interface Chamado {
   cliente_endereco?: string;
   profissional_id?: number | null;
   profissional_nome?: string | null;
+  profissional_endereco?: string | null;
+  tipo_atendimento?: string | null;
   anexo?: string | null;
   avaliacao_nota?: number | null;
   avaliacao_comentario?: string | null;

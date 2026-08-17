@@ -16,9 +16,10 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
 // Interface for what we send to PUT /tecnicos/me
 interface TecnicoUpdateRequest {
   nome: string;
-  telefone?: string;
-  cnpj?: string;
-  descricao_servicos?: string;
+  telefone: string;
+  cnpj: string;
+  descricao_servicos: string;
+  endereco?: string;
 }
 
 // Interface for what we send to PUT /clientes/me
@@ -247,29 +248,21 @@ interface ClienteUpdateRequest {
               
                 <div class="cfg-form-group" [class.has-error]="isInvalid('local')">
                   <label class="cfg-label" for="cfg-local">
-                    Cidade / Local de Atuação <span class="cfg-required">*</span>
+                    CEP de Atuação <span class="cfg-required">*</span>
                   </label>
                   <div class="cfg-input-icon-wrap" style="display: flex; width: 100%; position: relative;">
                     <i class="pi pi-map-marker" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); z-index: 2; pointer-events: none;"></i>
-                    <p-autoComplete
-                      id="cfg-local"
-                      formControlName="local"
-                      [suggestions]="sugestoesLocal"
-                      (completeMethod)="buscarLocal($event)"
-                      placeholder="Ex: Blumenau - SC"
-                      class="w-full"
-                      styleClass="w-full"
-                      inputStyleClass="cfg-input w-full"
-                      [inputStyle]="{'width':'100%', 'padding-left': '40px'}"
-                      [style]="{'width':'100%'}"
-                      [minLength]="2"
-                      [delay]="0"
-                    ></p-autoComplete>
+                    <input type="text" formControlName="cep" class="cfg-input w-full" style="padding-left: 40px;" placeholder="Digite seu CEP (apenas números)" maxlength="9" (input)="buscarCepDirect($event, 'local')">
                   </div>
-                  @if (isInvalid('local')) {
-                    <span class="cfg-error-text">
-                      <i class="pi pi-exclamation-circle"></i> A localização de atuação é obrigatória.
-                    </span>
+                  @if (form.get('local')?.value) {
+                    <div style="margin-top: 8px; padding: 10px; background: var(--tcc-bg, #f8fafc); border-radius: 6px; border: 1px solid var(--tcc-border, #e2e8f0); font-size: 0.9em; color: var(--tcc-text-main, #475569);">
+                      <i class="pi pi-check-circle" style="color: var(--tcc-primary, #3b82f6); margin-right: 6px;"></i>
+                      <strong>Localização:</strong> {{ form.get('local')?.value }}
+                    </div>
+                  } @else {
+                     <div style="margin-top: 8px; font-size: 0.85em; color: var(--tcc-danger, #ef4444);">
+                        Digite um CEP válido para carregar o endereço.
+                     </div>
                   }
                 </div>
 
@@ -289,6 +282,22 @@ interface ClienteUpdateRequest {
                     <i class="pi pi-chevron-down cfg-select-arrow"></i>
                   </div>
                   <span class="cfg-hint">Essas informações definem sua disponibilidade e facilitam a busca de novos clientes.</span>
+                </div>
+                
+                <div class="cfg-form-group col-span-2">
+                  <label class="cfg-label" for="cfg-bio">
+                    Sobre os Serviços (Bio)
+                  </label>
+                  <div class="cfg-input-icon-wrap" style="align-items: flex-start;">
+                    <i class="pi pi-align-left" style="top: 14px; transform: none;"></i>
+                    <textarea
+                      id="cfg-bio"
+                      formControlName="bio"
+                      class="cfg-input w-full"
+                      style="padding-left: 40px; padding-top: 10px; min-height: 100px; resize: vertical;"
+                      placeholder="Descreva brevemente os serviços que você oferece, sua experiência e diferenciais..."
+                    ></textarea>
+                  </div>
                 </div>
               </div>
             </section>
@@ -348,28 +357,24 @@ interface ClienteUpdateRequest {
                 </div>
 
            
-                <div class="cfg-form-group col-span-2">
+                <div class="cfg-form-group col-span-2" [class.has-error]="isInvalid('endereco')">
                   <label class="cfg-label" for="cfg-endereco">
-                    Cidade / Local de atuação
+                    CEP <span class="cfg-required">*</span>
                   </label>
                   <div class="cfg-input-icon-wrap" style="display: flex; width: 100%; position: relative;">
                     <i class="pi pi-map-marker" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); z-index: 2; pointer-events: none;"></i>
-                    <p-autoComplete
-                      id="cfg-endereco"
-                      formControlName="endereco"
-                      [suggestions]="sugestoesLocal"
-                      (completeMethod)="buscarLocal($event)"
-                      placeholder="Ex: Blumenau - SC"
-                      class="w-full"
-                      styleClass="w-full"
-                      inputStyleClass="cfg-input w-full"
-                      [inputStyle]="{'width':'100%', 'padding-left': '40px'}"
-                      [style]="{'width':'100%'}"
-                      [minLength]="2"
-                      [delay]="0"
-                    ></p-autoComplete>
+                    <input type="text" formControlName="cep" class="cfg-input w-full" style="padding-left: 40px;" placeholder="Digite seu CEP (apenas números)" maxlength="9" (input)="buscarCepDirect($event, 'endereco')">
                   </div>
-                  <span class="cfg-hint">Utilizado para localização em chamados e ordens de serviço presenciais.</span>
+                  @if (form.get('endereco')?.value) {
+                    <div style="margin-top: 8px; padding: 10px; background: var(--tcc-bg, #f8fafc); border-radius: 6px; border: 1px solid var(--tcc-border, #e2e8f0); font-size: 0.9em; color: var(--tcc-text-main, #475569);">
+                      <i class="pi pi-check-circle" style="color: var(--tcc-primary, #3b82f6); margin-right: 6px;"></i>
+                      <strong>Localização:</strong> {{ form.get('endereco')?.value }}
+                    </div>
+                  } @else {
+                     <div style="margin-top: 8px; font-size: 0.85em; color: var(--tcc-danger, #ef4444);">
+                        Digite um CEP válido para carregar o endereço.
+                     </div>
+                  }
                 </div>
               </div>
             </section>
@@ -1068,24 +1073,25 @@ export class ConfiguracoesComponent implements OnInit {
   sugestoesLocal: string[] = [];
   municipiosCache: string[] = [];
   
-  buscarLocal(event: any) {
-    const query = (event.query || '').toLowerCase();
-    if (!query) return;
-    
-    if (this.municipiosCache.length === 0) {
-      this.consultaExternaService.consultarMunicipios()
-        .subscribe({
-          next: (data) => {
-            this.municipiosCache = data.map((m: any) => m.formatado);
-            this.sugestoesLocal = this.municipiosCache.filter(m => m.toLowerCase().includes(query)).slice(0, 50);
-          },
-          error: (err) => {
-            console.error('Erro ao buscar municípios via backend', err);
-            this.sugestoesLocal = [];
+  buscarCepDirect(event: any, controlName: string) {
+    const query = (event.target.value || '').trim();
+    const cepMatch = query.replace(/\D/g, '');
+    if (cepMatch.length === 8) {
+      this.consultaExternaService.consultarCep(cepMatch).subscribe({
+        next: (data: any) => {
+          if (data) {
+            const enderecoFormatado = `${data.logradouro}, ${data.bairro}, ${data.cidade} - ${data.uf}`;
+            this.form.patchValue({ [controlName]: enderecoFormatado });
+          } else {
+             this.form.patchValue({ [controlName]: '' });
           }
-        });
+        },
+        error: () => this.form.patchValue({ [controlName]: '' })
+      });
     } else {
-      this.sugestoesLocal = this.municipiosCache.filter(m => m.toLowerCase().includes(query)).slice(0, 50);
+        if (cepMatch.length === 0 || cepMatch.length > 5) {
+            this.form.patchValue({ [controlName]: '' });
+        }
     }
   }
 
@@ -1236,7 +1242,9 @@ export class ConfiguracoesComponent implements OnInit {
         cnpj: ['', [this.cnpjValidator]],
         especialidade: ['Suporte Técnico', Validators.required],
         local: ['', Validators.required],
-        tempoResposta: ['Em até 1 hora', Validators.required]
+        cep: [''],
+        tempoResposta: ['Em até 1 hora', Validators.required],
+        bio: ['']
       });
     } else {
       this.form = this.fb.group({
@@ -1244,7 +1252,8 @@ export class ConfiguracoesComponent implements OnInit {
         telefone: ['', Validators.required],
         nome_completo: ['', Validators.required],
         empresa: [''],
-        endereco: ['']
+        endereco: ['', Validators.required],
+        cep: ['']
       });
     }
   }
@@ -1285,14 +1294,15 @@ export class ConfiguracoesComponent implements OnInit {
     return this.userRole === 'tecnico' ? 'T' : 'C';
   }
 
-  private parseDescricao(descricao: string | undefined): { especialidade: string; local: string; tempoResposta: string } {
+  private parseDescricao(descricao: string | undefined): { especialidade: string; local: string; tempoResposta: string; bio: string } {
     if (!descricao) {
-      return { especialidade: 'Suporte Técnico', local: '', tempoResposta: 'Em até 1 hora' };
+      return { especialidade: 'Suporte Técnico', local: '', tempoResposta: 'Em até 1 hora', bio: '' };
     }
 
     let especialidade = 'Suporte Técnico';
     let local = '';
     let tempoResposta = 'Em até 1 hora';
+    let bio = '';
 
     const parts = descricao.split('|').map(p => p.trim());
     for (const part of parts) {
@@ -1302,17 +1312,20 @@ export class ConfiguracoesComponent implements OnInit {
         local = part.replace(/^local:\s*/i, '').trim();
       } else if (part.toLowerCase().startsWith('tempo de resposta:')) {
         tempoResposta = part.replace(/^tempo de resposta:\s*/i, '').trim();
+      } else {
+        bio += (bio ? ' ' : '') + part;
       }
     }
 
-    return { especialidade, local, tempoResposta };
+    return { especialidade, local, tempoResposta, bio };
   }
 
-  private formatDescricao(especialidade: string, local: string, tempoResposta: string): string {
+  private formatDescricao(especialidade: string, local: string, tempoResposta: string, bio: string): string {
     const parts: string[] = [];
     if (especialidade) parts.push(`Especialidade: ${especialidade}`);
     if (local) parts.push(`Local: ${local}`);
     if (tempoResposta) parts.push(`Tempo de resposta: ${tempoResposta}`);
+    if (bio) parts.push(bio);
     return parts.join(' | ');
   }
 
@@ -1338,8 +1351,9 @@ export class ConfiguracoesComponent implements OnInit {
             nome_fantasia: data.nome_fantasia || '',
             cnpj: data.cnpj || '',
             especialidade: parsedDesc.especialidade,
-            local: parsedDesc.local,
-            tempoResposta: parsedDesc.tempoResposta
+            local: parsedDesc.local || data.endereco || '',
+            tempoResposta: parsedDesc.tempoResposta,
+            bio: parsedDesc.bio
           };
           this.form.patchValue(patchData);
           this.initialFormData = { ...patchData };
@@ -1406,24 +1420,36 @@ export class ConfiguracoesComponent implements OnInit {
 
     let saveProfile$: Observable<any>;
 
+    let localValue = formData.local;
+    if (typeof localValue === 'object' && localValue !== null && localValue.value) {
+      localValue = localValue.value;
+    }
+
+    let enderecoValue = formData.endereco;
+    if (typeof enderecoValue === 'object' && enderecoValue !== null && enderecoValue.value) {
+      enderecoValue = enderecoValue.value;
+    }
+
     if (this.userRole === 'tecnico') {
       const descricaoFormatada = this.formatDescricao(
         formData.especialidade,
-        formData.local,
-        formData.tempoResposta
+        localValue,
+        formData.tempoResposta,
+        formData.bio
       );
       saveProfile$ = this.profileService.atualizarPerfilTecnico({
         nome: formData.nome_fantasia,
         telefone: formData.telefone,
         cnpj: formData.cnpj,
-        descricao_servicos: descricaoFormatada
+        descricao_servicos: descricaoFormatada,
+        local: localValue
       } as TecnicoUpdateRequest);
     } else {
       saveProfile$ = this.profileService.atualizarPerfilCliente({
         nome: formData.nome_completo,
         telefone: formData.telefone,
         empresa: formData.empresa,
-        local: formData.endereco
+        local: enderecoValue
       } as ClienteUpdateRequest);
     }
 

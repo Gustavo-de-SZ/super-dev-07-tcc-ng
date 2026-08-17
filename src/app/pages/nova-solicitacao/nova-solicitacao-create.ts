@@ -11,6 +11,8 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { Solicitacao } from '../../models/solicitacao';
 import { SolicitacaoService } from '../../services/solicitacao.service';
+import { HttpClient } from '@angular/common/http';
+import { ConfigService } from '../../services/config.service';
 
 // Models e Services
 
@@ -70,7 +72,22 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
                 }
               </div>
 
+              <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('tipoAtendimento')">
+                <label for="tipoAtendimento">Tipo de Atendimento *</label>
+                <p-select formControlName="tipoAtendimento" [options]="tiposAtendimento"
+                  optionLabel="label" optionValue="value" placeholder="Selecione o tipo"
+                  class="ns-select w-full"></p-select>
+                @if (hasError('tipoAtendimento', 'required')) {
+                  <span class="ns-error-text"><i class="pi pi-info-circle"></i> Tipo de atendimento é obrigatório</span>
+                }
+              </div>
 
+              @if (solicitacaoForm.get('tipoAtendimento')?.value === 'PRESENCIAL' && profissionalSelecionado?.endereco) {
+                <div class="ns-info-box" style="margin-bottom: 20px; padding: 12px; background: var(--bg-main); border-left: 4px solid var(--primary); border-radius: 4px;">
+                  <strong style="color: var(--text-main); font-size: 13px;">Local de Atuação do Profissional:</strong>
+                  <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-muted);">{{ profissionalSelecionado?.endereco }}</p>
+                </div>
+              }
 
               <div class="ns-form-group" [class.ns-is-invalid]="isInvalid('descricao')">
                 <label for="descricao">Descrição do Problema *</label>
@@ -140,6 +157,10 @@ import { SolicitacaoService } from '../../services/solicitacao.service';
                 <span class="value ns-truncate" [title]="solicitacaoForm.get('descricao')?.value">
                   {{ solicitacaoForm.get('descricao')?.value || '—' }}
                 </span>
+              </div>
+              <div class="ns-summary-item">
+                <span class="label">Tipo</span>
+                <span class="value">{{ getTipoAtendimentoLabel() }}</span>
               </div>
               <div class="ns-summary-item">
                 <span class="label">Data</span>
@@ -363,12 +384,20 @@ export class NovaSolicitacao implements OnInit {
   private solicitacaoService = inject(SolicitacaoService);
   private messageService = inject(MessageService);
   private router = inject(Router);
+  private http = inject(HttpClient);
+  private config = inject(ConfigService);
   route = inject(ActivatedRoute);
 
   solicitacaoForm!: FormGroup;
   enviando = false;
   anexos: { url: string, nome: string }[] = [];
   dataAtual = new Date();
+  profissionalSelecionado: any = null;
+
+  tiposAtendimento = [
+    { label: 'Remoto', value: 'REMOTO' },
+    { label: 'Presencial', value: 'PRESENCIAL' }
+  ];
 
   // Hardcoded categories - adjust based on actual categories in your system
   categoriasOptions = [
@@ -384,7 +413,8 @@ export class NovaSolicitacao implements OnInit {
     this.solicitacaoForm = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(10)]],
       descricao: ['', [Validators.required, Validators.minLength(10)]],
-      categoriaId: ['', Validators.required]
+      categoriaId: ['', Validators.required],
+      tipoAtendimento: ['REMOTO', Validators.required]
     });
 
     // Pré-preenchimento vindo de atalhos rápidos da home
@@ -399,6 +429,21 @@ export class NovaSolicitacao implements OnInit {
         const catNum = Number(params['catId']);
         if (!isNaN(catNum)) {
           this.solicitacaoForm.patchValue({ categoriaId: catNum });
+        }
+      }
+      if (params['profId']) {
+        this.carregarProfissional(params['profId']);
+      }
+    });
+  }
+
+  carregarProfissional(id: string | number) {
+    // Usando HttpClient e ConfigService instanciados
+    this.http.get<any[]>(`${this.config.getApiUrl()}/profissionais`).subscribe({
+      next: (profs: any[]) => {
+        const prof = profs.find((p: any) => String(p.id) === String(id));
+        if (prof) {
+          this.profissionalSelecionado = prof;
         }
       }
     });
@@ -501,20 +546,19 @@ export class NovaSolicitacao implements OnInit {
   criarSolicitacao(): void {
     if (this.solicitacaoForm.valid) {
       const formValue = this.solicitacaoForm.getRawValue();
+      const vals = this.solicitacaoForm.getRawValue();
+      const anexosUrl = this.anexos.length > 0 ? this.anexos.map(a => a.url).join(',') : undefined;
 
-      const catId = typeof formValue.categoriaId === 'object' && formValue.categoriaId !== null
-        ? formValue.categoriaId.value
-        : formValue.categoriaId;
-
-      const solicitacao: Solicitacao = {
-        titulo: formValue.titulo,
-        descricao_problema: formValue.descricao,
-        categoria_id: catId,
-        anexo: this.anexos.length > 0 ? this.anexos.map(a => a.url).join(',') : undefined,
-        dataCriacao: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+      const payload = {
+        titulo: vals.titulo,
+        descricao_problema: vals.descricao,
+        categoria_id: Number(vals.categoriaId),
+        anexo: this.anexos.length > 0 ? this.anexos[0].url : undefined,
+        tipo_atendimento: vals.tipoAtendimento,
+        dataCriacao: new Date().toISOString()
       };
 
-      this.solicitacaoService.createSolicitacao(solicitacao).subscribe({
+      this.solicitacaoService.createSolicitacao(payload as any).subscribe({
         next: (response) => {
           this.messageService.add({
             severity: 'success',
@@ -559,8 +603,14 @@ export class NovaSolicitacao implements OnInit {
 
   // Helper to get category label for display
   getCategoriaLabel(): string {
-    const categoriaId = this.solicitacaoForm.get('categoriaId')?.value;
-    const categoria = this.categoriasOptions.find(c => c.value === categoriaId);
-    return categoria ? categoria.label : '—';
+    const v = this.solicitacaoForm.get('categoriaId')?.value;
+    const cat = this.categoriasOptions.find(c => c.value === v);
+    return cat ? cat.label : '—';
+  }
+
+  getTipoAtendimentoLabel(): string {
+    const v = this.solicitacaoForm.get('tipoAtendimento')?.value;
+    const tipo = this.tiposAtendimento.find(t => t.value === v);
+    return tipo ? tipo.label : '—';
   }
 }

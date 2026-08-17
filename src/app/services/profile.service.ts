@@ -13,11 +13,12 @@ export interface Tecnico {
   nome_fantasia: string;
   cnpj?: string;
   telefone?: string;
-  descricao_servicos?: string;
   aprovado_pelo_admin: boolean;
   criado_em: string;
   email: string;
-  foto_perfil?: string;
+  descricao_servicos: string;
+  foto_perfil: string;
+  endereco?: string;
 }
 
 export interface ProfileResponse {

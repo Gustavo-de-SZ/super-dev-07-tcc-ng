@@ -320,6 +320,13 @@ import { MenuItem, MessageService } from 'primeng/api';
                     {{ chamadoDetalhes.dataCriacao || formatData(chamadoDetalhes.data_criacao) }}
                   </span>
                 </div>
+                <div class="highlight-item right" style="text-align: right;">
+                  <label>Tipo de Atendimento</label>
+                  <span class="highlight-type">
+                    <i class="pi pi-compass"></i>
+                    {{ chamadoDetalhes.tipo_atendimento === 'PRESENCIAL' ? 'Presencial' : 'Remoto' }}
+                  </span>
+                </div>
               </div>
 
              
@@ -353,11 +360,18 @@ import { MenuItem, MessageService } from 'primeng/api';
                 }
 
                 @if (chamadoDetalhes.cliente_endereco) {
-                  <div class="tcc-modal-info-item">
+                  <div class="tcc-modal-info-item full-width">
                     <div class="info-icon"><i class="pi pi-map-marker"></i></div>
-                    <div class="info-content">
-                      <label>Local / Endereço</label>
-                      <span>{{ chamadoDetalhes.cliente_endereco }}</span>
+                    <div class="info-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                      <div>
+                        <label>Local / Endereço</label>
+                        <span>{{ chamadoDetalhes.cliente_endereco }}</span>
+                      </div>
+                      @if (chamadoDetalhes.tipo_atendimento === 'PRESENCIAL') {
+                        <a [href]="'https://www.google.com/maps/search/?api=1&query=' + chamadoDetalhes.cliente_endereco" target="_blank" class="tcc-btn-main tcc-btn-sm" style="padding: 6px 12px;">
+                          <i class="pi pi-map-marker"></i> Ver no Mapa
+                        </a>
+                      }
                     </div>
                   </div>
                 }

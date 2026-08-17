@@ -116,4 +116,25 @@ export class ConsultaExternaService {
       })
     );
   }
+
+  /**
+   * Consulta endereços reais usando a API pública do Nominatim (OpenStreetMap)
+   */
+  consultarEnderecoNominatim(query: string): Observable<any[]> {
+    if (!query || query.length < 3) return of([]);
+
+    const params = new HttpParams()
+      .set('q', query)
+      .set('format', 'json')
+      .set('addressdetails', '1')
+      .set('countrycodes', 'br')
+      .set('limit', '5');
+
+    return this.http.get<any[]>('https://nominatim.openstreetmap.org/search', { params }).pipe(
+      catchError(err => {
+        console.warn('Erro ao consultar Nominatim:', err);
+        return of([]);
+      })
+    );
+  }
 }

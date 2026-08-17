@@ -234,7 +234,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
 
             <div class="tcc-modal-body">
               <div class="tcc-modal-section">
-                <div class="tcc-modal-grid-2">
+                <div class="tcc-modal-grid-3">
                   <div class="tcc-info-box">
                     <span class="info-label">Status Atual</span>
                     <div class="tcc-status-pill inline-pill" [ngClass]="getStatusBadgeClass(chamadoDetalhes.status)">
@@ -247,8 +247,25 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
                     <span class="info-label">Data de Abertura</span>
                     <strong class="info-val">{{ chamadoDetalhes.dataCriacao || chamadoDetalhes.data_criacao }}</strong>
                   </div>
+
+                  <div class="tcc-info-box">
+                    <span class="info-label">Tipo de Atendimento</span>
+                    <strong class="info-val">{{ chamadoDetalhes.tipo_atendimento === 'PRESENCIAL' ? 'Presencial' : 'Remoto' }}</strong>
+                  </div>
                 </div>
               </div>
+
+              @if (chamadoDetalhes.tipo_atendimento === 'PRESENCIAL' && chamadoDetalhes.profissional_endereco) {
+                <div class="tcc-modal-section">
+                  <span class="info-label">Endereço do Técnico (Atendimento Presencial)</span>
+                  <div class="tcc-desc-box" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>{{ chamadoDetalhes.profissional_endereco }}</span>
+                    <a [href]="'https://www.google.com/maps/search/?api=1&query=' + chamadoDetalhes.profissional_endereco" target="_blank" class="tcc-btn-main tcc-btn-sm" style="width: auto; padding: 6px 12px; margin: 0;">
+                      <i class="pi pi-map-marker"></i> Ver no Mapa
+                    </a>
+                  </div>
+                </div>
+              }
 
               <div class="tcc-modal-section">
                 <span class="info-label">Descrição do Problema</span>
@@ -1027,9 +1044,9 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-    .tcc-modal-grid-2 {
+    .tcc-modal-grid-3 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
     .tcc-info-box {

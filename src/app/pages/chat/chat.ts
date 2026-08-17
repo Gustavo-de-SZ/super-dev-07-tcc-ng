@@ -1240,12 +1240,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.meuAuth0Id && msg.remetenteId === this.meuAuth0Id) {
       return true;
     }
-    if (this.meuTipo && msg.remetenteTipo && msg.remetenteTipo === this.meuTipo) {
-      return true;
-    }
-    if (this.meuNome && msg.remetenteNome === this.meuNome) {
-      return true;
-    }
     return false;
   }
 

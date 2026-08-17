@@ -20,6 +20,7 @@ interface ProfissionalParsed {
   aprovado: boolean;
   avaliacao_media: number | null;
   total_avaliacoes: number;
+  distanciaKm?: number;
 }
 
 @Component({
@@ -151,6 +152,12 @@ interface ProfissionalParsed {
                   <i class="pi pi-map-marker"></i>
                   <span>{{ prof.local }}</span>
                 </div>
+                @if (prof.distanciaKm != null) {
+                  <div class="tcc-meta-item">
+                    <i class="pi pi-compass"></i>
+                    <span>A {{ prof.distanciaKm }} km de você</span>
+                  </div>
+                }
                 <div class="tcc-meta-item">
                   <i class="pi pi-clock"></i>
                   <span>{{ prof.tempoResposta }}</span>
@@ -251,7 +258,15 @@ interface ProfissionalParsed {
                 </div>
                 <div class="tcc-info-box">
                   <span class="info-label">Região / Local</span>
-                  <strong class="info-val">{{ perfilModal.local }}</strong>
+                  <strong class="info-val">
+                    {{ perfilModal.local }}
+                    @if (perfilModal.distanciaKm != null) {
+                      <span style="display: block; font-size: 0.9em; color: var(--text-color-secondary); margin-top: 4px; font-weight: normal;">
+                        <i class="pi pi-compass" style="font-size: 0.9em; margin-right: 4px;"></i>
+                        A {{ perfilModal.distanciaKm }} km de você
+                      </span>
+                    }
+                  </strong>
                 </div>
                 <div class="tcc-info-box">
                   <span class="info-label">Tempo Resposta</span>
@@ -987,6 +1002,16 @@ export class BuscarProfissionais implements OnInit {
     }
 
     if (p.especialidade) especialidade = p.especialidade;
+
+    const especialidadeMap: Record<string, string> = {
+      'Suporte Técnico': 'Suporte Técnico & Help Desk',
+      'Redes': 'Redes e Infraestrutura',
+      'Segurança': 'Segurança da Informação',
+      'Software': 'Desenvolvimento e Sistemas',
+      'Hardware': 'Manutenção de Hardware e Servidores',
+      'Outros': 'Outros Serviços Especializados'
+    };
+    especialidade = especialidadeMap[especialidade] || especialidade;
     if (p.cidade || p.estado) local = `${p.cidade || ''} ${p.estado ? '- ' + p.estado : ''}`.trim() || local;
 
     return {
@@ -998,10 +1023,11 @@ export class BuscarProfissionais implements OnInit {
       especialidade,
       local,
       tempoResposta,
-      bio,
-      aprovado: p.aprovado !== false,
-      avaliacao_media: p.avaliacao_media ?? null,
-      total_avaliacoes: p.total_avaliacoes ?? 0
+      bio: bio.trim() || 'Sem descrição.',
+      aprovado: p.aprovado_pelo_admin,
+      avaliacao_media: p.avaliacao_media,
+      total_avaliacoes: p.total_avaliacoes || 0,
+      distanciaKm: p.distancia_km
     };
   }
 

@@ -196,24 +196,25 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
               </div>
 
               <div class="cd-field">
-                <label for="cliLocal" class="cd-label">Cidade / Local Atuação</label>
-                <p-autoComplete
-                  id="cliLocal"
-                  formControlName="local"
-                  [suggestions]="filteredCidades"
-                  (completeMethod)="filterCidades($event)"
-                  field="label"
-                  placeholder="Ex: São Paulo - SP"
-                  emptyMessage="Nenhum resultado encontrado"
-                  inputStyleClass="ns-input"
-                  [styleClass]="isFieldInvalid('cliente', 'local') ? 'ns-input-error' : ''"
-                  autocomplete="off"
-                ></p-autoComplete>
-                @if (isFieldInvalid('cliente', 'local')) {
-                  <span class="cd-error">
-                    <i class="pi pi-info-circle"></i> Localização é obrigatória
-                  </span>
-                }
+                <div class="ns-form-group" [class.has-error]="isFieldInvalid('cliente', 'local')">
+                  <label class="ns-label" for="cliCep">
+                    CEP de Atuação <span class="ns-required">*</span>
+                  </label>
+                  <div class="ns-input-wrap">
+                    <i class="pi pi-map-marker ns-input-icon"></i>
+                    <input id="cliCep" type="text" formControlName="cep" class="ns-input ns-with-icon w-full" placeholder="Digite seu CEP (apenas números)" maxlength="9" (input)="buscarCepDirect($event, 'cliente', 'local')">
+                  </div>
+                  @if (clienteForm.get('local')?.value) {
+                    <div style="margin-top: 8px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em; color: #475569;">
+                      <i class="pi pi-check-circle" style="color: #3b82f6; margin-right: 6px;"></i>
+                      <strong>Localização:</strong> {{ clienteForm.get('local')?.value }}
+                    </div>
+                  } @else {
+                     <div style="margin-top: 8px; font-size: 0.85em; color: #ef4444;">
+                        Digite um CEP válido para carregar o endereço.
+                     </div>
+                  }
+                </div>
               </div>
 
               <div class="cd-field">
@@ -363,24 +364,25 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
               </div>
 
               <div class="cd-field">
-                <label for="tecLocal" class="cd-label">Cidade / Local Atuação</label>
-                <p-autoComplete
-                  id="tecLocal"
-                  formControlName="local"
-                  [suggestions]="filteredCidades"
-                  (completeMethod)="filterCidades($event)"
-                  field="label"
-                  placeholder="Ex: São Paulo - SP"
-                  emptyMessage="Nenhum resultado encontrado"
-                  inputStyleClass="ns-input"
-                  [styleClass]="isFieldInvalid('tecnico', 'local') ? 'ns-input-error' : ''"
-                  autocomplete="off"
-                ></p-autoComplete>
-                @if (isFieldInvalid('tecnico', 'local')) {
-                  <span class="cd-error">
-                    <i class="pi pi-info-circle"></i> Localização é obrigatória
-                  </span>
-                }
+                <div class="ns-form-group" [class.has-error]="isFieldInvalid('tecnico', 'local')">
+                  <label class="ns-label" for="tecCep">
+                    CEP de Atuação <span class="ns-required">*</span>
+                  </label>
+                  <div class="ns-input-wrap">
+                    <i class="pi pi-map-marker ns-input-icon"></i>
+                    <input id="tecCep" type="text" formControlName="cep" class="ns-input ns-with-icon w-full" placeholder="Digite seu CEP (apenas números)" maxlength="9" (input)="buscarCepDirect($event, 'tecnico', 'local')">
+                  </div>
+                  @if (tecnicoForm.get('local')?.value) {
+                    <div style="margin-top: 8px; padding: 10px; background: #f8fafc; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.9em; color: #475569;">
+                      <i class="pi pi-check-circle" style="color: #3b82f6; margin-right: 6px;"></i>
+                      <strong>Localização:</strong> {{ tecnicoForm.get('local')?.value }}
+                    </div>
+                  } @else {
+                     <div style="margin-top: 8px; font-size: 0.85em; color: #ef4444;">
+                        Digite um CEP válido para carregar o endereço.
+                     </div>
+                  }
+                </div>
               </div>
 
               <div class="cd-field">
@@ -695,6 +697,33 @@ import { validarCNPJ } from '../../shared/validators/documento.validator';
       display: flex;
       align-items: center;
     }
+    ::ng-deep .cd-input-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    ::ng-deep .cd-input-icon i {
+      position: absolute;
+      left: 12px;
+      color: var(--tcc-text-muted);
+      z-index: 1;
+    }
+    ::ng-deep .ns-with-icon {
+      padding-left: 36px !important;
+    }
+    ::ng-deep .cd-full-width {
+      width: 100%;
+    }
+    ::ng-deep .ns-input-wrap {
+      position: relative;
+    }
+    ::ng-deep .ns-input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--tcc-text-muted);
+    }
   `,
 })
 export class Cadastro implements OnInit {
@@ -715,8 +744,9 @@ export class Cadastro implements OnInit {
   hasRoleInToken = false;
 
   // For city autocomplete
-  cidades: any[] = []; // Full list of cities from IBGE
-  filteredCidades: any[] = []; // Filtered list for autocomplete
+  cidades: any[] = []; 
+  filteredCidades: any[] = []; 
+  sugestoesLocal: string[] = [];
 
   clienteForm!: FormGroup;
   tecnicoForm!: FormGroup;
@@ -744,39 +774,33 @@ export class Cadastro implements OnInit {
   ];
 
   ngOnInit(): void {
-    // 1. Initialize forms with validations
     this.clienteForm = this.fb.group({
-      nome: ['', [Validators.required, Validators.minLength(3)]], // Changed to blank initially
+      nome: ['', [Validators.required, Validators.minLength(3)]],
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       empresa: [''],
-      telefone: ['', [Validators.required, this.phoneNumberValidator]],
+      cep: [''],
       local: ['', [Validators.required, Validators.minLength(3)]],
+      telefone: ['', [Validators.required, this.phoneNumberValidator]],
       tipoCliente: ['Individual', [Validators.required]]
     });
 
     this.tecnicoForm = this.fb.group({
-      nome: ['', [Validators.required, Validators.minLength(3)]], // Changed to blank initially
+      nome: ['', [Validators.required, Validators.minLength(3)]],
       email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       especialidadePrincipal: ['Suporte Técnico', [Validators.required]],
       cnpj: ['', [Validators.required, this.cnpjValidator]],
+      cep: [''],
       local: ['', [Validators.required, Validators.minLength(3)]],
       telefone: ['', [Validators.required, this.phoneNumberValidator]],
       tempoResposta: ['Em até 1 hora', [Validators.required]]
     });
 
-    // 2. Load cities for autocomplete
-    this.loadCidades();
-
-    // 3. Fetch logged in user and prefill forms (only email, keep nome blank)
     this.auth.user$.subscribe(u => {
       if (u) {
         this.user = u;
         const email = u.email || '';
-
-        this.clienteForm.patchValue({ nome: '', email: email }); // Nome blank, email from token
-        this.tecnicoForm.patchValue({ nome: '', email: email }); // Nome blank, email from token
-
-        // Check if role is pre-defined in token
+        this.clienteForm.patchValue({ nome: '', email: email });
+        this.tecnicoForm.patchValue({ nome: '', email: email });
         const roles = u['https://tcc-ng.com/roles'] || [];
         if (roles.length > 0) {
           const role = roles[0].toLowerCase();
@@ -788,38 +812,28 @@ export class Cadastro implements OnInit {
       }
     });
   }
+  buscarCepDirect(event: any, groupName: string, controlName: string) {
+    const query = (event.target.value || '').trim();
+    const cepMatch = query.replace(/\D/g, '');
+    const targetForm = groupName === 'cliente' ? this.clienteForm : this.tecnicoForm;
 
-  loadCidades(): void {
-    this.consultaExternaService.consultarMunicipios().subscribe({
-      next: (municipios) => {
-        if (municipios && municipios.length > 0) {
-          this.cidades = municipios.map(m => ({ label: m.formatado, value: m.formatado }));
-          this.filteredCidades = this.cidades.slice(0, 20);
+    if (cepMatch.length === 8) {
+      this.consultaExternaService.consultarCep(cepMatch).subscribe({
+        next: (data: any) => {
+          if (data) {
+            const enderecoFormatado = `${data.logradouro}, ${data.bairro}, ${data.cidade} - ${data.uf}`;
+            targetForm.patchValue({ [controlName]: enderecoFormatado });
+          } else {
+             targetForm.patchValue({ [controlName]: '' });
+          }
+        },
+        error: () => targetForm.patchValue({ [controlName]: '' })
+      });
+    } else {
+        if (cepMatch.length === 0 || cepMatch.length > 5) {
+            targetForm.patchValue({ [controlName]: '' });
         }
-      },
-      error: (err) => {
-        console.error('Erro ao carregar cidades:', err);
-      }
-    });
-  }
-
-  filterCidades(event: any): void {
-    const query = event.query;
-    this.filteredCidades = this.filterCidade(query, this.cidades);
-  }
-
-  filterCidade(query: string, cidades: any[]): any[] {
-    // In a real application, make a request to a remote url with the query and return filtered results
-    // For now, we filter locally
-    const filtered: any[] = [];
-    const lowerQuery = query.toLowerCase();
-    for (let i = 0; i < cidades.length; i++) {
-      const cidade = cidades[i];
-      if (cidade.label.toLowerCase().indexOf(lowerQuery) === 0) {
-        filtered.push(cidade);
-      }
     }
-    return filtered;
   }
 
   isRoleFixed(): boolean {
