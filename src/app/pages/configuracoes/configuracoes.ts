@@ -1266,6 +1266,7 @@ export class ConfiguracoesComponent implements OnInit {
   }
 
   get temAlteracoes(): boolean {
+    if (this.selectedPhotoFile !== null) return true;
     if (!this.initialFormData || Object.keys(this.initialFormData).length === 0) return false;
     const current = this.form.getRawValue();
     return Object.keys(this.initialFormData).some(key => current[key] !== this.initialFormData[key]);
