@@ -255,17 +255,7 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
                 </div>
               </div>
 
-              @if (chamadoDetalhes.tipo_atendimento === 'PRESENCIAL' && chamadoDetalhes.profissional_endereco) {
-                <div class="tcc-modal-section">
-                  <span class="info-label">Endereço do Técnico (Atendimento Presencial)</span>
-                  <div class="tcc-desc-box" style="display: flex; align-items: center; justify-content: space-between;">
-                    <span>{{ chamadoDetalhes.profissional_endereco }}</span>
-                    <a [href]="'https://www.google.com/maps/search/?api=1&query=' + chamadoDetalhes.profissional_endereco" target="_blank" class="tcc-btn-main tcc-btn-sm" style="width: auto; padding: 6px 12px; margin: 0;">
-                      <i class="pi pi-map-marker"></i> Ver no Mapa
-                    </a>
-                  </div>
-                </div>
-              }
+
 
               <div class="tcc-modal-section">
                 <span class="info-label">Descrição do Problema</span>
@@ -277,11 +267,14 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
               <div class="tcc-modal-section">
                 <span class="info-label">Anexos</span>
                 @if (chamadoDetalhes.anexo) {
-                  <div class="attachments-list">
+                  <div class="attachments-grid">
                     @for (url of getAnexos(chamadoDetalhes.anexo); track $index) {
-                      <a [href]="url" target="_blank" class="attachment-link">
-                        <i class="pi pi-file"></i> Anexo {{ $index + 1 }}
-                      </a>
+                      <div class="attachment-thumb" (click)="abrirAnexoModal(url)">
+                        <img [src]="url" alt="Anexo {{ $index + 1 }}">
+                        <div class="thumb-overlay">
+                          <i class="pi pi-search-plus"></i>
+                        </div>
+                      </div>
                     }
                   </div>
                 } @else {
@@ -374,6 +367,16 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
         </div>
       }
 
+      @if (isAnexoModalAberto) {
+        <div class="tcc-modal-backdrop" (click)="fecharAnexoModal()" style="z-index: 2000;">
+          <div class="tcc-modal-content" (click)="$event.stopPropagation()" style="max-width: 90vw; width: auto; background: transparent; box-shadow: none; padding: 0;">
+            <button class="tcc-modal-close-btn" (click)="fecharAnexoModal()" style="position: absolute; top: -40px; right: 0; color: #fff; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+              <i class="pi pi-times"></i>
+            </button>
+            <img [src]="modalImagemUrl" style="max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);" alt="Anexo Expandido">
+          </div>
+        </div>
+      }
   
       @if (modalCancelarConfirmacao) {
         <div class="tcc-modal-backdrop" (click)="modalCancelarConfirmacao = false">
@@ -1076,29 +1079,41 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
       white-space: pre-wrap;
     }
 
-    .attachments-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    .attachments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 12px;
       margin-top: 8px;
     }
-    .attachment-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--tcc-surface-hover, #f1f5f9);
+    .attachment-thumb {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
       border: 1px solid var(--tcc-border, #cbd5e1);
-      border-radius: 6px;
-      color: var(--tcc-primary, #3b82f6);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      transition: all 0.2s;
+      background: #f1f5f9;
     }
-    .attachment-link:hover {
-      background: var(--tcc-primary-light, #eff6ff);
-      border-color: var(--tcc-primary, #3b82f6);
+    .attachment-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .thumb-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .attachment-thumb:hover .thumb-overlay {
+      opacity: 1;
     }
 
     .tcc-tech-card-modal {
@@ -1388,6 +1403,21 @@ import { MeusChamadosService } from '../../services/meus-chamados.service';
   `]
 })
 export class MeusChamados implements OnInit {
+  isAnexoModalAberto = false;
+  modalImagemUrl = '';
+
+  abrirAnexoModal(url: string) {
+    this.modalImagemUrl = url;
+    this.isAnexoModalAberto = true;
+  }
+
+  fecharAnexoModal() {
+    this.isAnexoModalAberto = false;
+    this.modalImagemUrl = '';
+  }
+
+  // === State ===
+  user: any = null;
   private meusChamadosService = inject(MeusChamadosService);
   private messageService = inject(MessageService);
   private router = inject(Router);

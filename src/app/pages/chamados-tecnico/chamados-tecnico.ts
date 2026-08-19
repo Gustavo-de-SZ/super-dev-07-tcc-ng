@@ -339,15 +339,7 @@ import { MenuItem, MessageService } from 'primeng/api';
                   </div>
                 </div>
 
-                @if (chamadoDetalhes.cliente_telefone) {
-                  <div class="tcc-modal-info-item">
-                    <div class="info-icon"><i class="pi pi-phone"></i></div>
-                    <div class="info-content">
-                      <label>Telefone</label>
-                      <span>{{ chamadoDetalhes.cliente_telefone }}</span>
-                    </div>
-                  </div>
-                }
+
 
                 @if (chamadoDetalhes.cliente_email) {
                   <div class="tcc-modal-info-item">
@@ -364,7 +356,8 @@ import { MenuItem, MessageService } from 'primeng/api';
                     <div class="info-icon"><i class="pi pi-map-marker"></i></div>
                     <div class="info-content" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                       <div>
-                        <label>Local / Endereço</label>
+                        <label>Local / Endereço: </label>
+                        
                         <span>{{ chamadoDetalhes.cliente_endereco }}</span>
                       </div>
                       @if (chamadoDetalhes.tipo_atendimento === 'PRESENCIAL') {

@@ -204,7 +204,7 @@ import { AgendaService } from '../../../services/agenda.service';
                   class="ns-input"
                   style="flex: 1;"
                   >
-                  <option [ngValue]="null" disabled hidden selected>Selecione um equipamento...</option>
+                  <option [ngValue]="null" disabled selected>Selecione um equipamento...</option>
                   @for (eqp of equipamentosDoCliente; track trackByEquipamento($index, eqp)) {
                     <option [value]="eqp.id">
                       {{ eqp.tipo }} - {{ eqp.marca }} {{ eqp.modelo }} (S/N: {{ eqp.numeroSerie || 'N/A' }})
@@ -345,8 +345,8 @@ import { AgendaService } from '../../../services/agenda.service';
 
       </div>
     </div>
+    
 
-  
     @if (mostrandoModalNovoEquipamento) {
       <div class="tcc-modal-overlay" (click)="mostrandoModalNovoEquipamento = false" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(6px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 16px;">
         <div class="tcc-modal" style="background: var(--tcc-surface, #ffffff); border-radius: 16px; width: 100%; max-width: 540px; padding: 28px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.25); border: 1px solid var(--tcc-border, #e2e8f0);" (click)="$event.stopPropagation()">
@@ -470,20 +470,27 @@ import { AgendaService } from '../../../services/agenda.service';
       --tcc-surface-hover: var(--bg-card);
     }
 
+    .ns-page-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+    .ns-page-header h1 { font-size: 24px; font-weight: 700; color: var(--text-main); margin: 0 0 4px 0; }
+    .ns-page-header p { font-size: 14px; color: var(--text-muted); margin: 0; }
+
     .ns-back-btn {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 36px;
       height: 36px;
-      border-radius: 50%;
-      color: var(--tcc-text-muted, #64748b);
+      border-radius: 8px;
+      color: var(--text-muted);
       text-decoration: none;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      border: 1px solid var(--border);
+      background-color: var(--bg-card);
     }
-
     .ns-back-btn:hover {
-      background: var(--tcc-surface-hover, #e2e8f0);
+      background-color: var(--primary-bg);
+      color: var(--primary);
+      border-color: var(--primary);
     }
 
     .ns-grid-layout {
@@ -935,6 +942,9 @@ export class NovoServico implements OnInit {
             }
           }
         });
+      } else {
+        this.equipamentosDoCliente = [];
+        this.form.get('equipamentoId')?.setValue(null);
       }
     });
   }

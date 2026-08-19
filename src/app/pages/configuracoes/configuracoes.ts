@@ -12,6 +12,7 @@ import { first, Observable, of, switchMap } from 'rxjs';
 import { CnpjMaskDirective } from '../../shared/directives/cnpj-mask.directive';
 import { ConsultaExternaService } from '../../services/consulta-externa.service';
 import { validarCNPJ } from '../../shared/validators/documento.validator';
+import { StringUtils } from '../../shared/utils/string.utils';
 
 // Interface for what we send to PUT /tecnicos/me
 interface TecnicoUpdateRequest {
@@ -1149,6 +1150,7 @@ export class ConfiguracoesComponent implements OnInit {
               }
             }
           }
+          nomeEmpresa = StringUtils.toTitleCase(nomeEmpresa);
           const currentNome = this.form.get('nome_fantasia')?.value;
           const currentLocal = this.form.get('local')?.value;
           const currentTelefone = this.form.get('telefone')?.value;

@@ -41,12 +41,7 @@ import { ProfileService } from '../../services/profile.service';
                 </span>
               </div>
               <div class="meta-row">
-                @if (destinatarioTelefone) {
-                  <a [href]="'tel:' + destinatarioTelefone" class="contact-link">
-                    <i class="pi pi-phone"></i> {{ destinatarioTelefone }}
-                  </a>
-                  <span class="meta-divider">•</span>
-                }
+
                 <span class="status-text">Atendimento em tempo real</span>
               </div>
             </div>

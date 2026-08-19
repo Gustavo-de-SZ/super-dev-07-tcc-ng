@@ -19,7 +19,10 @@ import { Observable, of } from 'rxjs';
       <div class="tcc-wrapper tcc-flex-split">
 
         <div style="display: flex; align-items: center; gap: 3rem;">
-        
+          <a routerLink="/" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+            <img src="/assets/images/icon.jpg" alt="Logo" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--tcc-primary);">
+            <span style="font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;">TCC</span>
+          </a>
         </div>
 
         <div style="display: flex; align-items: center; gap: 1rem;">

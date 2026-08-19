@@ -148,10 +148,7 @@ interface ProfissionalParsed {
                   <i class="pi pi-wrench"></i>
                   <span>{{ prof.especialidade }}</span>
                 </div>
-                <div class="tcc-meta-item">
-                  <i class="pi pi-map-marker"></i>
-                  <span>{{ prof.local }}</span>
-                </div>
+
                 @if (prof.distanciaKm != null) {
                   <div class="tcc-meta-item">
                     <i class="pi pi-compass"></i>
@@ -251,22 +248,10 @@ interface ProfissionalParsed {
                 </div>
               </div>
 
-              <div class="tcc-modal-grid-3">
+              <div class="tcc-modal-grid-2">
                 <div class="tcc-info-box">
                   <span class="info-label">Especialidade</span>
                   <strong class="info-val">{{ perfilModal.especialidade }}</strong>
-                </div>
-                <div class="tcc-info-box">
-                  <span class="info-label">Região / Local</span>
-                  <strong class="info-val">
-                    {{ perfilModal.local }}
-                    @if (perfilModal.distanciaKm != null) {
-                      <span style="display: block; font-size: 0.9em; color: var(--text-color-secondary); margin-top: 4px; font-weight: normal;">
-                        <i class="pi pi-compass" style="font-size: 0.9em; margin-right: 4px;"></i>
-                        A {{ perfilModal.distanciaKm }} km de você
-                      </span>
-                    }
-                  </strong>
                 </div>
                 <div class="tcc-info-box">
                   <span class="info-label">Tempo Resposta</span>
@@ -817,9 +802,9 @@ interface ProfissionalParsed {
       h3 { margin: 0; font-size: 17px; color: var(--tcc-text-main, #0f172a); }
       .tcc-email-text { margin: 4px 0 0 0; font-size: 13px; color: var(--tcc-text-muted, #64748b); display: flex; align-items: center; gap: 6px; }
     }
-    .tcc-modal-grid-3 {
+    .tcc-modal-grid-2 {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
     .tcc-info-box {
@@ -897,7 +882,7 @@ interface ProfissionalParsed {
     }
 
     @media (max-width: 640px) {
-      .tcc-modal-grid-3 { grid-template-columns: 1fr; }
+      .tcc-modal-grid-2 { grid-template-columns: 1fr; }
     }
   `]
 })

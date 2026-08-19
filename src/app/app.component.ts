@@ -17,7 +17,7 @@ import { PRIME_NG_PT_BR } from './shared/i18n/primeng-pt-br';
   `
 })
 export class App {
-  protected readonly title = signal('tcc-ng');
+  protected readonly title = signal('TCC');
 
   constructor(
     private profileService: ProfileService,

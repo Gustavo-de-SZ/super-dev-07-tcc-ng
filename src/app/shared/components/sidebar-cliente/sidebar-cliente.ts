@@ -11,11 +11,11 @@ import { MeusChamadosService } from '../../../services/meus-chamados.service';
   template: `
     <aside class="tcc-sidebar">
       <div class="tcc-sidebar-brand">
-        <div class="tcc-logo-icon">
-          <i class="pi pi-desktop"></i>
+        <div class="tcc-logo-icon" style="background: transparent; box-shadow: none; width: auto; height: auto;">
+          <img src="/assets/images/icon.jpg" alt="Logo" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--tcc-primary); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
         </div>
         <div class="tcc-logo-text">
-          <strong>tcc</strong>
+          <strong>TCC</strong>
           <span>Portal do Cliente</span>
         </div>
       </div>
@@ -39,23 +39,10 @@ import { MeusChamadosService } from '../../../services/meus-chamados.service';
           }
         </a>
 
-        <a routerLink="/cliente/agendamentos" routerLinkActive="active" class="tcc-nav-item">
-          <i class="pi pi-calendar"></i>
-          <span>Meus Agendamentos</span>
-        </a>
 
-        <a routerLink="/cliente/historico" routerLinkActive="active" class="tcc-nav-item">
-          <i class="pi pi-history"></i>
-          <span>Histórico</span>
-        </a>
       </nav>
 
       <div class="tcc-sidebar-footer">
-        <a routerLink="/cliente/ajuda" routerLinkActive="active" class="tcc-nav-item">
-          <i class="pi pi-question-circle"></i>
-          <span>Ajuda & Suporte</span>
-        </a>
-
         <a routerLink="/cliente/configuracoes" routerLinkActive="active" class="tcc-nav-item">
           <i class="pi pi-cog"></i>
           <span>Configurações</span>

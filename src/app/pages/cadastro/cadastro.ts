@@ -17,6 +17,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { HttpClient } from '@angular/common/http';
 import { ConsultaExternaService } from '../../services/consulta-externa.service';
 import { validarCNPJ } from '../../shared/validators/documento.validator';
+import { StringUtils } from '../../shared/utils/string.utils';
 
 @Component({
   selector: 'app-cadastro',
@@ -933,6 +934,7 @@ export class Cadastro implements OnInit {
               }
             }
           }
+          nomeEmpresa = StringUtils.toTitleCase(nomeEmpresa);
           const currentNome = this.tecnicoForm.get('nome')?.value;
           const currentLocal = this.tecnicoForm.get('local')?.value;
           const currentTelefone = this.tecnicoForm.get('telefone')?.value;
@@ -999,7 +1001,8 @@ export class Cadastro implements OnInit {
         const email = formValue.email || this.user?.email || 'cliente@tcc-ng.com';
         const clienteData = {
           ...formValue,
-          email: email,
+          nome: StringUtils.toTitleCase(formValue.nome || ''),
+          email: email.toLowerCase(),
           avaliacao: 5.0,
           servicosAtivos: 0,
           servicosConcluidos: 0,
@@ -1060,8 +1063,8 @@ export class Cadastro implements OnInit {
         const formValue = this.tecnicoForm.getRawValue();
         const email = formValue.email || this.user?.email || 'tecnico@tcc-ng.com';
         const tecnicoData = {
-          nome: formValue.nome,
-          email: email,
+          nome: StringUtils.toTitleCase(formValue.nome || ''),
+          email: email.toLowerCase(),
           especialidadePrincipal: formValue.especialidadePrincipal,
           local: formValue.local,
           telefone: formValue.telefone,
